@@ -1,126 +1,171 @@
 @import "tailwindcss";
 
+@theme {
+  --font-poppins: var(--font-poppins), 'Inter', 'Noto Sans', system-ui, sans-serif;
+
+  /* Pipbud Design System - Amber Palette */
+  --color-amber-50: #FFF7ED;
+  --color-amber-100: #FFEDD5;
+  --color-amber-200: #FED7AA;
+  --color-amber-300: #FDBA74;
+  --color-amber-400: #FB923C;
+  --color-amber-500: #F97316;
+  --color-amber-600: #EA580C;
+  --color-amber-700: #C2410C;
+  --color-amber-800: #9A3412;
+  --color-amber-900: #7C2D12;
+
+  /* Pipbud Design System - Warm Stone Neutrals */
+  --color-ink: #1C1917;
+  --color-ink-2: #44403C;
+  --color-ink-3: #78716C;
+  --color-line: #E7E5E4;
+  --color-surface: #FAFAF9;
+  --color-card: #FFFFFF;
+  --color-subtle: #F5F5F4;
+
+  /* Pipbud Design System - Semantic & Trust */
+  --color-trust: #0F766E;
+  --color-trust-light: #CCFBF1;
+  --color-trust-soft: #F0FDFA;
+  --color-trust-dark: #2DD4BF;
+  --color-success: #15803D;
+  --color-warning: #A16207;
+  --color-error: #B91C1C;
+  --color-info: #2563EB;
+}
+
 :root {
-  --background: #000000;
-  --foreground: #ffffff;
-  --purple: #8b5cf6;
-  --purple-light: #a78bfa;
-  --purple-dark: #6d28d9;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-}
-
-/* Custom properties instead of @apply */
-* {
-  border-color: rgba(255, 255, 255, 0.1);
+  --background: #FAFAF9;
+  --foreground: #1C1917;
 }
 
 body {
-  background: var(--background);
+  background-color: var(--background);
   color: var(--foreground);
-  font-feature-settings: "rlig" 1, "calt" 1;
+  font-family: var(--font-poppins), 'Inter', 'Noto Sans', system-ui, sans-serif;
+  font-feature-settings: "tnum" 1, "rlig" 1, "calt" 1;
+  -webkit-font-smoothing: antialiased;
 }
 
-/* Your custom utilities */
-.text-gradient {
-  background: linear-gradient(to right, #c084fc, #a78bfa, #8b5cf6);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+/* Tabular figures for prices, ratings and financial stats */
+.tabular-nums {
+  font-feature-settings: "tnum" 1;
 }
 
-.glass {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+/* Pipbud Button Variants according to Design System Spec */
+.btn-primary {
+  background-color: #C2410C;
+  color: #FFFFFF;
+  font-weight: 500;
+  border-radius: 12px;
+  transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.btn-primary:hover {
+  background-color: #EA580C;
+}
+.btn-primary:active {
+  background-color: #9A3412;
+  transform: scale(0.98);
 }
 
-.glass-hover {
-  transition: all 0.3s ease;
+.btn-secondary {
+  background-color: #FFFFFF;
+  border: 1px solid #C2410C;
+  color: #C2410C;
+  font-weight: 500;
+  border-radius: 12px;
+  transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.btn-secondary:hover {
+  background-color: #FFF7ED;
+}
+.btn-secondary:active {
+  transform: scale(0.98);
 }
 
-.glass-hover:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(139, 92, 246, 0.3);
+.btn-ghost {
+  background-color: #FFF7ED;
+  color: #C2410C;
+  font-weight: 500;
+  border-radius: 12px;
+  transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.btn-ghost:hover {
+  background-color: #FFEDD5;
 }
 
+.btn-dark {
+  background-color: #1C1917;
+  color: #FFFFFF;
+  font-weight: 500;
+  border-radius: 12px;
+  transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.btn-dark:hover {
+  background-color: #44403C;
+}
+
+/* Card & Surface utilities */
+.card-pipbud {
+  background-color: #FFFFFF;
+  border: 1px solid #E7E5E4;
+  border-radius: 16px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.card-pipbud:hover {
+  border-color: #FED7AA;
+  box-shadow: 0 4px 12px rgba(28, 25, 23, 0.06);
+}
+
+/* Approved brand gradient */
+.brand-gradient {
+  background: linear-gradient(135deg, #FB923C 0%, #F97316 50%, #EA580C 100%);
+}
+
+.brand-gradient-subtle {
+  background: linear-gradient(135deg, #FFF7ED 0%, #FFEDD5 50%, #FED7AA 100%);
+}
 
 /* Smooth scrolling */
 html {
   scroll-behavior: smooth;
 }
 
-/* Custom scrollbar */
+/* Custom scrollbar matching warm stone */
 ::-webkit-scrollbar {
   width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #000;
+  background: #FAFAF9;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #4a0e7e;
-  border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #6a1db5;
-}
-
-/* Text selection */
-::selection {
-  background: rgba(139, 92, 246, 0.3);
-  color: white;
-}
-
-/* Focus styles */
-*:focus-visible {
-  outline: 2px solid rgba(139, 92, 246, 0.5);
-  outline-offset: 2px;
+  background: #E7E5E4;
   border-radius: 4px;
 }
 
-/* Font families */
-.font-outfit {
-  font-family: var(--font-outfit), sans-serif;
+::-webkit-scrollbar-thumb:hover {
+  background: #D6D3D1;
 }
 
-.font-inter {
-  font-family: var(--font-inter), sans-serif;
-}
-
-/* Animations */
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
-}
-
-.animate-float {
-  animation: float 3s ease-in-out infinite;
-}
-
-@keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 20px rgba(139, 92, 246, 0.2); }
-  50% { box-shadow: 0 0 40px rgba(139, 92, 246, 0.4); }
-}
-
-.animate-pulse-glow {
-  animation: pulse-glow 2s ease-in-out infinite;
-}
-
-/* Gradient backgrounds */
-.bg-grid {
-  background-image: 
-    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
-  background-size: 60px 60px;
-}
-
-.bg-dots {
-  background-image: radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px);
-  background-size: 20px 20px;
+/* Focus rings with amber-500 */
+*:focus-visible {
+  outline: 2px solid #F97316;
+  outline-offset: 2px;
+  border-radius: 6px;
 }
