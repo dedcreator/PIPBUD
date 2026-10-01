@@ -57,7 +57,18 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const API_BASE = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000').replace(/\/+$/, '');
+export const getApiBase = () => {
+  if (process.env.NEXT_PUBLIC_API_URL) {
+    return process.env.NEXT_PUBLIC_API_URL.replace(/\/+$/, '');
+  }
+  if (typeof window !== 'undefined') {
+    const host = window.location.hostname;
+    if (host !== 'localhost' && host !== '127.0.0.1') {
+      return 'https://pipbud-server.onrender.com';
+    }
+  }
+  return 'http://localhost:8000';
+};
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<TraderProfile | null>(null);
@@ -101,7 +112,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       : { username: cleanId.replace(/^@/, '') };
 
     try {
-      const res = await fetch(`${API_BASE}/api/auth/request-code/`, {
+      const res = await fetch(`${getApiBase()}/api/auth/request-code/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -123,7 +134,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setError(null);
     const cleanCode = code.trim();
     try {
-      const res = await fetch(`${API_BASE}/api/auth/verify-code/`, {
+      const res = await fetch(`${getApiBase()}/api/auth/verify-code/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ code: cleanCode }),
@@ -148,7 +159,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const loginWithTelegramWidget = async (telegramData: any) => {
     setError(null);
     try {
-      const res = await fetch(`${API_BASE}/api/auth/telegram-widget/`, {
+      const res = await fetch(`${getApiBase()}/api/auth/telegram-widget/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(telegramData),
@@ -182,7 +193,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     try {
       const token = localStorage.getItem('pipbud_token') || user.token;
-      await fetch(`${API_BASE}/api/auth/update-profile/`, {
+      await fetch(`${getApiBase()}/api/auth/update-profile/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -209,7 +220,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     try {
       const token = localStorage.getItem('pipbud_token') || user.token;
-      const res = await fetch(`${API_BASE}/api/integrations/connect-broker/`, {
+      const res = await fetch(`${getApiBase()}/api/integrations/connect-broker/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -255,7 +266,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     try {
       const token = localStorage.getItem('pipbud_token') || user.token;
-      const res = await fetch(`${API_BASE}/api/integrations/sync-now/`, {
+      const res = await fetch(`${getApiBase()}/api/integrations/sync-now/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

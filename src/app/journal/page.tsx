@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth, getApiBase } from '@/context/AuthContext';
 import { TRADER_TIERS } from '@/data/tiers';
 import {
   TrendingUp,
@@ -95,7 +95,7 @@ export default function JournalPage() {
     const fetchTrades = async () => {
       setIsLoadingTrades(true);
       try {
-        const apiBase = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000').replace(/\/+$/, '');
+        const apiBase = getApiBase();
         const token = localStorage.getItem('pipbud_token') || user.token;
         const res = await fetch(`${apiBase}/api/journal/trades/?trader_id=${encodeURIComponent(user.id)}`, {
           headers: {
