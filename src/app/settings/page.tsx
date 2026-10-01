@@ -101,7 +101,7 @@ const TRADING_STYLES = [
 
 export default function SettingsPage() {
   const router = useRouter();
-  const { user, updateProfile, loginWithDemo, logout } = useAuth();
+  const { user, updateProfile, logout } = useAuth();
 
   // Form states
   const [displayName, setDisplayName] = useState('');
@@ -207,13 +207,6 @@ export default function SettingsPage() {
                 <Send className="w-4 h-4" />
                 <span>Log In via Telegram</span>
               </Link>
-              <button
-                onClick={() => loginWithDemo(4)}
-                className="w-full h-12 bg-white hover:bg-[#FFF7ED] border border-[#E7E5E4] hover:border-[#FED7AA] text-[#1C1917] rounded-xl text-xs sm:text-sm font-semibold inline-flex items-center justify-center gap-2 transition-all active:scale-98 shadow-xs"
-              >
-                <Sparkles className="w-4 h-4 text-[#C2410C]" />
-                <span>⚡ Try Demo (Level 4: Funded)</span>
-              </button>
             </div>
           </div>
         </main>
@@ -801,28 +794,27 @@ export default function SettingsPage() {
               </div>
             </div>
 
-            {/* Test another tier */}
-            <div className="pt-2">
-              <span className="text-xs font-bold text-[#78716C] block mb-2">
-                Test Another Skill Level (1-Click Switch):
+            {/* Verified Track Record info */}
+            <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+              <span className="text-[#78716C]">
+                Your tier is dynamically verified against your live broker trade logs.
               </span>
-              <div className="flex flex-wrap gap-2">
-                {TRADER_TIERS.map((tier) => (
-                  <button
-                    key={tier.level}
-                    type="button"
-                    onClick={async () => {
-                      await loginWithDemo(tier.level);
-                    }}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all ${
-                      user.skill_level === tier.level
-                        ? 'bg-[#1C1917] text-white shadow-xs'
-                        : 'bg-[#FAFAF9] text-[#44403C] border border-[#E7E5E4] hover:bg-[#F5F5F4]'
-                    }`}
-                  >
-                    L{tier.level} {tier.badge.split(' ')[1]}
-                  </button>
-                ))}
+              <div className="flex items-center gap-3">
+                <Link
+                  href="/journal"
+                  className="font-semibold text-[#0F766E] hover:underline inline-flex items-center gap-1"
+                >
+                  <span>View Journal Audit</span>
+                  <ExternalLink className="w-3 h-3" />
+                </Link>
+                <span className="text-[#D6D3D1]">•</span>
+                <Link
+                  href="/forum"
+                  className="font-semibold text-[#C2410C] hover:underline inline-flex items-center gap-1"
+                >
+                  <span>Broker Settings</span>
+                  <ExternalLink className="w-3 h-3" />
+                </Link>
               </div>
             </div>
           </section>
