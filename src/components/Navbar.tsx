@@ -32,7 +32,7 @@ export default function Navbar() {
             <PipbudLogo size="md" />
           </div>
 
-          {/* Desktop Nav Links */}
+          {/* Desktop Nav Links: Gated based on login state */}
           <div className="hidden md:flex items-center gap-6">
             <Link
               href="/#tiers"
@@ -40,18 +40,43 @@ export default function Navbar() {
             >
               The 7 Tiers
             </Link>
-            <Link
-              href="/journal"
-              className="text-xs sm:text-sm font-medium text-[#44403C] hover:text-[#C2410C] transition-colors"
-            >
-              Web Journal
-            </Link>
-            <Link
-              href="/forum"
-              className="text-xs sm:text-sm font-medium text-[#44403C] hover:text-[#C2410C] transition-colors"
-            >
-              Trader Forum
-            </Link>
+
+            {user ? (
+              <>
+                <Link
+                  href="/journal"
+                  className="text-xs sm:text-sm font-semibold text-[#1C1917] hover:text-[#C2410C] transition-colors flex items-center gap-1.5"
+                >
+                  <span>Web Journal</span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#0F766E]" />
+                </Link>
+                <Link
+                  href="/forum"
+                  className="text-xs sm:text-sm font-semibold text-[#1C1917] hover:text-[#C2410C] transition-colors flex items-center gap-1.5"
+                >
+                  <span>Trader Forum</span>
+                  <span className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-[#FFF7ED] text-[#C2410C] border border-[#FED7AA]">
+                    L{user.skill_level}
+                  </span>
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/#how-it-works"
+                  className="text-xs sm:text-sm font-medium text-[#44403C] hover:text-[#C2410C] transition-colors"
+                >
+                  How It Works
+                </Link>
+                <Link
+                  href="/#bot"
+                  className="text-xs sm:text-sm font-medium text-[#44403C] hover:text-[#C2410C] transition-colors"
+                >
+                  Telegram Bot
+                </Link>
+              </>
+            )}
+
             <Link
               href="/#legitimacy"
               className="text-xs sm:text-sm font-medium text-[#44403C] hover:text-[#C2410C] transition-colors"
@@ -72,12 +97,12 @@ export default function Navbar() {
                   style={{ backgroundColor: user.tier_color || '#0F766E' }}
                 />
                 <span className="font-bold text-[#C2410C]">L{user.skill_level}</span>
-                <span className="text-[#44403C] max-w-[90px] truncate">@{user.username}</span>
+                <span className="text-[#44403C] max-w-[100px] truncate">@{user.username}</span>
               </Link>
             ) : (
               <Link
                 href="/login"
-                className="text-xs font-semibold text-[#44403C] hover:text-[#1C1917] px-3 py-1.5 transition-colors"
+                className="h-9 px-4 text-xs font-semibold text-[#1C1917] bg-white border border-[#E7E5E4] hover:border-[#FED7AA] hover:bg-[#FFF7ED] rounded-xl transition-all inline-flex items-center shadow-xs"
               >
                 Log In
               </Link>
@@ -107,7 +132,7 @@ export default function Navbar() {
 
       {/* Mobile Drawer */}
       {mobileOpen && (
-        <div className="md:hidden bg-white border-b border-[#E7E5E4] px-4 pt-3 pb-5 space-y-3 shadow-md">
+        <div className="md:hidden bg-white border-b border-[#E7E5E4] px-4 pt-3 pb-5 space-y-3 shadow-md animate-in slide-in-from-top-2 duration-150">
           {user && (
             <div className="p-3 bg-[#FAFAF9] rounded-xl border border-[#E7E5E4] flex items-center justify-between">
               <div>
@@ -115,7 +140,7 @@ export default function Navbar() {
                 <span className="text-xs font-bold text-[#1C1917]">@{user.username}</span>
               </div>
               <span
-                className="px-2 py-0.5 rounded-full text-[10px] font-bold text-white"
+                className="px-2 py-0.5 rounded-full text-[10px] font-bold text-white shadow-xs"
                 style={{ backgroundColor: user.tier_color || '#C2410C' }}
               >
                 {user.tier_badge}
@@ -131,20 +156,49 @@ export default function Navbar() {
             >
               The 7 Tiers
             </Link>
-            <Link
-              href="/journal"
-              onClick={() => setMobileOpen(false)}
-              className="px-2 py-1.5 rounded-lg text-sm font-medium text-[#1C1917] hover:bg-[#FFF7ED] hover:text-[#C2410C]"
-            >
-              Web Journal Dashboard
-            </Link>
-            <Link
-              href="/forum"
-              onClick={() => setMobileOpen(false)}
-              className="px-2 py-1.5 rounded-lg text-sm font-medium text-[#1C1917] hover:bg-[#FFF7ED] hover:text-[#C2410C]"
-            >
-              7-Tier Trader Forum
-            </Link>
+
+            {user ? (
+              <>
+                <Link
+                  href="/journal"
+                  onClick={() => setMobileOpen(false)}
+                  className="px-2 py-1.5 rounded-lg text-sm font-semibold text-[#1C1917] hover:bg-[#FFF7ED] hover:text-[#C2410C] flex items-center justify-between"
+                >
+                  <span>Web Journal Dashboard</span>
+                  <span className="text-[10px] font-bold text-[#0F766E] bg-[#F0FDFA] px-2 py-0.5 rounded-full border border-[#CCFBF1]">
+                    Audited
+                  </span>
+                </Link>
+                <Link
+                  href="/forum"
+                  onClick={() => setMobileOpen(false)}
+                  className="px-2 py-1.5 rounded-lg text-sm font-semibold text-[#1C1917] hover:bg-[#FFF7ED] hover:text-[#C2410C] flex items-center justify-between"
+                >
+                  <span>7-Tier Trader Forum</span>
+                  <span className="text-[10px] font-bold text-[#C2410C] bg-[#FFF7ED] px-2 py-0.5 rounded-full border border-[#FED7AA]">
+                    L{user.skill_level}
+                  </span>
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/#how-it-works"
+                  onClick={() => setMobileOpen(false)}
+                  className="px-2 py-1.5 rounded-lg text-sm font-medium text-[#1C1917] hover:bg-[#FFF7ED] hover:text-[#C2410C]"
+                >
+                  How It Works
+                </Link>
+                <Link
+                  href="/#bot"
+                  onClick={() => setMobileOpen(false)}
+                  className="px-2 py-1.5 rounded-lg text-sm font-medium text-[#1C1917] hover:bg-[#FFF7ED] hover:text-[#C2410C]"
+                >
+                  Telegram Bot Journal
+                </Link>
+              </>
+            )}
+
             <Link
               href="/#legitimacy"
               onClick={() => setMobileOpen(false)}
@@ -152,12 +206,13 @@ export default function Navbar() {
             >
               Removal Rules
             </Link>
+
             <Link
               href="/login"
               onClick={() => setMobileOpen(false)}
               className="px-2 py-1.5 rounded-lg text-sm font-medium text-[#1C1917] hover:bg-[#FFF7ED] hover:text-[#C2410C]"
             >
-              {user ? 'My Trader Profile' : 'Log In via Telegram'}
+              {user ? 'My Trader Profile & Logout' : 'Log In via Telegram'}
             </Link>
           </div>
 

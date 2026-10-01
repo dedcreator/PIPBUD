@@ -66,12 +66,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (stored) {
         setUser(JSON.parse(stored));
       } else {
-        // Initialize with default demo user for seamless preview
-        setUser(DEFAULT_DEMO_USER);
-        localStorage.setItem('pipbud_trader', JSON.stringify(DEFAULT_DEMO_USER));
+        setUser(null);
       }
     } catch {
-      setUser(DEFAULT_DEMO_USER);
+      setUser(null);
     } finally {
       setIsLoading(false);
     }

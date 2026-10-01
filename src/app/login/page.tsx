@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, Suspense } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Send,
   ShieldCheck,
@@ -23,8 +23,10 @@ import PipbudLogo from '@/components/PipbudLogo';
 import { useAuth } from '@/context/AuthContext';
 import { TRADER_TIERS } from '@/data/tiers';
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTarget = searchParams?.get('redirect') || '/journal';
   const { user, requestCode, verifyCode, loginWithDemo, logout } = useAuth();
 
   const [activeTab, setActiveTab] = useState<'otp' | 'widget' | 'tiers'>('otp');
@@ -105,7 +107,7 @@ export default function LoginPage() {
       const res = await verifyCode(fullCode);
       if (res.success) {
         setStatusMessage({ type: 'success', text: res.message });
-        setTimeout(() => router.push('/forum'), 800);
+        setTimeout(() => router.push(redirectTarget), 800);
       } else {
         setStatusMessage({ type: 'error', text: res.message });
       }
@@ -122,7 +124,7 @@ export default function LoginPage() {
     try {
       await loginWithDemo(level);
       setStatusMessage({ type: 'success', text: `Switched to Level ${level} profile.` });
-      setTimeout(() => router.push('/forum'), 600);
+      setTimeout(() => router.push(redirectTarget), 600);
     } catch (err: any) {
       setStatusMessage({ type: 'error', text: 'Failed to switch demo tier.' });
     } finally {
@@ -516,5 +518,19 @@ export default function LoginPage() {
         &copy; {new Date().getFullYear()} PipBud. Built with Next.js & Django.
       </footer>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-[#FAFAF9] flex items-center justify-center p-4">
+          <div className="w-8 h-8 rounded-full border-2 border-[#C2410C] border-t-transparent animate-spin" />
+        </div>
+      }
+    >
+      <LoginForm />
+    </Suspense>
   );
 }

@@ -8,7 +8,9 @@ import {
   MessageSquare,
   ShieldCheck,
   User,
-  Send
+  Send,
+  AlertOctagon,
+  Bot
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
@@ -16,40 +18,81 @@ export default function MobileNavDock() {
   const pathname = usePathname();
   const { user } = useAuth();
 
-  const navItems = [
-    {
-      label: 'Home',
-      href: '/',
-      icon: Home,
-      isActive: pathname === '/',
-    },
-    {
-      label: 'Journal',
-      href: '/journal',
-      icon: BarChart3,
-      isActive: pathname === '/journal',
-    },
-    {
-      label: 'Forum',
-      href: '/forum',
-      icon: MessageSquare,
-      badge: '7 Tiers',
-      isActive: pathname === '/forum',
-    },
-    {
-      label: 'Tiers',
-      href: '/#tiers',
-      icon: ShieldCheck,
-      isActive: pathname === '/#tiers' || (pathname === '/' && typeof window !== 'undefined' && window.location.hash === '#tiers'),
-    },
-    {
-      label: user ? user.username.slice(0, 7) : 'Log In',
-      href: '/login',
-      icon: User,
-      tierBadge: user ? `L${user.skill_level}` : null,
-      isActive: pathname === '/login',
-    },
-  ];
+  // On the forum chat page, hide the bottom nav dock to give 100% full screen
+  // to the live chat stream, trade cards, and keyboard input
+  if (pathname === '/forum') {
+    return null;
+  }
+
+  // If user is logged in, show Web Journal and 7-Tier Forum
+  // If user is logged out, show public landing navigations & Log In
+  const navItems = user
+    ? [
+        {
+          label: 'Home',
+          href: '/',
+          icon: Home,
+          isActive: pathname === '/',
+        },
+        {
+          label: 'Journal',
+          href: '/journal',
+          icon: BarChart3,
+          isActive: pathname === '/journal',
+        },
+        {
+          label: 'Forum',
+          href: '/forum',
+          icon: MessageSquare,
+          badge: `L${user.skill_level}`,
+          isActive: pathname === '/forum',
+        },
+        {
+          label: 'Tiers',
+          href: '/#tiers',
+          icon: ShieldCheck,
+          isActive: pathname === '/#tiers',
+        },
+        {
+          label: user.username.slice(0, 7),
+          href: '/login',
+          icon: User,
+          tierBadge: `L${user.skill_level}`,
+          isActive: pathname === '/login',
+        },
+      ]
+    : [
+        {
+          label: 'Home',
+          href: '/',
+          icon: Home,
+          isActive: pathname === '/',
+        },
+        {
+          label: '7 Tiers',
+          href: '/#tiers',
+          icon: ShieldCheck,
+          isActive: pathname === '/#tiers',
+        },
+        {
+          label: 'Bot',
+          href: '/#bot',
+          icon: Send,
+          isActive: pathname === '/#bot',
+        },
+        {
+          label: 'Rules',
+          href: '/#legitimacy',
+          icon: AlertOctagon,
+          isActive: pathname === '/#legitimacy',
+        },
+        {
+          label: 'Log In',
+          href: '/login',
+          icon: User,
+          isActive: pathname === '/login',
+        },
+      ];
 
   return (
     <nav
@@ -82,7 +125,9 @@ export default function MobileNavDock() {
                   </span>
                 )}
                 {item.badge && !item.tierBadge && (
-                  <span className="absolute -top-1 -right-2 w-2 h-2 bg-[#0F766E] rounded-full" />
+                  <span className="absolute -top-1 -right-2 px-1 py-0.2 bg-[#0F766E] text-white text-[8px] font-bold rounded-full border border-white">
+                    {item.badge}
+                  </span>
                 )}
               </div>
 

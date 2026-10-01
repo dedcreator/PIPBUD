@@ -1,11 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import Image from 'next/image';
 import { Download, X, Share2, PlusSquare, Smartphone, Check } from 'lucide-react';
 import PipbudLogo from './PipbudLogo';
 
 export default function InstallAppBanner() {
+  const pathname = usePathname();
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [isIOS, setIsIOS] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
@@ -73,7 +75,7 @@ export default function InstallAppBanner() {
     localStorage.setItem('pipbud_pwa_dismissed', Date.now().toString());
   };
 
-  if (!showBanner || isStandalone) return null;
+  if (pathname === '/forum' || !showBanner || isStandalone) return null;
 
   return (
     <>
