@@ -9,6 +9,7 @@ interface PipbudLogoProps {
   showWordmark?: boolean;
   href?: string | false;
   className?: string;
+  dark?: boolean;
 }
 
 export default function PipbudLogo({
@@ -16,6 +17,7 @@ export default function PipbudLogo({
   showWordmark = true,
   href = '/',
   className = '',
+  dark = false,
 }: PipbudLogoProps) {
   const iconDimensions = {
     sm: { width: 30, height: 30 },
@@ -45,8 +47,8 @@ export default function PipbudLogo({
 
       {showWordmark && (
         <span className={`font-bold tracking-tight inline-flex items-center ${textSize}`}>
-          <span className="text-[#1C1917]">Pip</span>
-          <span className="text-[#7C3AED]">Bud</span>
+          <span className={dark ? "text-white" : "text-[#F4F4F5]"}>Pip</span>
+          <span className="text-[#F59E0B]">Bud</span>
         </span>
       )}
     </div>
