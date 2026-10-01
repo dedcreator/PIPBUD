@@ -7,7 +7,6 @@ import {
   Send,
   ShieldCheck,
   ArrowRight,
-  Sparkles,
   Lock,
   CheckCircle2,
   AlertCircle,
@@ -17,23 +16,22 @@ import {
   Layers,
   BarChart3,
   MessageSquare,
-  Award
+  Award,
+  Sliders
 } from 'lucide-react';
 import PipbudLogo from '@/components/PipbudLogo';
 import { useAuth } from '@/context/AuthContext';
-import { TRADER_TIERS } from '@/data/tiers';
 
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTarget = searchParams?.get('redirect') || '/journal';
-  const { user, requestCode, verifyCode, loginWithDemo, logout } = useAuth();
+  const { user, requestCode, verifyCode, logout } = useAuth();
 
-  const [activeTab, setActiveTab] = useState<'otp' | 'widget' | 'tiers'>('otp');
+  const [activeTab, setActiveTab] = useState<'otp' | 'widget'>('otp');
   const [usernameInput, setUsernameInput] = useState('');
   const [codeDigits, setCodeDigits] = useState(['', '', '', '', '', '']);
   const [codeRequested, setCodeRequested] = useState(false);
-  const [generatedCodeHint, setGeneratedCodeHint] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
@@ -81,9 +79,6 @@ function LoginForm() {
     try {
       const res = await requestCode(usernameInput.trim());
       setCodeRequested(true);
-      if (res.code) {
-        setGeneratedCodeHint(res.code);
-      }
       setStatusMessage({ type: 'success', text: res.message });
       setTimeout(() => inputRefs.current[0]?.focus(), 150);
     } catch (err: any) {
@@ -118,29 +113,6 @@ function LoginForm() {
     }
   };
 
-  const handleDemoSelect = async (level: number) => {
-    setIsLoading(true);
-    setStatusMessage(null);
-    try {
-      await loginWithDemo(level);
-      setStatusMessage({ type: 'success', text: `Switched to Level ${level} profile.` });
-      setTimeout(() => router.push(redirectTarget), 600);
-    } catch (err: any) {
-      setStatusMessage({ type: 'error', text: 'Failed to switch demo tier.' });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Pre-fill demo code if available
-  const fillDemoCode = () => {
-    if (generatedCodeHint) {
-      setCodeDigits(generatedCodeHint.split(''));
-    } else {
-      setCodeDigits(['7', '7', '7', '7', '7', '7']);
-    }
-  };
-
   return (
     <div className="min-h-screen bg-[#FAFAF9] flex flex-col justify-between pt-16 pb-24 md:pb-12 px-4 sm:px-6">
       {/* Top Bar */}
@@ -158,98 +130,92 @@ function LoginForm() {
       <main className="max-w-md mx-auto w-full my-auto">
         <div className="bg-white rounded-3xl border border-[#E7E5E4] shadow-[0_12px_40px_rgba(28,25,23,0.06)] p-6 sm:p-8">
           {/* Header */}
-          <div className="text-center mb-6">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#F5F3FF] to-[#EDE9FE] border border-[#DDD6FE] flex items-center justify-center mx-auto mb-3 shadow-xs">
-              <PipbudLogo size="sm" showWordmark={false} href={false} />
+          <div className="text-center space-y-2 mb-6">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[#F0FDFA] border border-[#CCFBF1] text-[#0F766E] mx-auto">
+              <ShieldCheck className="w-3.5 h-3.5" />
+              <span>Cryptographic Telegram Authentication</span>
             </div>
-            <h1 className="text-2xl font-bold tracking-tight text-[#1C1917]">
-              {user ? 'Trader Account' : 'Log in to PipBud'}
+            <h1 className="text-xl sm:text-2xl font-bold text-[#1C1917] tracking-tight">
+              {user ? 'Authenticated Trader Session' : 'Log In to PipBud'}
             </h1>
-            <p className="text-xs sm:text-sm text-[#78716C] mt-1">
+            <p className="text-xs text-[#78716C] max-w-sm mx-auto">
               {user
-                ? 'Your verified Telegram identity and meritocracy tier'
-                : 'Connect via Telegram to sync your journal & forum tier'}
+                ? `Logged in as @${user.username}. Desks unlocked based on verified broker track record.`
+                : 'Access your audited journal, live desk huddles, and performance metrics securely via Telegram.'}
             </p>
           </div>
 
-          {/* If already logged in, show profile card */}
+          {/* Current Logged-in State Card */}
           {user ? (
-            <div className="space-y-5">
+            <div className="space-y-4">
               <div className="p-4 rounded-2xl bg-[#FAFAF9] border border-[#E7E5E4] space-y-3">
-                <div className="flex items-center justify-between pb-3 border-b border-[#E7E5E4]">
-                  <div>
-                    <h3 className="text-sm font-bold text-[#1C1917]">@{user.username}</h3>
-                    <p className="text-xs text-[#78716C]">{user.broker_name || 'Verified Prop Trader'}</p>
-                  </div>
-                  <span
-                    className="px-2.5 py-1 rounded-full text-xs font-bold text-white shadow-xs"
-                    style={{ backgroundColor: user.tier_color || '#C2410C' }}
+                <div className="flex items-center gap-3">
+                  <div
+                    className="w-12 h-12 rounded-xl text-white font-bold text-sm flex items-center justify-center shrink-0 shadow-xs uppercase"
+                    style={{ backgroundColor: user.tier_color || '#1C1917' }}
                   >
-                    {user.tier_badge}
-                  </span>
+                    {user.username.slice(0, 2)}
+                  </div>
+                  <div className="overflow-hidden min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-sm text-[#1C1917] truncate">
+                        {user.display_name || user.name || `@${user.username}`}
+                      </span>
+                      <span
+                        className="px-2 py-0.5 rounded text-[10px] font-bold text-white shrink-0"
+                        style={{ backgroundColor: user.tier_color || '#C2410C' }}
+                      >
+                        L{user.skill_level}
+                      </span>
+                    </div>
+                    <p className="text-xs font-semibold" style={{ color: user.tier_color || '#C2410C' }}>
+                      {user.tier_badge}
+                    </p>
+                    <p className="text-xs text-[#78716C] truncate">{user.broker_name || 'Verified Prop Trader'}</p>
+                  </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-2 text-center pt-1">
-                  <div className="bg-white p-2 rounded-xl border border-[#E7E5E4]">
-                    <span className="text-[10px] text-[#78716C] block">Win Rate</span>
-                    <strong className="text-xs font-bold text-[#0F766E]">{user.win_rate}%</strong>
+                <div className="grid grid-cols-3 gap-2 pt-2 border-t border-[#E7E5E4] text-center text-xs">
+                  <div>
+                    <span className="text-[#78716C] block text-[10px]">Win Rate</span>
+                    <strong className="text-[#1C1917]">{user.win_rate}%</strong>
                   </div>
-                  <div className="bg-white p-2 rounded-xl border border-[#E7E5E4]">
-                    <span className="text-[10px] text-[#78716C] block">Profit Factor</span>
-                    <strong className="text-xs font-bold text-[#1C1917]">{user.profit_factor}</strong>
+                  <div>
+                    <span className="text-[#78716C] block text-[10px]">Profit Factor</span>
+                    <strong className="text-[#0F766E]">{user.profit_factor}</strong>
                   </div>
-                  <div className="bg-white p-2 rounded-xl border border-[#E7E5E4]">
-                    <span className="text-[10px] text-[#78716C] block">Trades</span>
-                    <strong className="text-xs font-bold text-[#1C1917]">{user.total_verified_trades}</strong>
+                  <div>
+                    <span className="text-[#78716C] block text-[10px]">Max DD</span>
+                    <strong className="text-[#C2410C]">{user.max_drawdown}%</strong>
                   </div>
-                </div>
-
-                <div className="flex items-center justify-between text-xs text-[#44403C] px-1">
-                  <span>Tier Health:</span>
-                  <span className="font-semibold text-[#0F766E]">
-                    {user.tier_health}% (Active & In Good Standing)
-                  </span>
                 </div>
               </div>
 
-              {/* Navigation CTAs */}
-              <div className="grid grid-cols-2 gap-3">
-                <Link
-                  href="/journal"
-                  className="h-11 rounded-xl bg-white border border-[#E7E5E4] hover:bg-[#F5F5F4] text-[#1C1917] font-medium text-xs flex items-center justify-center gap-1.5 transition-all shadow-xs"
-                >
-                  <BarChart3 className="w-4 h-4 text-[#C2410C]" />
-                  <span>Web Journal</span>
-                </Link>
+              {/* Action Buttons */}
+              <div className="space-y-2">
                 <Link
                   href="/forum"
-                  className="h-11 rounded-xl bg-[#C2410C] hover:bg-[#EA580C] text-white font-medium text-xs flex items-center justify-center gap-1.5 transition-all shadow-xs"
+                  className="w-full h-11 rounded-xl bg-[#C2410C] hover:bg-[#EA580C] text-white font-semibold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 active:scale-98 shadow-xs"
                 >
                   <MessageSquare className="w-4 h-4" />
-                  <span>Open Forum</span>
+                  <span>Enter Trader Forum</span>
                 </Link>
-              </div>
 
-              {/* Tier Switcher for quick test */}
-              <div className="pt-3 border-t border-[#E7E5E4]">
-                <span className="text-[11px] font-semibold text-[#78716C] uppercase tracking-wider block mb-2">
-                  Test Another Skill Level:
-                </span>
-                <div className="flex flex-wrap gap-1.5">
-                  {TRADER_TIERS.map((t) => (
-                    <button
-                      key={t.level}
-                      onClick={() => handleDemoSelect(t.level)}
-                      className={`px-2 py-1 rounded-lg text-[10px] font-medium transition-all ${
-                        user.skill_level === t.level
-                          ? 'bg-[#1C1917] text-white'
-                          : 'bg-[#F5F5F4] text-[#44403C] hover:bg-[#E7E5E4]'
-                      }`}
-                    >
-                      L{t.level} {t.badge.split(' ')[1]}
-                    </button>
-                  ))}
-                </div>
+                <Link
+                  href="/journal"
+                  className="w-full h-11 rounded-xl bg-[#FAFAF9] hover:bg-[#F5F5F4] border border-[#E7E5E4] text-[#1C1917] font-semibold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 active:scale-98 shadow-xs"
+                >
+                  <BarChart3 className="w-4 h-4 text-[#0F766E]" />
+                  <span>Open Web Journal Dashboard</span>
+                </Link>
+
+                <Link
+                  href="/settings"
+                  className="w-full h-11 rounded-xl bg-[#FAFAF9] hover:bg-[#F5F5F4] border border-[#E7E5E4] text-[#1C1917] font-semibold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 active:scale-98 shadow-xs"
+                >
+                  <Sliders className="w-4 h-4 text-[#7C3AED]" />
+                  <span>Identity & Broker Settings</span>
+                </Link>
               </div>
 
               {/* Logout Button */}
@@ -258,12 +224,12 @@ function LoginForm() {
                 className="w-full h-10 rounded-xl text-xs font-medium text-[#DC2626] hover:bg-[#FEF2F2] transition-colors flex items-center justify-center gap-1.5 border border-[#FEE2E2]"
               >
                 <LogOut className="w-3.5 h-3.5" />
-                <span>Log Out</span>
+                <span>Log Out of Session</span>
               </button>
             </div>
           ) : (
             <>
-              {/* Tab Selector */}
+              {/* Tab Selector: Real Production Flows */}
               <div className="flex bg-[#F5F5F4] p-1 rounded-xl mb-6">
                 <button
                   type="button"
@@ -274,7 +240,7 @@ function LoginForm() {
                       : 'text-[#78716C] hover:text-[#1C1917]'
                   }`}
                 >
-                  1. Bot OTP Code
+                  1. Telegram Bot Code
                 </button>
                 <button
                   type="button"
@@ -285,18 +251,7 @@ function LoginForm() {
                       : 'text-[#78716C] hover:text-[#1C1917]'
                   }`}
                 >
-                  2. Telegram OAuth
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setActiveTab('tiers')}
-                  className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all ${
-                    activeTab === 'tiers'
-                      ? 'bg-white text-[#1C1917] shadow-xs'
-                      : 'text-[#78716C] hover:text-[#1C1917]'
-                  }`}
-                >
-                  ⚡ Test Tiers
+                  2. Telegram Web Direct
                 </button>
               </div>
 
@@ -318,24 +273,29 @@ function LoginForm() {
                 </div>
               )}
 
-              {/* USERFLOW 1: Telegram Bot OTP Code */}
+              {/* USERFLOW 1: 6-Digit Telegram One-Time Code */}
               {activeTab === 'otp' && (
-                <div className="space-y-4">
+                <div>
                   {!codeRequested ? (
                     <form onSubmit={handleRequestCode} className="space-y-4">
                       <div>
                         <label className="block text-xs font-semibold text-[#1C1917] mb-1.5">
-                          Your Telegram Username or ID
+                          Telegram Handle or Numeric ID
                         </label>
                         <div className="relative">
                           <input
                             type="text"
                             value={usernameInput}
                             onChange={(e) => setUsernameInput(e.target.value)}
-                            placeholder="@trader_dan or 8921472"
-                            className="w-full h-11 px-3.5 rounded-xl border border-[#E7E5E4] focus:outline-hidden focus:border-[#C2410C] focus:ring-1 focus:ring-[#C2410C] text-sm text-[#1C1917] placeholder:text-[#A8A29E]"
+                            placeholder="e.g. @your_username or 9928174"
+                            className="w-full h-11 pl-4 pr-10 rounded-xl border border-[#E7E5E4] focus:border-[#C2410C] focus:ring-1 focus:ring-[#C2410C] text-xs sm:text-sm text-[#1C1917] bg-[#FAFAF9] outline-hidden transition-all"
+                            required
                           />
+                          <Send className="w-4 h-4 text-[#A8A29E] absolute right-3.5 top-3.5" />
                         </div>
+                        <p className="text-[11px] text-[#78716C] mt-1.5">
+                          We will securely generate a 6-digit one-time code to authenticate your verified journal account.
+                        </p>
                       </div>
 
                       <button
@@ -346,7 +306,7 @@ function LoginForm() {
                         {isLoading ? (
                           <RefreshCw className="w-4 h-4 animate-spin" />
                         ) : (
-                          <Send className="w-4 h-4" />
+                          <Smartphone className="w-4 h-4" />
                         )}
                         <span>Request Login Code</span>
                       </button>
@@ -398,20 +358,6 @@ function LoginForm() {
                         </div>
                       </div>
 
-                      {/* Quick Auto-Fill for Testing */}
-                      {generatedCodeHint && (
-                        <div className="flex items-center justify-between px-2 py-1 bg-[#F0FDFA] rounded-lg text-[11px] text-[#0F766E]">
-                          <span>Active test code: <strong>{generatedCodeHint}</strong></span>
-                          <button
-                            type="button"
-                            onClick={fillDemoCode}
-                            className="underline font-bold"
-                          >
-                            Auto-fill
-                          </button>
-                        </div>
-                      )}
-
                       <button
                         type="submit"
                         disabled={isLoading}
@@ -434,10 +380,10 @@ function LoginForm() {
                 <div className="text-center py-4 space-y-4">
                   <div className="p-4 bg-[#F5F5F4] rounded-2xl border border-[#E7E5E4] text-xs text-[#44403C] space-y-2">
                     <p className="font-semibold text-[#1C1917]">
-                      Official Telegram OAuth Widget
+                      Official Telegram OAuth Session
                     </p>
                     <p className="text-[11px] text-[#78716C]">
-                      Telegram uses your verified phone session to authorize without typing passwords or sharing credentials.
+                      Telegram uses your verified active session to authorize without typing passwords or sharing credentials.
                     </p>
                   </div>
 
@@ -459,61 +405,30 @@ function LoginForm() {
                   </p>
                 </div>
               )}
-
-              {/* USERFLOW 3 / TEST SWITCHER: 1-Click Meritocracy Tiers */}
-              {activeTab === 'tiers' && (
-                <div className="space-y-3">
-                  <p className="text-xs text-[#78716C] mb-2">
-                    Select a skill tier to immediately log in and explore the tier-gated forum channels and anti-shortfall enforcement:
-                  </p>
-                  <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
-                    {TRADER_TIERS.map((tier) => (
-                      <button
-                        key={tier.level}
-                        type="button"
-                        onClick={() => handleDemoSelect(tier.level)}
-                        className="w-full p-2.5 rounded-xl border border-[#E7E5E4] hover:border-[#FED7AA] hover:bg-[#FFF7ED] text-left transition-all flex items-center justify-between group active:scale-98"
-                      >
-                        <div className="flex items-center gap-2.5">
-                          <span
-                            className="w-7 h-7 rounded-lg text-white font-bold text-xs flex items-center justify-center shrink-0"
-                            style={{ backgroundColor: tier.color }}
-                          >
-                            {tier.level}
-                          </span>
-                          <div>
-                            <h4 className="text-xs font-bold text-[#1C1917] group-hover:text-[#C2410C]">
-                              {tier.title}
-                            </h4>
-                            <p className="text-[10px] text-[#78716C]">
-                              WR: {tier.minWinRate}% • Max DD: {tier.maxDrawdown}%
-                            </p>
-                          </div>
-                        </div>
-
-                        <span className="text-xs text-[#A8A29E] group-hover:text-[#C2410C]">
-                          &rarr;
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
             </>
           )}
-        </div>
 
-        {/* Meritocracy Assurance Note */}
-        <div className="mt-4 text-center">
-          <p className="text-[11px] text-[#78716C] inline-flex items-center gap-1.5">
-            <ShieldCheck className="w-3.5 h-3.5 text-[#0F766E]" />
-            <span>Audited Meritocracy: Fall short of your tier’s stats, you get automatically removed.</span>
-          </p>
+          {/* Footer note inside card */}
+          <div className="mt-6 pt-5 border-t border-[#E7E5E4] text-center">
+            <p className="text-[11px] text-[#78716C]">
+              New to PipBud? Start by messaging{' '}
+              <a
+                href="https://t.me/PipBudBot"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[#C2410C] font-semibold hover:underline"
+              >
+                @PipBudBot
+              </a>{' '}
+              on Telegram to create your audited journal.
+            </p>
+          </div>
         </div>
       </main>
 
-      <footer className="text-center text-xs text-[#A8A29E] mt-6">
-        &copy; {new Date().getFullYear()} PipBud. Built with Next.js & Django.
+      {/* Footer */}
+      <footer className="max-w-md mx-auto w-full text-center text-xs text-[#A8A29E] pt-4">
+        &copy; {new Date().getFullYear()} PipBud. Verified Trader Meritocracy Network.
       </footer>
     </div>
   );
@@ -523,8 +438,8 @@ export default function LoginPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-[#FAFAF9] flex items-center justify-center p-4">
-          <div className="w-8 h-8 rounded-full border-2 border-[#C2410C] border-t-transparent animate-spin" />
+        <div className="min-h-screen bg-[#FAFAF9] flex items-center justify-center">
+          <RefreshCw className="w-6 h-6 animate-spin text-[#C2410C]" />
         </div>
       }
     >

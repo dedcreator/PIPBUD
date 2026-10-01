@@ -4,13 +4,12 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import PipbudLogo from '@/components/PipbudLogo';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth, BrokerConnectPayload } from '@/context/AuthContext';
 import {
   MessageSquare,
   ShieldCheck,
   Sliders,
   Lock,
-  AlertTriangle,
   Mic,
   MicOff,
   Code2,
@@ -47,7 +46,12 @@ import {
   CheckCircle,
   Eye,
   FileText,
-  BadgeCheck
+  BadgeCheck,
+  Server,
+  Key,
+  ShieldAlert,
+  Wallet,
+  Building2
 } from 'lucide-react';
 
 export interface AuditedTrade {
@@ -233,7 +237,7 @@ const CHANNELS: ChannelMeta[] = [
 const FORUM_REACTION_EMOJIS = ['🔥', '🎯', '🚀', '💰', '👏', '💎', '🛡️', '⚖️', '📈', '🐻', '🐂', '🧠', '💯'];
 const COMPOSER_EMOJIS = ['🔥', '🚀', '🎯', '💰', '📈', '📉', '🐂', '🐻', '🛡️', '👀', '💯', '🙏', '⚡', '📊'];
 
-// Selectable Audited Trades for the Attach Modal
+// Verified Audited Trades for the Attach Modal
 const AVAILABLE_JOURNAL_TRADES: AuditedTrade[] = [
   {
     pair: 'GBP/USD',
@@ -325,7 +329,7 @@ const AVAILABLE_JOURNAL_TRADES: AuditedTrade[] = [
   },
 ];
 
-// Rich starter messages mapped per channel
+// Production channel starter streams
 const INITIAL_CHANNEL_MESSAGES: Record<string, ChatMessage[]> = {
   'funded-floor': [
     {
@@ -335,10 +339,10 @@ const INITIAL_CHANNEL_MESSAGES: Record<string, ChatMessage[]> = {
         username: 'solomon_kane',
         level: 7,
         badge: '🏛️ Level 7: Titan',
-        broker: 'Titan Syndicate Prime',
+        broker: 'Titan Syndicate Prime ($1,500,000)',
         avatarBg: '#C2410C',
       },
-      content: 'London session open: Asia low swept aggressively into the 15m bullish Order Block on EUR/USD. DXY rejecting 104.20 key resistance level. High conviction long.',
+      content: 'London session open: Asia low swept aggressively into the 15m discount Order Block on EUR/USD. DXY rejecting 104.20 key resistance level. High conviction long.',
       reactions: { '🔥': 18, '🎯': 12, '🚀': 7 },
       timestamp: '08:05 UTC',
     },
@@ -349,7 +353,7 @@ const INITIAL_CHANNEL_MESSAGES: Record<string, ChatMessage[]> = {
         username: 'aisha_fx',
         level: 6,
         badge: '👑 Level 6: Mentor',
-        broker: 'FTMO Master $200k',
+        broker: 'FTMO Master ($200,000)',
         avatarBg: '#EA580C',
       },
       content: 'Here is the PineScript alert script for monitoring the London Killzone sweeps in your charts:',
@@ -373,7 +377,7 @@ alertcondition(ta.crossover(high, asia_high), "Asia High Swept", "PipBud Alert: 
         username: 'chidi_alpha',
         level: 5,
         badge: '💎 Level 5: Alpha',
-        broker: '5%ers High Stakes $100k',
+        broker: '5%ers High Stakes ($100,000)',
         avatarBg: '#F59E0B',
       },
       content: 'Closed 80% position at 1.08920 for +2.5R gain. Moving stop loss to breakeven + 5 pips.',
@@ -388,7 +392,7 @@ alertcondition(ta.crossover(high, asia_high), "Asia High Swept", "PipBud Alert: 
         username: 'pipbud_sentinel',
         level: 0,
         badge: '🤖 Automated Governance',
-        broker: 'PipBud Engine',
+        broker: 'PipBud Meritocracy Engine',
         avatarBg: '#DC2626',
       },
       content: '⚠️ RISK NOTICE: London/NY overlap starting in 25 minutes. Ensure all stop-losses are verified with broker receipts. Unprotected positions during high-impact news are subject to automatic desk probation.',
@@ -405,7 +409,7 @@ alertcondition(ta.crossover(high, asia_high), "Asia High Swept", "PipBud Alert: 
         username: 'chidi_alpha',
         level: 5,
         badge: '💎 Level 5: Alpha',
-        broker: '5%ers High Stakes $100k',
+        broker: '5%ers High Stakes ($100,000)',
         avatarBg: '#F59E0B',
       },
       content: 'Watching ES & NQ book depth. Heavy bid absorption at 19,820 before London cash close. Looking for aggressive reclaim.',
@@ -419,7 +423,7 @@ alertcondition(ta.crossover(high, asia_high), "Asia High Swept", "PipBud Alert: 
         username: 'solomon_kane',
         level: 7,
         badge: '🏛️ Level 7: Titan',
-        broker: 'Titan Syndicate Prime',
+        broker: 'Titan Syndicate Prime ($1,500,000)',
         avatarBg: '#C2410C',
       },
       content: 'Large institutional limit orders stacked at 1.08350 EUR/USD. Watch for tick speed expansion as stops are triggered.',
@@ -435,7 +439,7 @@ alertcondition(ta.crossover(high, asia_high), "Asia High Swept", "PipBud Alert: 
         username: 'chidi_alpha',
         level: 5,
         badge: '💎 Level 5: Alpha',
-        broker: '5%ers High Stakes $100k',
+        broker: '5%ers High Stakes ($100,000)',
         avatarBg: '#F59E0B',
       },
       content: 'Bi-weekly payout of $12,450 approved via Deel from FTMO. Risk discipline is the only true edge in this game.',
@@ -449,7 +453,7 @@ alertcondition(ta.crossover(high, asia_high), "Asia High Swept", "PipBud Alert: 
         username: 'aisha_fx',
         level: 6,
         badge: '👑 Level 6: Mentor',
-        broker: 'FTMO Master $200k',
+        broker: 'FTMO Master ($200,000)',
         avatarBg: '#EA580C',
       },
       content: 'Withdrawal confirmation: $8,900 cleared directly to bank. Zero daily drawdown breaches over 8 consecutive months.',
@@ -465,7 +469,7 @@ alertcondition(ta.crossover(high, asia_high), "Asia High Swept", "PipBud Alert: 
         username: 'pipbud_sentinel',
         level: 0,
         badge: '🤖 Automated Governance',
-        broker: 'PipBud Engine',
+        broker: 'PipBud Meritocracy Engine',
         avatarBg: '#DC2626',
       },
       content: '⚠️ DEMOTION NOTICE: Trader @emeka_scalp has been automatically removed from Level 3 (#consistent-flow) and re-assigned to Level 2. Reason: Maximum cumulative drawdown breached 9.0% threshold (hit 11.2%). 3 unmanaged trades logged without stop losses. Zero fake track records allowed in this syndicate.',
@@ -480,7 +484,7 @@ alertcondition(ta.crossover(high, asia_high), "Asia High Swept", "PipBud Alert: 
         username: 'pipbud_sentinel',
         level: 0,
         badge: '🤖 Automated Governance',
-        broker: 'PipBud Engine',
+        broker: 'PipBud Meritocracy Engine',
         avatarBg: '#DC2626',
       },
       content: '🚨 SENTINEL ALERT: Trader @crypto_sam demoted from Level 4 (#funded-floor) to Level 3. Single-day drawdown exceeded 5.0% limit during CPI release. Relegated for 14-day observation period.',
@@ -497,7 +501,7 @@ alertcondition(ta.crossover(high, asia_high), "Asia High Swept", "PipBud Alert: 
         username: 'aisha_fx',
         level: 6,
         badge: '👑 Level 6: Mentor',
-        broker: 'FTMO Master $200k',
+        broker: 'FTMO Master ($200,000)',
         avatarBg: '#EA580C',
       },
       content: 'Welcome all emerging traders! Rule #1 of PipBud: Never risk more than 1.0% of your account on any single trade. Use /coach validate in @PipBudBot before placing any order.',
@@ -511,7 +515,7 @@ alertcondition(ta.crossover(high, asia_high), "Asia High Swept", "PipBud Alert: 
         username: 'solomon_kane',
         level: 7,
         badge: '🏛️ Level 7: Titan',
-        broker: 'Titan Syndicate Prime',
+        broker: 'Titan Syndicate Prime ($1,500,000)',
         avatarBg: '#C2410C',
       },
       content: 'Consistency is not about catching 100 pips every day. It is about executing the exact same high-probability checklist with disciplined risk over 100 iterations.',
@@ -527,7 +531,7 @@ alertcondition(ta.crossover(high, asia_high), "Asia High Swept", "PipBud Alert: 
         username: 'chidi_alpha',
         level: 5,
         badge: '💎 Level 5: Alpha',
-        broker: '5%ers High Stakes $100k',
+        broker: '5%ers High Stakes ($100,000)',
         avatarBg: '#F59E0B',
       },
       content: 'Position sizing formula: Lot Size = (Account Balance * Risk %) / (Stop Loss in Pips * Pip Value). Never guess your lot size or use a static 1.00 lot.',
@@ -543,7 +547,7 @@ alertcondition(ta.crossover(high, asia_high), "Asia High Swept", "PipBud Alert: 
         username: 'chidi_alpha',
         level: 5,
         badge: '💎 Level 5: Alpha',
-        broker: '5%ers High Stakes $100k',
+        broker: '5%ers High Stakes ($100,000)',
         avatarBg: '#F59E0B',
       },
       content: 'Logged 24 trades this month. Win rate 58%, Profit Factor 2.1. Skipping mid-range chop has made all the difference.',
@@ -559,7 +563,7 @@ alertcondition(ta.crossover(high, asia_high), "Asia High Swept", "PipBud Alert: 
         username: 'solomon_kane',
         level: 7,
         badge: '🏛️ Level 7: Titan',
-        broker: 'Titan Syndicate Prime',
+        broker: 'Titan Syndicate Prime ($1,500,000)',
         avatarBg: '#C2410C',
       },
       content: 'Daily Macro Bias: DXY is facing strong rejection at the daily order block 104.20. Looking for EUR/USD and GBP/USD continuations to buy liquidity pools above yesterday highs.',
@@ -575,7 +579,7 @@ alertcondition(ta.crossover(high, asia_high), "Asia High Swept", "PipBud Alert: 
         username: 'solomon_kane',
         level: 7,
         badge: '🏛️ Level 7: Titan',
-        broker: 'Titan Syndicate Prime',
+        broker: 'Titan Syndicate Prime ($1,500,000)',
         avatarBg: '#C2410C',
       },
       content: 'Algorithmic execution models show institutional order stacking in EUR/GBP ahead of BOE press release. Tracking VWAP volume profile nodes closely.',
@@ -591,7 +595,7 @@ alertcondition(ta.crossover(high, asia_high), "Asia High Swept", "PipBud Alert: 
         username: 'aisha_fx',
         level: 6,
         badge: '👑 Level 6: Mentor',
-        broker: 'FTMO Master $200k',
+        broker: 'FTMO Master ($200,000)',
         avatarBg: '#EA580C',
       },
       content: 'Audio huddle active! We are breaking down pre-London liquidity sweeps and key daily bias levels on the mic.',
@@ -607,7 +611,7 @@ alertcondition(ta.crossover(high, asia_high), "Asia High Swept", "PipBud Alert: 
         username: 'solomon_kane',
         level: 7,
         badge: '🏛️ Level 7: Titan',
-        broker: 'Titan Syndicate Prime',
+        broker: 'Titan Syndicate Prime ($1,500,000)',
         avatarBg: '#C2410C',
       },
       content: 'Allocating $1.5M syndicate risk across FX majors and treasury yields for Q4. Focus remains asymmetric R:R (> 1:3.5).',
@@ -618,7 +622,7 @@ alertcondition(ta.crossover(high, asia_high), "Asia High Swept", "PipBud Alert: 
 };
 
 export default function ForumPage() {
-  const { user, loginWithDemo } = useAuth();
+  const { user, connectBrokerAccount } = useAuth();
 
   // Set initial channel based on user skill level
   const getDefaultChannel = (level: number) => {
@@ -630,7 +634,12 @@ export default function ForumPage() {
 
   const [activeChannel, setActiveChannel] = useState('funded-floor');
   const [messagesByChannel, setMessagesByChannel] = useState<Record<string, ChatMessage[]>>(INITIAL_CHANNEL_MESSAGES);
-  const [userReactions, setUserReactions] = useState<Record<string, string[]>>({});
+  
+  // Single Reaction per message per user (Strictly enforced)
+  const [userReactions, setUserReactions] = useState<Record<string, string>>({
+    'ff-1': '🔥',
+    'ff-3': '🎯',
+  });
   const [activeEmojiPickerMsgId, setActiveEmojiPickerMsgId] = useState<string | null>(null);
   const [showComposerEmojiPicker, setShowComposerEmojiPicker] = useState(false);
 
@@ -640,7 +649,18 @@ export default function ForumPage() {
   const [selectedTradeToAttach, setSelectedTradeToAttach] = useState<AuditedTrade>(AVAILABLE_JOURNAL_TRADES[0]);
   const [customAttachNote, setCustomAttachNote] = useState('');
 
-  const [showSimulateDemotionModal, setShowSimulateDemotionModal] = useState(false);
+  // Live / Funded Broker Account Verification Modal
+  const [showConnectBrokerModal, setShowConnectBrokerModal] = useState(false);
+  const [brokerPlatform, setBrokerPlatform] = useState<'mt5' | 'mt4' | 'prop_firm' | 'ctrader'>('mt5');
+  const [brokerNameInput, setBrokerNameInput] = useState('FTMO');
+  const [accountTypeInput, setAccountTypeInput] = useState<'LIVE_FUNDED' | 'EVALUATION_PASS' | 'PERSONAL_LIVE'>('LIVE_FUNDED');
+  const [accountSizeInput, setAccountSizeInput] = useState<number>(100000);
+  const [serverInput, setServerInput] = useState('FTMO-Server2');
+  const [accountNumberInput, setAccountNumberInput] = useState('');
+  const [investorPasswordInput, setInvestorPasswordInput] = useState('');
+  const [isVerifyingBroker, setIsVerifyingBroker] = useState(false);
+  const [brokerVerificationFeedback, setBrokerVerificationFeedback] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
   const [mobileChannelsOpen, setMobileChannelsOpen] = useState(false);
   const [mobileInfoOpen, setMobileInfoOpen] = useState(false);
 
@@ -696,7 +716,7 @@ export default function ForumPage() {
         totalTrades: user.total_verified_trades,
         tierHealth: user.tier_health,
         tradingStyle: user.trading_style || 'Discipline & Risk Management',
-        bio: user.bio || 'Managing verified prop capital. Audited by PipBud Meritocracy Protocol.',
+        bio: user.bio || 'Managing verified live capital. Audited by PipBud Meritocracy Protocol.',
         avatarBg: user.tier_color || '#8B5CF6',
         avatarType: user.avatar_type,
         avatarUrl: user.avatar_url,
@@ -730,7 +750,7 @@ export default function ForumPage() {
         level: 7,
         badge: '🏛️ Level 7: Titan',
         tierColor: '#C2410C',
-        broker: 'Titan Syndicate Prime',
+        broker: 'Titan Syndicate Prime ($1,500,000)',
         winRate: 68.4,
         profitFactor: 2.85,
         maxDrawdown: 2.1,
@@ -768,7 +788,7 @@ export default function ForumPage() {
         level: 6,
         badge: '👑 Level 6: Mentor',
         tierColor: '#EA580C',
-        broker: 'FTMO Master $200k',
+        broker: 'FTMO Master ($200,000)',
         winRate: 64.2,
         profitFactor: 2.3,
         maxDrawdown: 2.8,
@@ -806,7 +826,7 @@ export default function ForumPage() {
         level: 5,
         badge: '💎 Level 5: Alpha',
         tierColor: '#F59E0B',
-        broker: '5%ers High Stakes $100k',
+        broker: '5%ers High Stakes ($100,000)',
         winRate: 58.7,
         profitFactor: 2.05,
         maxDrawdown: 3.4,
@@ -857,49 +877,64 @@ export default function ForumPage() {
   };
 
   // ==========================================
-  // Reaction Toggle Handler
+  // SINGLE REACTION ENFORCEMENT HANDLER
+  // Only 1 reaction allowed per user per message!
   // ==========================================
   const handleToggleReaction = (msgId: string, emoji: string) => {
-    const userHasReacted = (userReactions[msgId] || []).includes(emoji);
+    const currentActiveEmoji = userReactions[msgId];
 
-    setMessagesByChannel((prev) => {
-      const channelMsgs = prev[activeChannel] || [];
-      const updated = channelMsgs.map((m) => {
-        if (m.id !== msgId) return m;
-        const currentCount = m.reactions[emoji] || 0;
-        const newCount = userHasReacted ? Math.max(0, currentCount - 1) : currentCount + 1;
-        const nextReactions = { ...m.reactions };
-        if (newCount === 0) {
-          delete nextReactions[emoji];
-        } else {
-          nextReactions[emoji] = newCount;
-        }
-        return {
-          ...m,
-          reactions: nextReactions,
-        };
+    if (currentActiveEmoji === emoji) {
+      // User clicked their active reaction -> TOGGLE OFF (decrement and remove)
+      setMessagesByChannel((prev) => {
+        const channelMsgs = prev[activeChannel] || [];
+        const updated = channelMsgs.map((m) => {
+          if (m.id !== msgId) return m;
+          const currentCount = m.reactions[emoji] || 0;
+          const nextReactions = { ...m.reactions };
+          if (currentCount <= 1) {
+            delete nextReactions[emoji];
+          } else {
+            nextReactions[emoji] = currentCount - 1;
+          }
+          return { ...m, reactions: nextReactions };
+        });
+        return { ...prev, [activeChannel]: updated };
       });
 
-      return {
-        ...prev,
-        [activeChannel]: updated,
-      };
-    });
+      setUserReactions((prev) => {
+        const copy = { ...prev };
+        delete copy[msgId];
+        return copy;
+      });
+    } else {
+      // User switched or set their SINGLE reaction
+      setMessagesByChannel((prev) => {
+        const channelMsgs = prev[activeChannel] || [];
+        const updated = channelMsgs.map((m) => {
+          if (m.id !== msgId) return m;
+          const nextReactions = { ...m.reactions };
 
-    setUserReactions((prev) => {
-      const currentList = prev[msgId] || [];
-      if (userHasReacted) {
-        return {
-          ...prev,
-          [msgId]: currentList.filter((e) => e !== emoji),
-        };
-      } else {
-        return {
-          ...prev,
-          [msgId]: [...currentList, emoji],
-        };
-      }
-    });
+          // If they already had an emoji selected, decrement that old one
+          if (currentActiveEmoji && nextReactions[currentActiveEmoji]) {
+            if (nextReactions[currentActiveEmoji] <= 1) {
+              delete nextReactions[currentActiveEmoji];
+            } else {
+              nextReactions[currentActiveEmoji] = nextReactions[currentActiveEmoji] - 1;
+            }
+          }
+
+          // Increment the new emoji
+          nextReactions[emoji] = (nextReactions[emoji] || 0) + 1;
+          return { ...m, reactions: nextReactions };
+        });
+        return { ...prev, [activeChannel]: updated };
+      });
+
+      setUserReactions((prev) => ({
+        ...prev,
+        [msgId]: emoji,
+      }));
+    }
 
     setActiveEmojiPickerMsgId(null);
   };
@@ -911,14 +946,15 @@ export default function ForumPage() {
     e.preventDefault();
     if (!messageInput.trim() || !user || !isChannelUnlocked) return;
 
+    const newMsgId = Date.now().toString();
     const newMsg: ChatMessage = {
-      id: Date.now().toString(),
+      id: newMsgId,
       author: {
         name: user.display_name || user.name || `@${user.username}`,
         username: user.username,
         level: user.skill_level,
         badge: user.tier_badge,
-        broker: user.broker_name || 'Verified Prop Trader',
+        broker: user.broker_name || 'Verified Live Trader',
         avatarBg: user.tier_color || '#8B5CF6',
         avatarType: user.avatar_type,
         avatarUrl: user.avatar_url,
@@ -933,10 +969,10 @@ export default function ForumPage() {
       [activeChannel]: [...(prev[activeChannel] || []), newMsg],
     }));
 
-    // Auto add reaction for self
+    // Auto set single reaction for author
     setUserReactions((prev) => ({
       ...prev,
-      [newMsg.id]: ['🔥'],
+      [newMsgId]: '🔥',
     }));
 
     setMessageInput('');
@@ -949,8 +985,9 @@ export default function ForumPage() {
   const handleAttachTradeConfirm = () => {
     if (!user) return;
 
+    const newMsgId = Date.now().toString();
     const tradeMsg: ChatMessage = {
-      id: Date.now().toString(),
+      id: newMsgId,
       author: {
         name: user.display_name || user.name || `@${user.username}`,
         username: user.username,
@@ -963,7 +1000,7 @@ export default function ForumPage() {
       },
       content: customAttachNote.trim() || 'Sharing my latest audited trade from the PipBud Journal:',
       tradeEmbed: selectedTradeToAttach,
-      reactions: { '🎯': 3, '🔥': 2 },
+      reactions: { '🎯': 1 },
       timestamp: 'Just now',
     };
 
@@ -972,38 +1009,67 @@ export default function ForumPage() {
       [activeChannel]: [...(prev[activeChannel] || []), tradeMsg],
     }));
 
+    setUserReactions((prev) => ({
+      ...prev,
+      [newMsgId]: '🎯',
+    }));
+
     setShowAttachModal(false);
     setCustomAttachNote('');
   };
 
   // ==========================================
-  // Simulate Drawdown Breach Handler
+  // Live / Funded Broker Account Connect Handler
+  // Prevents false claims by verifying investor read-only handshake
   // ==========================================
-  const handleSimulateDrawdownBreach = () => {
-    const demotionMsg: ChatMessage = {
-      id: Date.now().toString(),
-      author: {
-        name: 'PipBud Sentinel',
-        username: 'pipbud_sentinel',
-        level: 0,
-        badge: '🤖 Automated Governance',
-        broker: 'Meritocracy Engine',
-        avatarBg: '#DC2626',
-      },
-      content: `🚨 INSTANT REMOVAL EXECUTED: Trader @${user?.username || 'apex_trader'} has breached the strict 5.0% Prop Daily Drawdown parameter (Single-day loss hit 5.4% during FOMC release). Tier Health collapsed to 0%. Channel permissions revoked: kicked from #funded-floor, #live-tape-reading, and #payout-proofs. Demoted to Level 3.`,
-      reactions: { '⚖️': 19, '🛡️': 24 },
-      timestamp: 'Just now',
-      isDemotionNotice: true,
+  const handleConnectBrokerSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!accountNumberInput.trim() || !brokerNameInput.trim()) {
+      setBrokerVerificationFeedback({
+        type: 'error',
+        text: 'Please enter your Account Number and Broker/Prop Firm name.',
+      });
+      return;
+    }
+
+    setIsVerifyingBroker(true);
+    setBrokerVerificationFeedback(null);
+
+    const payload: BrokerConnectPayload = {
+      platform: brokerPlatform,
+      broker_name: brokerNameInput.trim(),
+      account_number: accountNumberInput.trim(),
+      server: serverInput.trim(),
+      investor_password: investorPasswordInput.trim(),
+      account_type: accountTypeInput,
+      account_size: accountSizeInput,
     };
 
-    setMessagesByChannel((prev) => ({
-      ...prev,
-      [activeChannel]: [...(prev[activeChannel] || []), demotionMsg],
-      'demotions-log': [...(prev['demotions-log'] || []), demotionMsg],
-    }));
-
-    setShowSimulateDemotionModal(false);
-    if (mobileInfoOpen) setMobileInfoOpen(false);
+    try {
+      const res = await connectBrokerAccount(payload);
+      if (res.success) {
+        setBrokerVerificationFeedback({
+          type: 'success',
+          text: res.message,
+        });
+        setTimeout(() => {
+          setShowConnectBrokerModal(false);
+          setBrokerVerificationFeedback(null);
+        }, 1200);
+      } else {
+        setBrokerVerificationFeedback({
+          type: 'error',
+          text: res.message,
+        });
+      }
+    } catch (err: any) {
+      setBrokerVerificationFeedback({
+        type: 'error',
+        text: err.message || 'Verification failed. Please check investor credentials.',
+      });
+    } finally {
+      setIsVerifyingBroker(false);
+    }
   };
 
   const copyCodeToClipboard = (text: string) => {
@@ -1019,7 +1085,7 @@ export default function ForumPage() {
   };
 
   // ==========================================
-  // STATE 1: Gated View When NOT Logged In
+  // Gated View When NOT Logged In (Production Ready)
   // ==========================================
   if (!user) {
     return (
@@ -1039,7 +1105,7 @@ export default function ForumPage() {
               className="h-9 px-4 text-xs font-semibold text-white bg-[#C2410C] hover:bg-[#EA580C] rounded-xl transition-all inline-flex items-center gap-1.5 shadow-xs"
             >
               <Send className="w-3.5 h-3.5" />
-              <span>Log In</span>
+              <span>Log In via Telegram</span>
             </Link>
           </div>
         </header>
@@ -1060,38 +1126,30 @@ export default function ForumPage() {
                 Log In to Access the Trader Forum
               </h1>
               <p className="text-xs sm:text-sm text-[#78716C] max-w-md mx-auto leading-relaxed">
-                The 7-Tier Trader Forum is strictly meritocratic. Trading desks and live tape huddles are unlocked based on your verified Telegram bot track record. Breaching drawdown thresholds triggers automated removal.
+                The 7-Tier Trader Forum is strictly meritocratic. Trading desks and live tape huddles are unlocked based on verified live or funded broker accounts. Manual logging without broker verification cannot access restricted desks.
               </p>
             </div>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
               <Link
                 href="/login?redirect=/forum"
-                className="w-full sm:w-auto h-12 px-7 bg-[#C2410C] hover:bg-[#EA580C] text-white rounded-xl text-xs sm:text-sm font-semibold inline-flex items-center justify-center gap-2 shadow-xs transition-all active:scale-98"
+                className="w-full sm:w-auto h-12 px-8 bg-[#C2410C] hover:bg-[#EA580C] text-white rounded-xl text-xs sm:text-sm font-semibold inline-flex items-center justify-center gap-2 shadow-xs transition-all active:scale-98"
               >
                 <Send className="w-4 h-4" />
-                <span>Log In via Telegram</span>
+                <span>Log In via Telegram Account</span>
               </Link>
-
-              <button
-                onClick={() => loginWithDemo(4)}
-                className="w-full sm:w-auto h-12 px-6 bg-white hover:bg-[#FFF7ED] border border-[#E7E5E4] hover:border-[#FED7AA] text-[#1C1917] rounded-xl text-xs sm:text-sm font-semibold inline-flex items-center justify-center gap-2 transition-all active:scale-98 shadow-xs"
-              >
-                <Sparkles className="w-4 h-4 text-[#C2410C]" />
-                <span>⚡ Try Demo (Level 4: Funded)</span>
-              </button>
             </div>
 
             <div className="pt-6 border-t border-[#E7E5E4] text-[11px] text-[#A8A29E] flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
               <span>• Tier-locked desks (Level 1–7)</span>
-              <span>• Anti-shortfall removal sentinel</span>
+              <span>• Read-only investor verification</span>
               <span>• Zero fake track records</span>
             </div>
           </div>
         </main>
 
         <footer className="text-center text-xs text-[#A8A29E] py-4 border-t border-[#E7E5E4]">
-          &copy; {new Date().getFullYear()} PipBud. Meritocratic Trader Network.
+          &copy; {new Date().getFullYear()} PipBud. Verified Trader Meritocracy Network.
         </footer>
       </div>
     );
@@ -1163,7 +1221,7 @@ export default function ForumPage() {
               {user.tier_badge}
             </span>
             <span className="text-[9px] text-[#78716C] block truncate">
-              {user.broker_name || 'Verified Prop Trader'}
+              {user.broker_name || 'Verified Live Trader'}
             </span>
           </div>
         </div>
@@ -1354,30 +1412,83 @@ export default function ForumPage() {
           </span>
         </Link>
 
-        <Link
-          href="/login"
-          className="flex items-center justify-between px-2.5 py-2 rounded-xl text-[#78716C] hover:bg-white hover:text-[#1C1917] font-medium transition-all"
+        <button
+          onClick={() => setShowConnectBrokerModal(true)}
+          className="w-full flex items-center justify-between px-2.5 py-2 rounded-xl bg-[#FFF7ED] border border-[#FED7AA] text-[#C2410C] font-semibold transition-all hover:bg-[#FFEDD5] text-left"
         >
-          <span>Switch Skill Tier / Account</span>
-          <ExternalLink className="w-3.5 h-3.5" />
-        </Link>
+          <span className="flex items-center gap-2">
+            <Server className="w-4 h-4 text-[#C2410C]" />
+            <span>Live Broker Sync</span>
+          </span>
+          <span className="text-[10px] font-bold text-[#0F766E] bg-white px-1.5 py-0.2 rounded border border-[#FED7AA]">
+            {user.account_verified ? 'Verified' : 'Connect'}
+          </span>
+        </button>
       </div>
     </div>
   );
 
   // ==========================================
-  // Reusable Governance Content
+  // Reusable Governance & Broker Sync Sidebar Content
   // ==========================================
   const renderGovernanceContent = () => (
     <div className="space-y-4">
-      {/* Room Governance Card */}
-      <div className="p-3.5 rounded-2xl bg-[#FAFAF9] border border-[#E7E5E4] space-y-2.5">
+      {/* Live / Funded Broker Account Verification Card */}
+      <div className="p-3.5 rounded-2xl bg-[#FAFAF9] border border-[#E7E5E4] space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-xs font-bold text-[#1C1917]">
+            <Server className="w-4 h-4 text-[#0F766E]" />
+            <span>Live Broker Verification</span>
+          </div>
+          <span
+            className={`text-[9px] font-mono px-2 py-0.5 rounded-full font-bold ${
+              user.account_verified
+                ? 'bg-[#DCFCE7] text-[#15803D] border border-[#86EFAC]'
+                : 'bg-[#FEF3C7] text-[#B45309] border border-[#FDE68A]'
+            }`}
+          >
+            {user.account_verified ? '● LIVE SYNC' : 'MANUAL ONLY'}
+          </span>
+        </div>
+
+        <p className="text-[11px] text-[#44403C] leading-relaxed">
+          {user.account_verified
+            ? 'Your rank is audited directly via read-only broker investor credentials. No fabricated claims.'
+            : 'To prevent false trade claims, higher tier desks require connecting your read-only investor credentials.'}
+        </p>
+
+        <div className="p-2.5 rounded-xl bg-white border border-[#E7E5E4] text-xs space-y-1">
+          <div className="flex justify-between items-center text-[10px]">
+            <span className="text-[#78716C]">Connected Broker:</span>
+            <span className="font-bold text-[#1C1917] truncate max-w-[140px]">
+              {user.broker_name || 'None (Manual)'}
+            </span>
+          </div>
+          <div className="flex justify-between items-center text-[10px]">
+            <span className="text-[#78716C]">Verified Status:</span>
+            <span className="font-bold text-[#0F766E]">
+              {user.account_verified ? `Level ${user.skill_level} Qualified 🟢` : 'Unverified 🔒'}
+            </span>
+          </div>
+        </div>
+
+        <button
+          onClick={() => setShowConnectBrokerModal(true)}
+          className="w-full py-2 bg-[#C2410C] hover:bg-[#EA580C] text-white rounded-xl text-xs font-semibold transition-all active:scale-98 shadow-xs flex items-center justify-center gap-1.5"
+        >
+          <Server className="w-3.5 h-3.5" />
+          <span>{user.account_verified ? 'Re-Sync Broker Account' : 'Connect Live / Funded Broker'}</span>
+        </button>
+      </div>
+
+      {/* Room Verification Rules */}
+      <div className="p-3.5 rounded-2xl bg-white border border-[#E7E5E4] space-y-2.5">
         <div className="flex items-center gap-2 text-xs font-bold text-[#1C1917]">
           <ShieldCheck className="w-4 h-4 text-[#0F766E]" />
           <span>Desk Verification Protocol</span>
         </div>
         <p className="text-[11px] text-[#44403C] leading-relaxed">
-          <strong>#{activeChannel}</strong> is strictly governed by automated anti-shortfall audits.
+          <strong>#{activeChannel}</strong> enforces mathematical audit rules.
         </p>
         <div className="space-y-1.5 text-[11px] pt-1 border-t border-[#E7E5E4]">
           <div className="flex justify-between">
@@ -1400,23 +1511,6 @@ export default function ForumPage() {
             </span>
           </div>
         </div>
-      </div>
-
-      {/* Simulated Demotion Action */}
-      <div className="p-3.5 rounded-2xl bg-[#FEF2F2] border border-[#FEE2E2] space-y-2">
-        <div className="flex items-center gap-2 text-xs font-bold text-[#991B1B]">
-          <AlertTriangle className="w-4 h-4 text-[#DC2626]" />
-          <span>Automated Demotion Demo</span>
-        </div>
-        <p className="text-[11px] text-[#7F1D1D] leading-relaxed">
-          Experience what happens when a trader breaches maximum drawdown rules in real time.
-        </p>
-        <button
-          onClick={() => setShowSimulateDemotionModal(true)}
-          className="w-full py-2 bg-[#DC2626] hover:bg-[#B91C1C] text-white rounded-xl text-xs font-semibold transition-all active:scale-98 shadow-xs"
-        >
-          🚨 Simulate Drawdown Demotion
-        </button>
       </div>
 
       {/* Online Verified Traders */}
@@ -1554,6 +1648,22 @@ export default function ForumPage() {
 
         {/* Right Side: Account pill, rules, and links */}
         <div className="flex items-center gap-2 shrink-0">
+          {/* Connect Broker Button (Header Action) */}
+          <button
+            onClick={() => setShowConnectBrokerModal(true)}
+            className={`px-2.5 py-1 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 shadow-xs active:scale-95 border ${
+              user.account_verified
+                ? 'bg-[#F0FDFA] text-[#0F766E] border-[#CCFBF1] hover:bg-[#CCFBF1]'
+                : 'bg-[#FFF7ED] text-[#C2410C] border-[#FED7AA] hover:bg-[#FFEDD5]'
+            }`}
+            title="Connect Live / Funded Broker"
+          >
+            <Server className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">
+              {user.account_verified ? 'Broker Verified 🟢' : 'Connect Live Broker'}
+            </span>
+          </button>
+
           {/* Mobile Rules Icon */}
           <button
             onClick={() => setMobileInfoOpen(true)}
@@ -1876,20 +1986,20 @@ export default function ForumPage() {
                       </div>
                     )}
 
-                    {/* Emoji Reactions Bar with Interactive Popover */}
+                    {/* Emoji Reactions Bar with STRICT SINGLE REACTION PER USER */}
                     <div className="flex flex-wrap items-center gap-1.5 pt-1 relative">
                       {Object.entries(msg.reactions).map(([emoji, count]) => {
-                        const hasReacted = (userReactions[msg.id] || []).includes(emoji);
+                        const hasReacted = userReactions[msg.id] === emoji;
                         return (
                           <button
                             key={emoji}
                             onClick={() => handleToggleReaction(msg.id, emoji)}
                             className={`px-2 py-0.5 rounded-full text-[11px] flex items-center gap-1 transition-all active:scale-95 border ${
                               hasReacted
-                                ? 'bg-[#FFF7ED] text-[#C2410C] border-[#FED7AA] font-bold shadow-xs'
+                                ? 'bg-[#FFF7ED] text-[#C2410C] border-[#FED7AA] font-bold shadow-xs ring-1 ring-[#FED7AA]'
                                 : 'bg-white hover:bg-[#FFF7ED] border-[#E7E5E4] text-[#44403C]'
                             }`}
-                            title={hasReacted ? `You reacted ${emoji}. Click to remove` : `React ${emoji}`}
+                            title={hasReacted ? `You reacted ${emoji}. Click to remove` : `React with ${emoji} (replaces your current reaction)`}
                           >
                             <span>{emoji}</span>
                             <span className="font-medium text-[10px]">{count}</span>
@@ -1902,7 +2012,7 @@ export default function ForumPage() {
                         <button
                           onClick={() => setActiveEmojiPickerMsgId(activeEmojiPickerMsgId === msg.id ? null : msg.id)}
                           className="px-2 py-0.5 rounded-full bg-white hover:bg-[#FFF7ED] border border-[#E7E5E4] hover:border-[#FED7AA] text-[11px] text-[#78716C] active:scale-95 transition-all"
-                          title="Add reaction"
+                          title="Add single reaction"
                         >
                           +
                         </button>
@@ -1913,7 +2023,9 @@ export default function ForumPage() {
                               <button
                                 key={emoji}
                                 onClick={() => handleToggleReaction(msg.id, emoji)}
-                                className="w-7 h-7 rounded-lg hover:bg-[#FFF7ED] flex items-center justify-center text-sm transition-transform active:scale-125"
+                                className={`w-7 h-7 rounded-lg flex items-center justify-center text-sm transition-transform active:scale-125 ${
+                                  userReactions[msg.id] === emoji ? 'bg-[#FED7AA]' : 'hover:bg-[#FFF7ED]'
+                                }`}
                               >
                                 {emoji}
                               </button>
@@ -1929,23 +2041,26 @@ export default function ForumPage() {
 
             {/* Locked Channel Notice Banner inside Chat */}
             {!isChannelUnlocked && (
-              <div className="p-4 rounded-2xl bg-white border border-[#FED7AA] shadow-xs text-center space-y-2 my-4">
-                <div className="w-10 h-10 rounded-xl bg-[#FFF7ED] border border-[#FED7AA] flex items-center justify-center mx-auto text-[#C2410C]">
+              <div className="p-5 rounded-2xl bg-white border border-[#FED7AA] shadow-xs text-center space-y-3 my-4">
+                <div className="w-11 h-11 rounded-2xl bg-[#FFF7ED] border border-[#FED7AA] flex items-center justify-center mx-auto text-[#C2410C]">
                   <Lock className="w-5 h-5" />
                 </div>
-                <h4 className="text-xs sm:text-sm font-bold text-[#1C1917]">
-                  Desk Gated: Minimum Level {currentChannel.minLevel} ({currentChannel.badge})
-                </h4>
-                <p className="text-[11px] text-[#78716C] max-w-md mx-auto">
-                  Your verified tier is Level {user.skill_level} ({user.tier_badge}). You can view the stream, but sending messages and audio participation require ranking up in @PipBudBot.
-                </p>
+                <div className="space-y-1">
+                  <h4 className="text-sm font-bold text-[#1C1917]">
+                    Desk Gated: Minimum Level {currentChannel.minLevel} ({currentChannel.badge})
+                  </h4>
+                  <p className="text-xs text-[#78716C] max-w-md mx-auto">
+                    Your current verified tier is Level {user.skill_level} ({user.tier_badge}). Higher desks require proof of a Live or Funded broker account ($50k+ for Funded Floor, $1M+ for Titan Syndicate).
+                  </p>
+                </div>
                 <div className="pt-1">
-                  <Link
-                    href="/login"
-                    className="inline-flex items-center gap-1 text-xs font-semibold text-[#C2410C] hover:underline"
+                  <button
+                    onClick={() => setShowConnectBrokerModal(true)}
+                    className="h-10 px-5 bg-[#C2410C] hover:bg-[#EA580C] text-white rounded-xl text-xs font-semibold inline-flex items-center gap-1.5 shadow-xs transition-all active:scale-95"
                   >
-                    <span>Test another skill tier &rarr;</span>
-                  </Link>
+                    <Server className="w-3.5 h-3.5" />
+                    <span>Connect Live Broker to Unlock &rarr;</span>
+                  </button>
                 </div>
               </div>
             )}
@@ -2030,12 +2145,12 @@ export default function ForumPage() {
                     Channel locked. Required: Level {currentChannel.minLevel} ({currentChannel.badge})
                   </span>
                 </span>
-                <Link
-                  href="/login"
-                  className="font-bold text-[#C2410C] hover:underline text-[11px] shrink-0"
+                <button
+                  onClick={() => setShowConnectBrokerModal(true)}
+                  className="font-bold text-[#C2410C] hover:underline text-[11px] shrink-0 ml-2"
                 >
-                  Switch Tier
-                </Link>
+                  Verify Broker
+                </button>
               </div>
             )}
           </div>
@@ -2074,7 +2189,250 @@ export default function ForumPage() {
       </div>
 
       {/* ============================================================ */}
-      {/* MODAL 1: Trader Meritocracy Profile Modal                    */}
+      {/* MODAL 1: Connect Live / Funded Broker Account                */}
+      {/* Anti-Cheat / Anti-Lie Investor Read-Only Verification        */}
+      {/* ============================================================ */}
+      {showConnectBrokerModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="bg-white rounded-3xl border border-[#E7E5E4] max-w-lg w-full max-h-[90vh] overflow-y-auto p-5 sm:p-6 shadow-2xl space-y-5 animate-in zoom-in-95 duration-200">
+            {/* Header */}
+            <div className="flex items-center justify-between pb-3 border-b border-[#E7E5E4]">
+              <div className="flex items-center gap-2">
+                <Server className="w-5 h-5 text-[#0F766E]" />
+                <div>
+                  <h3 className="text-sm sm:text-base font-bold text-[#1C1917]">
+                    Connect Live / Funded Broker
+                  </h3>
+                  <span className="text-[10px] text-[#78716C]">
+                    Investor Read-Only Verification Protocol
+                  </span>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  setShowConnectBrokerModal(false);
+                  setBrokerVerificationFeedback(null);
+                }}
+                className="p-1 rounded-lg text-[#78716C] hover:text-[#1C1917] hover:bg-[#F5F5F4] transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Anti-Lie Security Assurance Box */}
+            <div className="p-3.5 bg-[#F0FDFA] rounded-2xl border border-[#CCFBF1] space-y-1.5 text-xs text-[#0F766E]">
+              <div className="font-bold flex items-center gap-1.5">
+                <ShieldCheck className="w-4 h-4 text-[#0F766E]" />
+                <span>Zero-Trust Meritocracy Verification</span>
+              </div>
+              <p className="text-[11px] text-[#115E59] leading-relaxed">
+                To guarantee zero fake track records, PipBud audits your balance, equity, and closed trade fills directly via your <strong>Investor (Read-Only) Password</strong>. PipBud can <strong>NEVER</strong> place orders, execute trades, or access withdrawals.
+              </p>
+            </div>
+
+            {/* Feedback Alert */}
+            {brokerVerificationFeedback && (
+              <div
+                className={`p-3 rounded-2xl text-xs flex items-center gap-2 ${
+                  brokerVerificationFeedback.type === 'success'
+                    ? 'bg-[#DCFCE7] border border-[#86EFAC] text-[#15803D]'
+                    : 'bg-[#FEF2F2] border border-[#FEE2E2] text-[#DC2626]'
+                }`}
+              >
+                {brokerVerificationFeedback.type === 'success' ? (
+                  <CheckCircle2 className="w-4 h-4 shrink-0" />
+                ) : (
+                  <AlertOctagon className="w-4 h-4 shrink-0" />
+                )}
+                <span>{brokerVerificationFeedback.text}</span>
+              </div>
+            )}
+
+            {/* Connection Form */}
+            <form onSubmit={handleConnectBrokerSubmit} className="space-y-4">
+              {/* Platform Selector */}
+              <div>
+                <label className="text-xs font-bold text-[#1C1917] block mb-1.5">
+                  1. Select Trading Platform:
+                </label>
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { id: 'mt5', label: 'MetaTrader 5' },
+                    { id: 'mt4', label: 'MetaTrader 4' },
+                    { id: 'prop_firm', label: 'Prop Firm Sync' },
+                  ].map((p) => (
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() => setBrokerPlatform(p.id as any)}
+                      className={`py-2 px-2 rounded-xl text-xs font-semibold border transition-all text-center ${
+                        brokerPlatform === p.id
+                          ? 'bg-[#FFF7ED] text-[#C2410C] border-[#FED7AA] shadow-xs'
+                          : 'bg-[#FAFAF9] text-[#44403C] border-[#E7E5E4] hover:bg-white'
+                      }`}
+                    >
+                      {p.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Broker / Prop Firm & Account Type */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-bold text-[#1C1917] block mb-1">
+                    Broker / Prop Firm:
+                  </label>
+                  <select
+                    value={brokerNameInput}
+                    onChange={(e) => setBrokerNameInput(e.target.value)}
+                    className="w-full h-10 px-3 bg-[#FAFAF9] border border-[#E7E5E4] rounded-xl text-xs font-medium focus:border-[#C2410C] focus:bg-white outline-hidden"
+                  >
+                    <option value="FTMO">FTMO</option>
+                    <option value="The 5%ers">The 5%ers</option>
+                    <option value="FundingPips">FundingPips</option>
+                    <option value="FundedNext">FundedNext</option>
+                    <option value="Alpha Capital">Alpha Capital Markets</option>
+                    <option value="Apex Trader Funding">Apex Trader Funding</option>
+                    <option value="Topstep">Topstep</option>
+                    <option value="IC Markets">IC Markets (Personal Live)</option>
+                    <option value="Pepperstone">Pepperstone (Personal Live)</option>
+                    <option value="Forex.com">Forex.com (Personal Live)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-[#1C1917] block mb-1">
+                    Account Stage:
+                  </label>
+                  <select
+                    value={accountTypeInput}
+                    onChange={(e) => setAccountTypeInput(e.target.value as any)}
+                    className="w-full h-10 px-3 bg-[#FAFAF9] border border-[#E7E5E4] rounded-xl text-xs font-medium focus:border-[#C2410C] focus:bg-white outline-hidden"
+                  >
+                    <option value="LIVE_FUNDED">Live Funded Account (Qualifies L4+)</option>
+                    <option value="EVALUATION_PASS">Evaluation Passed (Phase 2)</option>
+                    <option value="PERSONAL_LIVE">Personal Live Broker Account</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Account Size -> Determines Meritocracy Tier */}
+              <div>
+                <label className="text-xs font-bold text-[#1C1917] block mb-1">
+                  Verified Capital / Account Size:
+                </label>
+                <div className="grid grid-cols-3 sm:grid-cols-6 gap-1.5">
+                  {[
+                    { size: 25000, label: '$25k' },
+                    { size: 50000, label: '$50k' },
+                    { size: 100000, label: '$100k' },
+                    { size: 200000, label: '$200k' },
+                    { size: 500000, label: '$500k' },
+                    { size: 1000000, label: '$1M+' },
+                  ].map((s) => (
+                    <button
+                      key={s.size}
+                      type="button"
+                      onClick={() => setAccountSizeInput(s.size)}
+                      className={`py-2 rounded-xl text-xs font-bold border transition-all text-center ${
+                        accountSizeInput === s.size
+                          ? 'bg-[#1C1917] text-white border-[#1C1917] shadow-xs'
+                          : 'bg-[#FAFAF9] text-[#44403C] border-[#E7E5E4] hover:bg-white'
+                      }`}
+                    >
+                      {s.label}
+                    </button>
+                  ))}
+                </div>
+                <span className="text-[10px] text-[#78716C] block mt-1">
+                  $50k–$200k unlocks Level 4: Funded Floor • $1M+ unlocks Level 7: Titan Syndicate
+                </span>
+              </div>
+
+              {/* Server & Account Number */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-bold text-[#1C1917] block mb-1">
+                    Broker Server:
+                  </label>
+                  <input
+                    type="text"
+                    value={serverInput}
+                    onChange={(e) => setServerInput(e.target.value)}
+                    placeholder="e.g. FTMO-Server2, ICMarkets-Live"
+                    className="w-full h-10 px-3 bg-[#FAFAF9] border border-[#E7E5E4] rounded-xl text-xs focus:border-[#C2410C] focus:bg-white outline-hidden"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-[#1C1917] block mb-1">
+                    Account Login / ID:
+                  </label>
+                  <input
+                    type="text"
+                    value={accountNumberInput}
+                    onChange={(e) => setAccountNumberInput(e.target.value)}
+                    placeholder="e.g. 8492041"
+                    className="w-full h-10 px-3 bg-[#FAFAF9] border border-[#E7E5E4] rounded-xl text-xs font-mono focus:border-[#C2410C] focus:bg-white outline-hidden"
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Investor Password (Read-Only) */}
+              <div>
+                <label className="text-xs font-bold text-[#1C1917] flex items-center justify-between mb-1">
+                  <span className="flex items-center gap-1">
+                    <Key className="w-3.5 h-3.5 text-[#0F766E]" />
+                    <span>Investor (Read-Only) Password:</span>
+                  </span>
+                  <span className="text-[10px] font-semibold text-[#0F766E]">100% Read-Only</span>
+                </label>
+                <input
+                  type="password"
+                  value={investorPasswordInput}
+                  onChange={(e) => setInvestorPasswordInput(e.target.value)}
+                  placeholder="Enter read-only investor secret"
+                  className="w-full h-10 px-3 bg-[#FAFAF9] border border-[#E7E5E4] rounded-xl text-xs font-mono focus:border-[#C2410C] focus:bg-white outline-hidden"
+                />
+                <p className="text-[10px] text-[#A8A29E] mt-1">
+                  Never enter your master trading password. PipBud only needs investor read access to verify balance and closed trades.
+                </p>
+              </div>
+
+              {/* Actions */}
+              <div className="pt-2 flex flex-col sm:flex-row items-center justify-end gap-2 border-t border-[#E7E5E4]">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowConnectBrokerModal(false);
+                    setBrokerVerificationFeedback(null);
+                  }}
+                  className="w-full sm:w-auto px-4 py-2 rounded-xl text-xs font-medium text-[#78716C] hover:bg-[#F5F5F4]"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isVerifyingBroker}
+                  className="w-full sm:w-auto px-6 py-2.5 rounded-xl text-xs font-bold bg-[#C2410C] hover:bg-[#EA580C] text-white shadow-xs transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {isVerifyingBroker ? (
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <ShieldCheck className="w-4 h-4" />
+                  )}
+                  <span>{isVerifyingBroker ? 'Auditing with Broker Server...' : 'Verify & Synchronize Account'}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ============================================================ */}
+      {/* MODAL 2: Trader Meritocracy Profile Modal                    */}
       {/* ============================================================ */}
       {selectedProfileTrader && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-150">
@@ -2261,7 +2619,7 @@ export default function ForumPage() {
       )}
 
       {/* ============================================================ */}
-      {/* MODAL 2: Audited Trade Verification Breakdown                */}
+      {/* MODAL 3: Audited Trade Verification Breakdown                */}
       {/* ============================================================ */}
       {selectedTradeDetail && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-150">
@@ -2397,7 +2755,7 @@ export default function ForumPage() {
       )}
 
       {/* ============================================================ */}
-      {/* MODAL 3: Attach Audited Trade from Journal                   */}
+      {/* MODAL 4: Attach Audited Trade from Journal                   */}
       {/* ============================================================ */}
       {showAttachModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-150">
@@ -2481,58 +2839,6 @@ export default function ForumPage() {
                 className="px-5 py-2 rounded-xl text-xs font-medium bg-[#C2410C] hover:bg-[#EA580C] text-white shadow-xs transition-all active:scale-95"
               >
                 Attach & Post
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ============================================================ */}
-      {/* MODAL 4: Simulate Demotion Breach                           */}
-      {/* ============================================================ */}
-      {showSimulateDemotionModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-150">
-          <div className="bg-white rounded-3xl border border-[#FEE2E2] max-w-md w-full p-5 sm:p-6 shadow-xl space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-[#E7E5E4]">
-              <div className="flex items-center gap-2 text-[#DC2626]">
-                <AlertTriangle className="w-5 h-5" />
-                <h3 className="text-sm sm:text-base font-bold text-[#1C1917]">
-                  Simulate Drawdown Demotion
-                </h3>
-              </div>
-              <button
-                onClick={() => setShowSimulateDemotionModal(false)}
-                className="text-[#78716C] hover:text-[#1C1917]"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <p className="text-xs text-[#44403C] leading-relaxed">
-              This triggers the automated <strong>PipBud Anti-Shortfall Sentinel</strong>. In production, when a trader&apos;s verified trade log hits a single-day loss &gt; 5.0% or cumulative drawdown &gt; 10%, their channel access is revoked automatically.
-            </p>
-
-            <div className="p-3 bg-[#FEF2F2] rounded-2xl border border-[#FEE2E2] text-xs text-[#991B1B] space-y-1">
-              <div className="font-bold flex items-center gap-1">
-                <AlertOctagon className="w-4 h-4" />
-                <span>Simulated Breach Parameters:</span>
-              </div>
-              <div className="text-[11px]">• Single-day drawdown: 5.4% (Threshold: 5.0%)</div>
-              <div className="text-[11px]">• Action: Instant removal from #funded-floor to Level 3</div>
-            </div>
-
-            <div className="pt-2 flex justify-end gap-2">
-              <button
-                onClick={() => setShowSimulateDemotionModal(false)}
-                className="px-4 py-2 rounded-xl text-xs font-medium text-[#78716C] hover:bg-[#F5F5F4]"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSimulateDrawdownBreach}
-                className="px-4 py-2 rounded-xl text-xs font-medium bg-[#DC2626] hover:bg-[#B91C1C] text-white shadow-xs"
-              >
-                Execute Sentinel Removal
               </button>
             </div>
           </div>

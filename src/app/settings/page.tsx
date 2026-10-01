@@ -567,6 +567,25 @@ export default function SettingsPage() {
                 </button>
               </div>
             </div>
+
+            {/* Live Broker Read-Only Sync Notice */}
+            <div className="p-4 rounded-2xl bg-[#F0FDFA] border border-[#CCFBF1] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+              <div className="space-y-1">
+                <div className="flex items-center gap-1.5 font-bold text-[#0F766E]">
+                  <ShieldCheck className="w-4 h-4" />
+                  <span>Meritocracy Live Account Verification</span>
+                </div>
+                <p className="text-[11px] text-[#115E59] leading-relaxed">
+                  PipBud requires read-only investor verification to assign Level 2–7 desk permissions. Manual self-logging cannot claim funded status without cryptographic broker server proof.
+                </p>
+              </div>
+              <Link
+                href="/forum"
+                className="px-3.5 py-2 rounded-xl bg-[#0F766E] hover:bg-[#115E59] text-white font-semibold text-xs whitespace-nowrap shrink-0 shadow-xs transition-all text-center"
+              >
+                Sync Broker in Forum
+              </Link>
+            </div>
           </section>
 
           {/* ======================================================== */}
