@@ -75,7 +75,7 @@ export default function RootLayout({
     <html lang="en" className="scroll-smooth">
       <body className={`${poppins.variable} ${inter.variable} bg-[#FAFAF9] text-[#1C1917] antialiased selection:bg-[#FED7AA] selection:text-[#9A3412]`}>
         <AuthProvider>
-          <div className="min-h-screen flex flex-col pb-16 md:pb-0">
+          <div className="min-h-screen flex flex-col">
             {children}
             <InstallAppBanner />
             <MobileNavDock />
