@@ -37,6 +37,33 @@ function LoginForm() {
 
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
+  // Automatically process 1-Tap Login if code is in URL
+  useEffect(() => {
+    const incomingCode = searchParams?.get('code')?.trim();
+    if (incomingCode && incomingCode.length === 6 && /^\d+$/.test(incomingCode)) {
+      setCodeDigits(incomingCode.split(''));
+      setCodeRequested(true);
+      setActiveTab('otp');
+      (async () => {
+        setIsLoading(true);
+        setStatusMessage(null);
+        try {
+          const res = await verifyCode(incomingCode);
+          if (res.success) {
+            setStatusMessage({ type: 'success', text: res.message });
+            setTimeout(() => router.push(redirectTarget), 700);
+          } else {
+            setStatusMessage({ type: 'error', text: res.message });
+          }
+        } catch (err: any) {
+          setStatusMessage({ type: 'error', text: err.message || 'Verification failed.' });
+        } finally {
+          setIsLoading(false);
+        }
+      })();
+    }
+  }, [searchParams]);
+
   // Auto-focus next digit
   const handleDigitChange = (index: number, value: string) => {
     if (value.length > 1) {

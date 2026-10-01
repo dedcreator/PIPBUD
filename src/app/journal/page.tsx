@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import { useAuth } from '@/context/AuthContext';
@@ -82,236 +82,70 @@ export interface JournalTrade {
 export default function JournalPage() {
   const { user, syncBrokerTrades } = useAuth();
 
-  // Comprehensive audited trade ledger dataset
-  const [trades, setTrades] = useState<JournalTrade[]>([
-    {
-      id: '1',
-      ticketId: '89241081',
-      pair: 'EUR/USD',
-      direction: 'LONG',
-      setupType: 'Order Block (OB)',
-      timeframe: '15m',
-      session: 'London',
-      entryPrice: 1.08420,
-      stopLoss: 1.08220,
-      takeProfit: 1.08920,
-      exitPrice: 1.08920,
-      lotSize: 2.50,
-      riskReward: 2.50,
-      realizedRR: 2.50,
-      outcome: 'WIN',
-      profitPercent: 2.50,
-      profitDollar: 250.00,
-      holdingTime: '1h 14m',
-      emotion: 'Disciplined',
-      mistakeTag: 'A+ Setup',
-      preTradeThesis: 'London open swept Asia session low into 15m discount OB with displacement.',
-      postTradeReview: 'Clean rejection. TP hit at London session high without drawdowns.',
-      chartUrl: 'https://tradingview.com',
-      rulesFollowed: true,
-      notes: 'London open swept Asia session low straight into 15m discount OB.',
-      date: 'Today, 08:30 UTC',
-      dateIso: '2026-10-01'
-    },
-    {
-      id: '2',
-      ticketId: '89241082',
-      pair: 'GBP/USD',
-      direction: 'SHORT',
-      setupType: 'Fair Value Gap (FVG)',
-      timeframe: '15m',
-      session: 'NY Killzone',
-      entryPrice: 1.29850,
-      stopLoss: 1.30050,
-      takeProfit: 1.29250,
-      exitPrice: 1.29250,
-      lotSize: 2.00,
-      riskReward: 3.00,
-      realizedRR: 3.00,
-      outcome: 'WIN',
-      profitPercent: 3.00,
-      profitDollar: 300.00,
-      holdingTime: '2h 05m',
-      emotion: 'Patient',
-      mistakeTag: 'Followed Plan',
-      preTradeThesis: 'NY open liquidity sweep of London highs into 1H bearish breaker block.',
-      postTradeReview: 'Patience paid off. Held full runner down to the liquidity pool at 1.29250.',
-      chartUrl: 'https://tradingview.com',
-      rulesFollowed: true,
-      notes: 'Clean reaction at 15m bearish FVG after London high sweep.',
-      date: 'Yesterday, 14:15 UTC',
-      dateIso: '2026-09-30'
-    },
-    {
-      id: '3',
-      ticketId: '89241083',
-      pair: 'XAU/USD',
-      direction: 'LONG',
-      setupType: 'Liquidity Sweep',
-      timeframe: '1H',
-      session: 'NY Killzone',
-      entryPrice: 2645.50,
-      stopLoss: 2638.00,
-      takeProfit: 2668.00,
-      exitPrice: 2638.00,
-      lotSize: 1.00,
-      riskReward: 3.00,
-      realizedRR: -1.00,
-      outcome: 'LOSS',
-      profitPercent: -1.00,
-      profitDollar: -100.00,
-      holdingTime: '38m',
-      emotion: 'Slight FOMO',
-      mistakeTag: 'News Volatility',
-      preTradeThesis: 'Anticipated bullish continuation post-sweep before CPI announcement.',
-      postTradeReview: 'CPI spike swept stops before continuation. Strict 1% risk saved account health.',
-      chartUrl: 'https://tradingview.com',
-      rulesFollowed: true,
-      notes: 'Gold tapped entry then CPI news spiked stop loss. Sizing was strictly 1%.',
-      date: 'Sep 24, 13:30 UTC',
-      dateIso: '2026-09-24'
-    },
-    {
-      id: '4',
-      ticketId: '89241084',
-      pair: 'NAS100',
-      direction: 'LONG',
-      setupType: 'Breaker Block',
-      timeframe: '5m',
-      session: 'NY Killzone',
-      entryPrice: 19820.0,
-      stopLoss: 19780.0,
-      takeProfit: 19940.0,
-      exitPrice: 19940.0,
-      lotSize: 3.00,
-      riskReward: 3.00,
-      realizedRR: 3.00,
-      outcome: 'WIN',
-      profitPercent: 3.00,
-      profitDollar: 300.00,
-      holdingTime: '55m',
-      emotion: 'Disciplined',
-      mistakeTag: 'Followed Plan',
-      preTradeThesis: 'Opening bell liquidity run followed by immediate break of structure with volume.',
-      postTradeReview: 'Perfect execution. Closed entire position at standard 3R target.',
-      rulesFollowed: true,
-      notes: 'Opening bell liquidity run followed by immediate break of structure.',
-      date: 'Sep 23, 15:00 UTC',
-      dateIso: '2026-09-23'
-    },
-    {
-      id: '5',
-      ticketId: '89241085',
-      pair: 'USD/JPY',
-      direction: 'SHORT',
-      setupType: 'SMC Divergence',
-      timeframe: '15m',
-      session: 'Asian Session',
-      entryPrice: 144.200,
-      stopLoss: 144.500,
-      takeProfit: 143.600,
-      exitPrice: 144.200,
-      lotSize: 1.50,
-      riskReward: 2.00,
-      realizedRR: 0.00,
-      outcome: 'BE',
-      profitPercent: 0.00,
-      profitDollar: 0.00,
-      holdingTime: '3h 10m',
-      emotion: 'Patience',
-      mistakeTag: 'Protected Capital',
-      preTradeThesis: 'Bearish divergence on 15m RSI with high-timeframe order block rejection.',
-      postTradeReview: 'Tapped 1.2R, moved stop to breakeven, then re-traced before dumping.',
-      rulesFollowed: true,
-      notes: 'Price reached 1R, moved stop to breakeven, then re-traced before dumping.',
-      date: 'Sep 22, 02:15 UTC',
-      dateIso: '2026-09-22'
-    },
-    {
-      id: '6',
-      ticketId: '89241086',
-      pair: 'EUR/USD',
-      direction: 'SHORT',
-      setupType: 'Fair Value Gap (FVG)',
-      timeframe: '15m',
-      session: 'London',
-      entryPrice: 1.09100,
-      stopLoss: 1.09250,
-      takeProfit: 1.08650,
-      exitPrice: 1.08650,
-      lotSize: 2.00,
-      riskReward: 3.00,
-      realizedRR: 3.00,
-      outcome: 'WIN',
-      profitPercent: 3.00,
-      profitDollar: 300.00,
-      holdingTime: '1h 45m',
-      emotion: 'Disciplined',
-      mistakeTag: 'A+ Setup',
-      preTradeThesis: 'London Killzone FVG filled after institutional sweep.',
-      postTradeReview: 'Precision entry, clean drawdown-free drop to targets.',
-      rulesFollowed: true,
-      notes: 'Textbook institutional displacement after Frankfurt high raid.',
-      date: 'Sep 19, 09:10 UTC',
-      dateIso: '2026-09-19'
-    },
-    {
-      id: '7',
-      ticketId: '89241087',
-      pair: 'GBP/JPY',
-      direction: 'LONG',
-      setupType: 'Order Block (OB)',
-      timeframe: '1H',
-      session: 'London',
-      entryPrice: 191.400,
-      stopLoss: 190.900,
-      takeProfit: 192.900,
-      exitPrice: 192.900,
-      lotSize: 1.80,
-      riskReward: 3.00,
-      realizedRR: 3.00,
-      outcome: 'WIN',
-      profitPercent: 3.00,
-      profitDollar: 300.00,
-      holdingTime: '4h 12m',
-      emotion: 'Patient',
-      mistakeTag: 'Followed Plan',
-      preTradeThesis: 'High timeframe 4H bullish structure tap on 1H order block.',
-      postTradeReview: 'Clean bounce off the 50% equilibrium level.',
-      rulesFollowed: true,
-      notes: 'Strong continuation off the 1H demand zone.',
-      date: 'Sep 18, 08:45 UTC',
-      dateIso: '2026-09-18'
-    },
-    {
-      id: '8',
-      ticketId: '89241088',
-      pair: 'XAU/USD',
-      direction: 'SHORT',
-      setupType: 'Liquidity Sweep',
-      timeframe: '15m',
-      session: 'NY Killzone',
-      entryPrice: 2662.00,
-      stopLoss: 2668.00,
-      takeProfit: 2644.00,
-      exitPrice: 2668.00,
-      lotSize: 1.00,
-      riskReward: 3.00,
-      realizedRR: -1.00,
-      outcome: 'LOSS',
-      profitPercent: -1.00,
-      profitDollar: -100.00,
-      holdingTime: '22m',
-      emotion: 'FOMO Entry',
-      mistakeTag: 'FOMO Entry',
-      preTradeThesis: 'Anticipated reversal before the liquidity pool was completely tapped.',
-      postTradeReview: 'Entered prematurely without waiting for 5m market structure shift.',
-      rulesFollowed: false,
-      notes: 'Jumped in early without confirmation. Controlled 1% loss.',
-      date: 'Sep 16, 14:00 UTC',
-      dateIso: '2026-09-16'
+  // Live audited trade ledger dataset
+  const [trades, setTrades] = useState<JournalTrade[]>([]);
+  const [isLoadingTrades, setIsLoadingTrades] = useState(false);
+
+  // Fetch real verified trades from backend API
+  useEffect(() => {
+    if (!user) {
+      setTrades([]);
+      return;
     }
-  ]);
+    const fetchTrades = async () => {
+      setIsLoadingTrades(true);
+      try {
+        const apiBase = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000').replace(/\/+$/, '');
+        const token = localStorage.getItem('pipbud_token') || user.token;
+        const res = await fetch(`${apiBase}/api/journal/trades/?trader_id=${encodeURIComponent(user.id)}`, {
+          headers: {
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            'X-Trader-Id': user.id,
+          },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.trades && Array.isArray(data.trades)) {
+            const mapped: JournalTrade[] = data.trades.map((t: any) => ({
+              id: t.id,
+              ticketId: t.id.slice(0, 8),
+              pair: t.pair,
+              direction: t.direction,
+              setupType: t.setup_type || 'Order Block (OB)',
+              timeframe: t.timeframe || '15m',
+              session: t.session || 'London',
+              entryPrice: t.entry_price || 0,
+              stopLoss: t.stop_loss || 0,
+              takeProfit: t.take_profit || 0,
+              exitPrice: t.take_profit || t.entry_price || 0,
+              lotSize: 1.0,
+              riskReward: t.risk_reward_ratio || 2.0,
+              realizedRR: t.outcome === 'WIN' ? (t.risk_reward_ratio || 2.0) : t.outcome === 'LOSS' ? -1.0 : 0.0,
+              outcome: t.outcome || 'WIN',
+              profitPercent: t.profit_loss_percent || (t.outcome === 'WIN' ? 2.5 : t.outcome === 'LOSS' ? -1.0 : 0.0),
+              profitDollar: (t.profit_loss_percent || 0) * 100,
+              holdingTime: '1h 00m',
+              emotion: 'Disciplined',
+              mistakeTag: 'A+ Setup',
+              preTradeThesis: t.notes || 'Logged trade',
+              postTradeReview: t.notes || '',
+              chartUrl: t.screenshot_url || '',
+              rulesFollowed: true,
+              notes: t.notes || '',
+              date: t.date_display || (t.created_at ? new Date(t.created_at).toLocaleDateString() : 'Today'),
+              dateIso: t.created_at ? t.created_at.split('T')[0] : new Date().toISOString().split('T')[0],
+            }));
+            setTrades(mapped);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load journal trades:', err);
+      } finally {
+        setIsLoadingTrades(false);
+      }
+    };
+    fetchTrades();
+  }, [user]);
 
   // View state & analytics tab
   const [activeAnalyticsTab, setActiveAnalyticsTab] = useState<
@@ -1405,9 +1239,23 @@ export default function JournalPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#E7E5E4]">
-                  {filteredTrades.map((t) => (
-                    <tr
-                      key={t.id}
+                  {filteredTrades.length === 0 ? (
+                    <tr>
+                      <td colSpan={9} className="py-16 px-4 text-center">
+                        <div className="max-w-sm mx-auto space-y-2">
+                          <p className="font-bold text-sm text-[#1C1917]">No Verified Trades Logged Yet</p>
+                          <p className="text-xs text-[#78716C] leading-relaxed">
+                            {trades.length === 0
+                              ? 'Your journal ledger updates automatically when you send trade screenshots or statements to @PipBudBot on Telegram, or click "+ Log Trade" above.'
+                              : 'No trades match your active filter criteria.'}
+                          </p>
+                        </div>
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredTrades.map((t) => (
+                      <tr
+                        key={t.id}
                       onClick={() => setSelectedAutopsyTrade(t)}
                       className="hover:bg-[#FFF7ED]/30 transition-colors cursor-pointer group"
                     >
@@ -1504,7 +1352,8 @@ export default function JournalPage() {
                         </button>
                       </td>
                     </tr>
-                  ))}
+                  ))
+                )}
                 </tbody>
               </table>
             </div>
