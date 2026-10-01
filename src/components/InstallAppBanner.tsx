@@ -86,8 +86,8 @@ export default function InstallAppBanner() {
       >
         <div className="flex items-center gap-3">
           {/* App Icon */}
-          <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#FFF7ED] to-[#FFEDD5] border border-[#FED7AA] flex items-center justify-center shrink-0 shadow-xs">
-            <PipbudLogo size="sm" showWordmark={false} />
+          <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#F5F3FF] to-[#EDE9FE] border border-[#DDD6FE] flex items-center justify-center shrink-0 shadow-xs">
+            <PipbudLogo size="sm" showWordmark={false} href={false} />
           </div>
 
           {/* Text Info */}

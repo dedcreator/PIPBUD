@@ -692,7 +692,7 @@ alertcondition(ta.crossover(high, asia_high), "Asia High Swept", "PipBud Alert: 
           href="/"
           className="flex items-center gap-2 px-2.5 py-2 rounded-xl text-[#78716C] hover:bg-white hover:text-[#1C1917] font-medium transition-all"
         >
-          <PipbudLogo size="sm" showWordmark={false} />
+          <PipbudLogo size="sm" showWordmark={false} href={false} />
           <span>Home Landing</span>
         </Link>
 

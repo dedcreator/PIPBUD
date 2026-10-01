@@ -145,9 +145,7 @@ function LoginForm() {
     <div className="min-h-screen bg-[#FAFAF9] flex flex-col justify-between pt-16 pb-24 md:pb-12 px-4 sm:px-6">
       {/* Top Bar */}
       <header className="max-w-md mx-auto w-full flex items-center justify-between py-4">
-        <Link href="/" className="inline-flex items-center gap-2">
-          <PipbudLogo size="md" />
-        </Link>
+        <PipbudLogo size="md" />
         <Link
           href="/"
           className="text-xs font-medium text-[#78716C] hover:text-[#1C1917] transition-colors"
@@ -161,8 +159,8 @@ function LoginForm() {
         <div className="bg-white rounded-3xl border border-[#E7E5E4] shadow-[0_12px_40px_rgba(28,25,23,0.06)] p-6 sm:p-8">
           {/* Header */}
           <div className="text-center mb-6">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#FFF7ED] to-[#FFEDD5] border border-[#FED7AA] flex items-center justify-center mx-auto mb-3 shadow-xs">
-              <PipbudLogo size="sm" showWordmark={false} />
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#F5F3FF] to-[#EDE9FE] border border-[#DDD6FE] flex items-center justify-center mx-auto mb-3 shadow-xs">
+              <PipbudLogo size="sm" showWordmark={false} href={false} />
             </div>
             <h1 className="text-2xl font-bold tracking-tight text-[#1C1917]">
               {user ? 'Trader Account' : 'Log in to PipBud'}
