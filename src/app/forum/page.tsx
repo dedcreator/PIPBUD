@@ -2,12 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import PipbudLogo from '@/components/PipbudLogo';
 import { TRADER_TIERS } from '@/data/tiers';
 import { useAuth } from '@/context/AuthContext';
 import {
   MessageSquare,
   ShieldCheck,
+  Sliders,
   Lock,
   Unlock,
   AlertTriangle,
@@ -302,7 +304,7 @@ alertcondition(ta.crossover(high, asia_high), "Asia High Swept", "PipBud Alert: 
     const newMsg: ChatMessage = {
       id: Date.now().toString(),
       author: {
-        name: user.name,
+        name: user.display_name || user.name,
         level: user.skill_level,
         badge: user.tier_badge,
         broker: user.broker_name || 'Verified Prop Trader',
@@ -361,7 +363,7 @@ alertcondition(ta.crossover(high, asia_high), "Asia High Swept", "PipBud Alert: 
     const tradeMsg: ChatMessage = {
       id: Date.now().toString(),
       author: {
-        name: user.name,
+        name: user.display_name || user.name,
         level: user.skill_level,
         badge: user.tier_badge,
         broker: user.broker_name || 'Verified Broker',
@@ -485,23 +487,51 @@ alertcondition(ta.crossover(high, asia_high), "Asia High Swept", "PipBud Alert: 
       {/* Authenticated Trader Status Card */}
       <div className="p-3.5 border-b border-[#E7E5E4] bg-[#FAFAF9] shrink-0 space-y-3">
         <div className="flex items-center gap-2.5">
-          <div
-            className="w-9 h-9 rounded-xl text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-xs"
-            style={{ backgroundColor: user.tier_color || '#1C1917' }}
-          >
-            {user.username.slice(0, 2).toUpperCase()}
-          </div>
+          {user.avatar_type?.startsWith('mascot') || !user.avatar_type ? (
+            <div className="w-10 h-10 rounded-xl bg-white border border-[#FED7AA] p-1 flex items-center justify-center shrink-0 shadow-xs">
+              <Image
+                src="/icon-192.png"
+                alt="Avatar"
+                width={30}
+                height={30}
+                className="object-contain"
+              />
+            </div>
+          ) : user.avatar_type === 'custom' && user.avatar_url ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={user.avatar_url}
+              alt="Avatar"
+              className="w-10 h-10 rounded-xl object-cover shrink-0 shadow-xs border border-[#E7E5E4]"
+            />
+          ) : (
+            <div
+              className="w-10 h-10 rounded-xl text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-xs uppercase"
+              style={{ backgroundColor: user.tier_color || '#1C1917' }}
+            >
+              {(user.display_name || user.username).slice(0, 2)}
+            </div>
+          )}
           <div className="overflow-hidden min-w-0 flex-1">
             <div className="flex items-center justify-between gap-1">
               <span className="font-bold text-xs text-[#1C1917] truncate">
-                @{user.username}
+                {user.display_name || `@${user.username}`}
               </span>
-              <span
-                className="px-1.5 py-0.2 rounded text-[9px] font-bold text-white shrink-0"
-                style={{ backgroundColor: user.tier_color || '#C2410C' }}
-              >
-                L{user.skill_level}
-              </span>
+              <div className="flex items-center gap-1 shrink-0">
+                <span
+                  className="px-1.5 py-0.2 rounded text-[9px] font-bold text-white shrink-0"
+                  style={{ backgroundColor: user.tier_color || '#C2410C' }}
+                >
+                  L{user.skill_level}
+                </span>
+                <Link
+                  href="/settings"
+                  className="p-1 rounded-md text-[#78716C] hover:text-[#C2410C] hover:bg-white transition-colors"
+                  title="Privacy & Identity Settings"
+                >
+                  <Sliders className="w-3 h-3" />
+                </Link>
+              </div>
             </div>
             <span
               className="text-[10px] font-semibold block truncate"
@@ -694,6 +724,19 @@ alertcondition(ta.crossover(high, asia_high), "Asia High Swept", "PipBud Alert: 
         >
           <PipbudLogo size="sm" showWordmark={false} href={false} />
           <span>Home Landing</span>
+        </Link>
+
+        <Link
+          href="/settings"
+          className="flex items-center justify-between px-2.5 py-2 rounded-xl text-[#1C1917] hover:bg-white hover:text-[#C2410C] font-semibold transition-all"
+        >
+          <span className="flex items-center gap-2">
+            <Sliders className="w-4 h-4 text-[#C2410C]" />
+            <span>Privacy & Trader Settings</span>
+          </span>
+          <span className="text-[10px] font-bold text-[#0F766E] bg-[#F0FDFA] px-1.5 py-0.2 rounded border border-[#CCFBF1]">
+            Shield
+          </span>
         </Link>
 
         <Link
@@ -893,17 +936,17 @@ alertcondition(ta.crossover(high, asia_high), "Asia High Swept", "PipBud Alert: 
 
           {/* User Account Chip */}
           <Link
-            href="/login"
+            href="/settings"
             className="px-2.5 py-1 rounded-xl bg-[#FAFAF9] border border-[#E7E5E4] hover:border-[#FED7AA] hover:bg-[#FFF7ED] transition-all flex items-center gap-1.5 shadow-xs active:scale-95"
-            title="Trader Account & Tier Switcher"
+            title="Trader Identity & Privacy Settings"
           >
             <span
               className="w-2.5 h-2.5 rounded-full shrink-0"
               style={{ backgroundColor: user.tier_color || '#C2410C' }}
             />
             <span className="font-bold text-xs text-[#C2410C]">L{user.skill_level}</span>
-            <span className="text-xs font-medium text-[#44403C] hidden sm:inline max-w-[90px] truncate">
-              @{user.username}
+            <span className="text-xs font-medium text-[#44403C] hidden sm:inline max-w-[110px] truncate">
+              {user.display_name || `@${user.username}`}
             </span>
           </Link>
 

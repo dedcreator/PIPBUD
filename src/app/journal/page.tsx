@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
 import { useAuth } from '@/context/AuthContext';
 import { TRADER_TIERS } from '@/data/tiers';
 import {
@@ -866,7 +865,29 @@ export default function JournalPage() {
         </div>
       )}
 
-      <Footer />
+      {/* App Status Bar (App-like dashboard footer) */}
+      <footer className="mt-12 py-6 border-t border-[#E7E5E4] text-center text-xs text-[#A8A29E] flex flex-col sm:flex-row items-center justify-between gap-3 max-w-7xl mx-auto px-4 pwa:hidden">
+        <div className="flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-[#15803D]" />
+          <span>PipBud Verified Meritocracy Engine • Live Track Record Sync</span>
+        </div>
+        <div className="flex items-center gap-4 text-xs font-medium text-[#78716C]">
+          <Link href="/settings" className="hover:text-[#C2410C] transition-colors">
+            Privacy & Settings
+          </Link>
+          <Link href="/forum" className="hover:text-[#C2410C] transition-colors">
+            Trader Forum
+          </Link>
+          <a
+            href="https://t.me/PipBudBot"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-[#C2410C] transition-colors"
+          >
+            @PipBudBot
+          </a>
+        </div>
+      </footer>
     </main>
   );
 }

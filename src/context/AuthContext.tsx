@@ -19,6 +19,15 @@ export interface TraderProfile {
   broker_name: string;
   account_verified?: boolean;
   token?: string;
+  // Custom Identity & Privacy Settings
+  display_name?: string;
+  avatar_url?: string;
+  avatar_type?: string;
+  hide_telegram?: boolean;
+  allow_direct_messages?: boolean;
+  trading_style?: string;
+  bio?: string;
+  show_broker_badge?: boolean;
 }
 
 interface AuthContextType {
@@ -29,12 +38,14 @@ interface AuthContextType {
   verifyCode: (code: string) => Promise<{ success: boolean; message: string }>;
   loginWithTelegramWidget: (telegramData: any) => Promise<{ success: boolean; message: string }>;
   loginWithDemo: (level: number) => Promise<void>;
+  updateProfile: (updates: Partial<TraderProfile>) => Promise<{ success: boolean; message: string }>;
   logout: () => void;
 }
 
 const DEFAULT_DEMO_USER: TraderProfile = {
   id: 'apex-trader-uuid',
   username: 'apex_trader',
+  display_name: 'Apex Trader',
   name: 'Apex Trader',
   telegram_id: '9928174',
   skill_level: 4,
@@ -49,6 +60,12 @@ const DEFAULT_DEMO_USER: TraderProfile = {
   broker_name: 'FTMO Funded $100k',
   account_verified: true,
   token: 'pb_token_demo_apex_4',
+  hide_telegram: true,
+  allow_direct_messages: false,
+  trading_style: 'SMC / ICT Concepts',
+  bio: 'London Killzone trader focusing on EUR/USD liquidity sweeps. 1:3 R:R strict rule.',
+  avatar_type: 'mascot_purple',
+  show_broker_badge: true,
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -213,9 +230,45 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       broker_name: level >= 4 ? 'Prop Alpha Fund' : 'MetaTrader Live',
       account_verified: true,
       token: `demo_token_${level}`,
+      display_name: `Level ${level} Trader`,
+      avatar_type: 'mascot_purple',
+      hide_telegram: true,
+      allow_direct_messages: false,
+      trading_style: 'SMC / ICT Concepts',
+      bio: 'Disciplined trader building verifiable edge in the PipBud meritocracy.',
+      show_broker_badge: true,
     };
 
     persistUser(newTrader);
+  };
+
+  const updateProfile = async (updates: Partial<TraderProfile>): Promise<{ success: boolean; message: string }> => {
+    if (!user) {
+      return { success: false, message: 'You must be logged in to update your profile.' };
+    }
+
+    const updatedUser: TraderProfile = {
+      ...user,
+      ...updates,
+    };
+
+    persistUser(updatedUser);
+
+    // Try posting to backend API if running
+    try {
+      await fetch(`${API_BASE}/api/auth/update-profile/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          trader_id: user.id,
+          ...updates,
+        }),
+      });
+    } catch {
+      // Local storage persistence guarantees offline and demo support
+    }
+
+    return { success: true, message: 'Profile & privacy preferences updated!' };
   };
 
   const logout = () => {
@@ -232,6 +285,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         verifyCode,
         loginWithTelegramWidget,
         loginWithDemo,
+        updateProfile,
         logout,
       }}
     >

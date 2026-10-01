@@ -169,3 +169,11 @@ html {
   outline-offset: 2px;
   border-radius: 6px;
 }
+
+/* Standalone PWA App Mode - Hide marketing footers & website elements */
+@media (display-mode: standalone) {
+  footer,
+  .pwa-hide {
+    display: none !important;
+  }
+}

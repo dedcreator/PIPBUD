@@ -1,12 +1,27 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import PipbudLogo from './PipbudLogo';
 import { ShieldCheck, Send, MessageSquare, BarChart3 } from 'lucide-react';
 
 export default function Footer() {
+  const [isStandalone, setIsStandalone] = useState(false);
+
+  useEffect(() => {
+    const standalone =
+      window.matchMedia('(display-mode: standalone)').matches ||
+      (window.navigator as any).standalone === true;
+    setIsStandalone(standalone);
+  }, []);
+
+  // When running installed as a PWA, hide footer completely so it looks like a native app
+  if (isStandalone) {
+    return null;
+  }
+
   return (
-    <footer className="bg-[#FAFAF9] border-t border-[#E7E5E4] pt-16 pb-28 md:pb-12 text-xs text-[#78716C]">
+    <footer className="bg-[#FAFAF9] border-t border-[#E7E5E4] pt-16 pb-28 md:pb-12 text-xs text-[#78716C] pwa:hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-12">
           {/* Brand Info */}

@@ -10,7 +10,8 @@ import {
   User,
   Send,
   AlertOctagon,
-  Bot
+  Bot,
+  Sliders
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
@@ -54,11 +55,11 @@ export default function MobileNavDock() {
           isActive: pathname === '/#tiers',
         },
         {
-          label: user.username.slice(0, 7),
-          href: '/login',
-          icon: User,
+          label: 'Settings',
+          href: '/settings',
+          icon: Sliders,
           tierBadge: `L${user.skill_level}`,
-          isActive: pathname === '/login',
+          isActive: pathname === '/settings',
         },
       ]
     : [

@@ -89,15 +89,18 @@ export default function Navbar() {
           <div className="hidden sm:flex items-center gap-3">
             {user ? (
               <Link
-                href="/login"
-                className="h-9 px-3 text-xs font-semibold bg-white border border-[#E7E5E4] hover:border-[#FED7AA] text-[#1C1917] rounded-xl transition-all inline-flex items-center gap-2 shadow-xs"
+                href="/settings"
+                className="h-9 px-3 text-xs font-semibold bg-white border border-[#E7E5E4] hover:border-[#FED7AA] text-[#1C1917] rounded-xl transition-all inline-flex items-center gap-2 shadow-xs hover:bg-[#FFF7ED]"
+                title="Trader Settings & Privacy"
               >
                 <span
                   className="w-2 h-2 rounded-full"
                   style={{ backgroundColor: user.tier_color || '#0F766E' }}
                 />
                 <span className="font-bold text-[#C2410C]">L{user.skill_level}</span>
-                <span className="text-[#44403C] max-w-[100px] truncate">@{user.username}</span>
+                <span className="text-[#44403C] max-w-[110px] truncate">
+                  {user.display_name || `@${user.username}`}
+                </span>
               </Link>
             ) : (
               <Link
@@ -207,12 +210,25 @@ export default function Navbar() {
               Removal Rules
             </Link>
 
+            {user && (
+              <Link
+                href="/settings"
+                onClick={() => setMobileOpen(false)}
+                className="px-2 py-1.5 rounded-lg text-sm font-semibold text-[#1C1917] hover:bg-[#FFF7ED] hover:text-[#C2410C] flex items-center justify-between"
+              >
+                <span>Privacy & Trader Settings</span>
+                <span className="text-[10px] font-bold text-[#0F766E] bg-[#F0FDFA] px-2 py-0.5 rounded-full border border-[#CCFBF1]">
+                  Shield
+                </span>
+              </Link>
+            )}
+
             <Link
               href="/login"
               onClick={() => setMobileOpen(false)}
               className="px-2 py-1.5 rounded-lg text-sm font-medium text-[#1C1917] hover:bg-[#FFF7ED] hover:text-[#C2410C]"
             >
-              {user ? 'My Trader Profile & Logout' : 'Log In via Telegram'}
+              {user ? 'Account Tiers & Logout' : 'Log In via Telegram'}
             </Link>
           </div>
 
