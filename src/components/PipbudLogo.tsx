@@ -47,8 +47,8 @@ export default function PipbudLogo({
 
       {showWordmark && (
         <span className={`font-bold tracking-tight inline-flex items-center ${textSize}`}>
-          <span className={dark ? "text-white" : "text-[#F4F4F5]"}>Pip</span>
-          <span className="text-[#F59E0B]">Bud</span>
+          <span className="text-[#1C1917]">Pip</span>
+          <span className="text-[#C2410C]">Bud</span>
         </span>
       )}
     </div>

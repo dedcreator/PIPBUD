@@ -36,8 +36,8 @@
 }
 
 :root {
-  --background: #09090B;
-  --foreground: #F4F4F5;
+  --background: #FAFAF9;
+  --foreground: #1C1917;
 }
 
 body {
@@ -53,11 +53,11 @@ body {
   font-feature-settings: "tnum" 1;
 }
 
-/* Pipbud Button Variants - Dark Carbon & Amber Gold */
+/* Pipbud Button Variants according to Design System Spec */
 .btn-primary {
-  background-color: #F59E0B;
-  color: #09090B;
-  font-weight: 600;
+  background-color: #C2410C;
+  color: #FFFFFF;
+  font-weight: 500;
   border-radius: 12px;
   transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
   display: inline-flex;
@@ -65,17 +65,17 @@ body {
   justify-content: center;
 }
 .btn-primary:hover {
-  background-color: #D97706;
+  background-color: #EA580C;
 }
 .btn-primary:active {
-  background-color: #B45309;
+  background-color: #9A3412;
   transform: scale(0.98);
 }
 
 .btn-secondary {
-  background-color: #18181B;
-  border: 1px solid #27272A;
-  color: #F4F4F5;
+  background-color: #FFFFFF;
+  border: 1px solid #C2410C;
+  color: #C2410C;
   font-weight: 500;
   border-radius: 12px;
   transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
@@ -84,16 +84,15 @@ body {
   justify-content: center;
 }
 .btn-secondary:hover {
-  border-color: #F59E0B;
-  background-color: #27272A;
+  background-color: #FFF7ED;
 }
 .btn-secondary:active {
   transform: scale(0.98);
 }
 
 .btn-ghost {
-  background-color: rgba(245, 158, 11, 0.1);
-  color: #F59E0B;
+  background-color: #FFF7ED;
+  color: #C2410C;
   font-weight: 500;
   border-radius: 12px;
   transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
@@ -102,12 +101,11 @@ body {
   justify-content: center;
 }
 .btn-ghost:hover {
-  background-color: rgba(245, 158, 11, 0.2);
+  background-color: #FFEDD5;
 }
 
 .btn-dark {
-  background-color: #121215;
-  border: 1px solid #27272A;
+  background-color: #1C1917;
   color: #FFFFFF;
   font-weight: 500;
   border-radius: 12px;
@@ -117,58 +115,58 @@ body {
   justify-content: center;
 }
 .btn-dark:hover {
-  background-color: #27272A;
+  background-color: #44403C;
 }
 
 /* Card & Surface utilities */
 .card-pipbud {
-  background-color: #121215;
-  border: 1px solid #27272A;
+  background-color: #FFFFFF;
+  border: 1px solid #E7E5E4;
   border-radius: 16px;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 .card-pipbud:hover {
-  border-color: #3F3F46;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  border-color: #FED7AA;
+  box-shadow: 0 4px 12px rgba(28, 25, 23, 0.06);
 }
 
 /* Approved brand gradient */
 .brand-gradient {
-  background: linear-gradient(135deg, #F59E0B 0%, #D97706 50%, #B45309 100%);
+  background: linear-gradient(135deg, #FB923C 0%, #F97316 50%, #EA580C 100%);
 }
 
 .brand-gradient-subtle {
-  background: linear-gradient(135deg, rgba(245, 158, 11, 0.12) 0%, rgba(217, 119, 6, 0.08) 100%);
+  background: linear-gradient(135deg, #FFF7ED 0%, #FFEDD5 50%, #FED7AA 100%);
 }
 
 /* Smooth scrolling */
 html {
   scroll-behavior: smooth;
-  color-scheme: dark;
+  color-scheme: light;
 }
 
-/* Custom scrollbar matching dark carbon terminal */
+/* Custom scrollbar matching warm stone */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #09090B;
+  background: #FAFAF9;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #27272A;
+  background: #E7E5E4;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #3F3F46;
+  background: #D6D3D1;
 }
 
 /* Focus rings with amber-500 */
 *:focus-visible {
-  outline: 2px solid #F59E0B;
+  outline: 2px solid #F97316;
   outline-offset: 2px;
   border-radius: 6px;
 }
