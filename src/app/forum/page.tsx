@@ -4,16 +4,15 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import PipbudLogo from '@/components/PipbudLogo';
-import { TRADER_TIERS } from '@/data/tiers';
 import { useAuth } from '@/context/AuthContext';
 import {
   MessageSquare,
   ShieldCheck,
   Sliders,
   Lock,
-  Unlock,
   AlertTriangle,
   Mic,
+  MicOff,
   Code2,
   Paperclip,
   Smile,
@@ -38,30 +37,51 @@ import {
   BarChart3,
   LogOut,
   RefreshCw,
-  Award
+  Award,
+  Radio,
+  Headphones,
+  PhoneOff,
+  Clock,
+  TrendingUp,
+  Flame,
+  CheckCircle,
+  Eye,
+  FileText,
+  BadgeCheck
 } from 'lucide-react';
 
-interface ChatMessage {
+export interface AuditedTrade {
+  pair: string;
+  direction: 'LONG' | 'SHORT';
+  setup: string;
+  entry: string;
+  sl: string;
+  tp: string;
+  rr: string;
+  outcome: string;
+  profit: string;
+  pipsRisk?: string;
+  pipsTarget?: string;
+  hash?: string;
+  ticketId?: string;
+  session?: string;
+  confluences?: string[];
+}
+
+export interface ChatMessage {
   id: string;
   author: {
     name: string;
+    username: string;
     level: number;
     badge: string;
     broker: string;
     avatarBg: string;
+    avatarType?: string;
+    avatarUrl?: string;
   };
   content: string;
-  tradeEmbed?: {
-    pair: string;
-    direction: 'LONG' | 'SHORT';
-    setup: string;
-    entry: string;
-    sl: string;
-    tp: string;
-    rr: string;
-    outcome: string;
-    profit: string;
-  };
+  tradeEmbed?: AuditedTrade;
   codeSnippet?: {
     language: string;
     code: string;
@@ -71,7 +91,7 @@ interface ChatMessage {
   isDemotionNotice?: boolean;
 }
 
-interface ChannelMeta {
+export interface ChannelMeta {
   id: string;
   name: string;
   minLevel: number;
@@ -80,6 +100,34 @@ interface ChannelMeta {
   isVoice?: boolean;
   isDemotion?: boolean;
   description: string;
+}
+
+export interface TraderProfileModalData {
+  name: string;
+  username: string;
+  level: number;
+  badge: string;
+  tierColor: string;
+  broker: string;
+  winRate: number;
+  profitFactor: number;
+  maxDrawdown: number;
+  totalTrades: number;
+  tierHealth: number;
+  tradingStyle: string;
+  bio: string;
+  avatarBg: string;
+  avatarType?: string;
+  avatarUrl?: string;
+  isCurrentUser?: boolean;
+  recentTrades?: {
+    pair: string;
+    direction: 'LONG' | 'SHORT';
+    outcome: string;
+    profit: string;
+    rr: string;
+    date: string;
+  }[];
 }
 
 const CHANNELS: ChannelMeta[] = [
@@ -182,9 +230,395 @@ const CHANNELS: ChannelMeta[] = [
   },
 ];
 
+const FORUM_REACTION_EMOJIS = ['🔥', '🎯', '🚀', '💰', '👏', '💎', '🛡️', '⚖️', '📈', '🐻', '🐂', '🧠', '💯'];
+const COMPOSER_EMOJIS = ['🔥', '🚀', '🎯', '💰', '📈', '📉', '🐂', '🐻', '🛡️', '👀', '💯', '🙏', '⚡', '📊'];
+
+// Selectable Audited Trades for the Attach Modal
+const AVAILABLE_JOURNAL_TRADES: AuditedTrade[] = [
+  {
+    pair: 'GBP/USD',
+    direction: 'SHORT',
+    setup: '15m Fair Value Gap (FVG)',
+    entry: '1.29850',
+    sl: '1.30050',
+    tp: '1.29250',
+    rr: '1:3.00',
+    outcome: 'WIN',
+    profit: '+3.00% (+$3,000.00)',
+    pipsRisk: '20.0 pips',
+    pipsTarget: '60.0 pips',
+    hash: 'pb-sha256-49281a98e01bf2',
+    ticketId: '#8492041',
+    session: 'London Killzone',
+    confluences: [
+      'Daily structure bearish continuation',
+      'London session high swept liquidity pool',
+      '15m FVG mitigation entry',
+      'DXY moving into strong H4 support',
+    ],
+  },
+  {
+    pair: 'EUR/USD',
+    direction: 'LONG',
+    setup: '15m Bullish Order Block (OB)',
+    entry: '1.08420',
+    sl: '1.08220',
+    tp: '1.08920',
+    rr: '1:2.50',
+    outcome: 'WIN',
+    profit: '+2.50% (+$2,500.00)',
+    pipsRisk: '20.0 pips',
+    pipsTarget: '50.0 pips',
+    hash: 'pb-sha256-88194b11f44a9',
+    ticketId: '#8493108',
+    session: 'London/NY Overlap',
+    confluences: [
+      'Asia low swept during London open',
+      '15m Bullish Order Block confirmation',
+      'DXY rejected from 104.20 key resistance',
+      'Strict 1.0% account risk parameter',
+    ],
+  },
+  {
+    pair: 'NAS100',
+    direction: 'LONG',
+    setup: 'Opening Range Breakout (ORB)',
+    entry: '19,840.50',
+    sl: '19,790.00',
+    tp: '20,050.00',
+    rr: '1:4.20',
+    outcome: 'WIN',
+    profit: '+4.20% (+$4,200.00)',
+    pipsRisk: '50.5 pts',
+    pipsTarget: '210.0 pts',
+    hash: 'pb-sha256-22019c43a88de',
+    ticketId: '#8494552',
+    session: 'New York Open',
+    confluences: [
+      'Tech earnings sentiment strongly positive',
+      'VWAP lower band held with high delta',
+      'Pre-market high taken with volume expansion',
+      'Trailing stop activated after +2R',
+    ],
+  },
+  {
+    pair: 'USD/JPY',
+    direction: 'SHORT',
+    setup: 'Daily Liquidity Sweep + CHoCH',
+    entry: '156.450',
+    sl: '156.750',
+    tp: '155.850',
+    rr: '1:2.00',
+    outcome: 'WIN',
+    profit: '+2.00% (+$2,000.00)',
+    pipsRisk: '30.0 pips',
+    pipsTarget: '60.0 pips',
+    hash: 'pb-sha256-77142d99c31fa',
+    ticketId: '#8495910',
+    session: 'Tokyo / London Transition',
+    confluences: [
+      'Daily equal highs swept cleanly',
+      '15m Change of Character (CHoCH) printed',
+      'BoJ currency jawboning headwind',
+      'Risk reward >= 1:2.0 verified by bot',
+    ],
+  },
+];
+
+// Rich starter messages mapped per channel
+const INITIAL_CHANNEL_MESSAGES: Record<string, ChatMessage[]> = {
+  'funded-floor': [
+    {
+      id: 'ff-1',
+      author: {
+        name: 'Solomon Kane',
+        username: 'solomon_kane',
+        level: 7,
+        badge: '🏛️ Level 7: Titan',
+        broker: 'Titan Syndicate Prime',
+        avatarBg: '#C2410C',
+      },
+      content: 'London session open: Asia low swept aggressively into the 15m bullish Order Block on EUR/USD. DXY rejecting 104.20 key resistance level. High conviction long.',
+      reactions: { '🔥': 18, '🎯': 12, '🚀': 7 },
+      timestamp: '08:05 UTC',
+    },
+    {
+      id: 'ff-2',
+      author: {
+        name: 'Aisha Bello',
+        username: 'aisha_fx',
+        level: 6,
+        badge: '👑 Level 6: Mentor',
+        broker: 'FTMO Master $200k',
+        avatarBg: '#EA580C',
+      },
+      content: 'Here is the PineScript alert script for monitoring the London Killzone sweeps in your charts:',
+      codeSnippet: {
+        language: 'pinescript',
+        code: `//@version=5
+indicator("PipBud London Liquidity Sweep", overlay=true)
+asia_high = ta.highest(high, 24)
+asia_low = ta.lowest(low, 24)
+plot(asia_high, "Asia High", color=color.new(color.orange, 0))
+plot(asia_low, "Asia Low", color=color.new(color.blue, 0))
+alertcondition(ta.crossover(high, asia_high), "Asia High Swept", "PipBud Alert: High Liquidity Taken")`,
+      },
+      reactions: { '👏': 14, '🔥': 9 },
+      timestamp: '08:12 UTC',
+    },
+    {
+      id: 'ff-3',
+      author: {
+        name: 'Chidi Okonkwo',
+        username: 'chidi_alpha',
+        level: 5,
+        badge: '💎 Level 5: Alpha',
+        broker: '5%ers High Stakes $100k',
+        avatarBg: '#F59E0B',
+      },
+      content: 'Closed 80% position at 1.08920 for +2.5R gain. Moving stop loss to breakeven + 5 pips.',
+      tradeEmbed: AVAILABLE_JOURNAL_TRADES[1],
+      reactions: { '🎯': 24, '🚀': 16, '💰': 19 },
+      timestamp: '08:35 UTC',
+    },
+    {
+      id: 'ff-4',
+      author: {
+        name: 'PipBud Sentinel',
+        username: 'pipbud_sentinel',
+        level: 0,
+        badge: '🤖 Automated Governance',
+        broker: 'PipBud Engine',
+        avatarBg: '#DC2626',
+      },
+      content: '⚠️ RISK NOTICE: London/NY overlap starting in 25 minutes. Ensure all stop-losses are verified with broker receipts. Unprotected positions during high-impact news are subject to automatic desk probation.',
+      reactions: { '🛡️': 31, '⚖️': 28 },
+      timestamp: '09:02 UTC',
+      isDemotionNotice: true,
+    },
+  ],
+  'live-tape-reading': [
+    {
+      id: 'ltr-1',
+      author: {
+        name: 'Chidi Okonkwo',
+        username: 'chidi_alpha',
+        level: 5,
+        badge: '💎 Level 5: Alpha',
+        broker: '5%ers High Stakes $100k',
+        avatarBg: '#F59E0B',
+      },
+      content: 'Watching ES & NQ book depth. Heavy bid absorption at 19,820 before London cash close. Looking for aggressive reclaim.',
+      reactions: { '👀': 15, '📈': 11 },
+      timestamp: '09:14 UTC',
+    },
+    {
+      id: 'ltr-2',
+      author: {
+        name: 'Solomon Kane',
+        username: 'solomon_kane',
+        level: 7,
+        badge: '🏛️ Level 7: Titan',
+        broker: 'Titan Syndicate Prime',
+        avatarBg: '#C2410C',
+      },
+      content: 'Large institutional limit orders stacked at 1.08350 EUR/USD. Watch for tick speed expansion as stops are triggered.',
+      reactions: { '🔥': 20, '🧠': 14 },
+      timestamp: '09:20 UTC',
+    },
+  ],
+  'payout-proofs': [
+    {
+      id: 'pp-1',
+      author: {
+        name: 'Chidi Okonkwo',
+        username: 'chidi_alpha',
+        level: 5,
+        badge: '💎 Level 5: Alpha',
+        broker: '5%ers High Stakes $100k',
+        avatarBg: '#F59E0B',
+      },
+      content: 'Bi-weekly payout of $12,450 approved via Deel from FTMO. Risk discipline is the only true edge in this game.',
+      reactions: { '💰': 48, '👏': 35, '🚀': 29 },
+      timestamp: 'Yesterday',
+    },
+    {
+      id: 'pp-2',
+      author: {
+        name: 'Aisha Bello',
+        username: 'aisha_fx',
+        level: 6,
+        badge: '👑 Level 6: Mentor',
+        broker: 'FTMO Master $200k',
+        avatarBg: '#EA580C',
+      },
+      content: 'Withdrawal confirmation: $8,900 cleared directly to bank. Zero daily drawdown breaches over 8 consecutive months.',
+      reactions: { '💰': 52, '💎': 41, '🎯': 30 },
+      timestamp: '2 days ago',
+    },
+  ],
+  'demotions-log': [
+    {
+      id: 'dl-1',
+      author: {
+        name: 'PipBud Sentinel',
+        username: 'pipbud_sentinel',
+        level: 0,
+        badge: '🤖 Automated Governance',
+        broker: 'PipBud Engine',
+        avatarBg: '#DC2626',
+      },
+      content: '⚠️ DEMOTION NOTICE: Trader @emeka_scalp has been automatically removed from Level 3 (#consistent-flow) and re-assigned to Level 2. Reason: Maximum cumulative drawdown breached 9.0% threshold (hit 11.2%). 3 unmanaged trades logged without stop losses. Zero fake track records allowed in this syndicate.',
+      reactions: { '🛡️': 42, '⚖️': 38 },
+      timestamp: '09:02 UTC',
+      isDemotionNotice: true,
+    },
+    {
+      id: 'dl-2',
+      author: {
+        name: 'PipBud Sentinel',
+        username: 'pipbud_sentinel',
+        level: 0,
+        badge: '🤖 Automated Governance',
+        broker: 'PipBud Engine',
+        avatarBg: '#DC2626',
+      },
+      content: '🚨 SENTINEL ALERT: Trader @crypto_sam demoted from Level 4 (#funded-floor) to Level 3. Single-day drawdown exceeded 5.0% limit during CPI release. Relegated for 14-day observation period.',
+      reactions: { '⚖️': 27, '🛡️': 19 },
+      timestamp: 'Yesterday',
+      isDemotionNotice: true,
+    },
+  ],
+  'novice-welcome': [
+    {
+      id: 'nw-1',
+      author: {
+        name: 'Aisha Bello',
+        username: 'aisha_fx',
+        level: 6,
+        badge: '👑 Level 6: Mentor',
+        broker: 'FTMO Master $200k',
+        avatarBg: '#EA580C',
+      },
+      content: 'Welcome all emerging traders! Rule #1 of PipBud: Never risk more than 1.0% of your account on any single trade. Use /coach validate in @PipBudBot before placing any order.',
+      reactions: { '🌱': 30, '🙏': 19, '💯': 25 },
+      timestamp: '07:30 UTC',
+    },
+    {
+      id: 'nw-2',
+      author: {
+        name: 'Solomon Kane',
+        username: 'solomon_kane',
+        level: 7,
+        badge: '🏛️ Level 7: Titan',
+        broker: 'Titan Syndicate Prime',
+        avatarBg: '#C2410C',
+      },
+      content: 'Consistency is not about catching 100 pips every day. It is about executing the exact same high-probability checklist with disciplined risk over 100 iterations.',
+      reactions: { '🎯': 22, '💎': 18 },
+      timestamp: '08:00 UTC',
+    },
+  ],
+  'risk-mastery': [
+    {
+      id: 'rm-1',
+      author: {
+        name: 'Chidi Okonkwo',
+        username: 'chidi_alpha',
+        level: 5,
+        badge: '💎 Level 5: Alpha',
+        broker: '5%ers High Stakes $100k',
+        avatarBg: '#F59E0B',
+      },
+      content: 'Position sizing formula: Lot Size = (Account Balance * Risk %) / (Stop Loss in Pips * Pip Value). Never guess your lot size or use a static 1.00 lot.',
+      reactions: { '🎯': 33, '🧠': 24, '💯': 20 },
+      timestamp: '08:45 UTC',
+    },
+  ],
+  'consistent-flow': [
+    {
+      id: 'cf-1',
+      author: {
+        name: 'Chidi Okonkwo',
+        username: 'chidi_alpha',
+        level: 5,
+        badge: '💎 Level 5: Alpha',
+        broker: '5%ers High Stakes $100k',
+        avatarBg: '#F59E0B',
+      },
+      content: 'Logged 24 trades this month. Win rate 58%, Profit Factor 2.1. Skipping mid-range chop has made all the difference.',
+      reactions: { '🔥': 17, '📈': 14 },
+      timestamp: '08:20 UTC',
+    },
+  ],
+  'daily-bias': [
+    {
+      id: 'db-1',
+      author: {
+        name: 'Solomon Kane',
+        username: 'solomon_kane',
+        level: 7,
+        badge: '🏛️ Level 7: Titan',
+        broker: 'Titan Syndicate Prime',
+        avatarBg: '#C2410C',
+      },
+      content: 'Daily Macro Bias: DXY is facing strong rejection at the daily order block 104.20. Looking for EUR/USD and GBP/USD continuations to buy liquidity pools above yesterday highs.',
+      reactions: { '🎯': 29, '📈': 22, '🔥': 18 },
+      timestamp: '07:15 UTC',
+    },
+  ],
+  'elite-alpha-desk': [
+    {
+      id: 'ea-1',
+      author: {
+        name: 'Solomon Kane',
+        username: 'solomon_kane',
+        level: 7,
+        badge: '🏛️ Level 7: Titan',
+        broker: 'Titan Syndicate Prime',
+        avatarBg: '#C2410C',
+      },
+      content: 'Algorithmic execution models show institutional order stacking in EUR/GBP ahead of BOE press release. Tracking VWAP volume profile nodes closely.',
+      reactions: { '💎': 19, '🧠': 15 },
+      timestamp: '08:50 UTC',
+    },
+  ],
+  'live-audio-huddle': [
+    {
+      id: 'lah-1',
+      author: {
+        name: 'Aisha Bello',
+        username: 'aisha_fx',
+        level: 6,
+        badge: '👑 Level 6: Mentor',
+        broker: 'FTMO Master $200k',
+        avatarBg: '#EA580C',
+      },
+      content: 'Audio huddle active! We are breaking down pre-London liquidity sweeps and key daily bias levels on the mic.',
+      reactions: { '🎙️': 28, '🔥': 20 },
+      timestamp: '08:00 UTC',
+    },
+  ],
+  'titan-inner-sanctuary': [
+    {
+      id: 'tis-1',
+      author: {
+        name: 'Solomon Kane',
+        username: 'solomon_kane',
+        level: 7,
+        badge: '🏛️ Level 7: Titan',
+        broker: 'Titan Syndicate Prime',
+        avatarBg: '#C2410C',
+      },
+      content: 'Allocating $1.5M syndicate risk across FX majors and treasury yields for Q4. Focus remains asymmetric R:R (> 1:3.5).',
+      reactions: { '🏛️': 19, '👑': 14, '💰': 17 },
+      timestamp: '07:00 UTC',
+    },
+  ],
+};
+
 export default function ForumPage() {
-  const { user, loginWithDemo, logout } = useAuth();
-  const userLevel = user ? user.skill_level : 0;
+  const { user, loginWithDemo } = useAuth();
 
   // Set initial channel based on user skill level
   const getDefaultChannel = (level: number) => {
@@ -195,12 +629,28 @@ export default function ForumPage() {
   };
 
   const [activeChannel, setActiveChannel] = useState('funded-floor');
+  const [messagesByChannel, setMessagesByChannel] = useState<Record<string, ChatMessage[]>>(INITIAL_CHANNEL_MESSAGES);
+  const [userReactions, setUserReactions] = useState<Record<string, string[]>>({});
+  const [activeEmojiPickerMsgId, setActiveEmojiPickerMsgId] = useState<string | null>(null);
+  const [showComposerEmojiPicker, setShowComposerEmojiPicker] = useState(false);
+
   const [messageInput, setMessageInput] = useState('');
   const [copiedCode, setCopiedCode] = useState(false);
   const [showAttachModal, setShowAttachModal] = useState(false);
+  const [selectedTradeToAttach, setSelectedTradeToAttach] = useState<AuditedTrade>(AVAILABLE_JOURNAL_TRADES[0]);
+  const [customAttachNote, setCustomAttachNote] = useState('');
+
   const [showSimulateDemotionModal, setShowSimulateDemotionModal] = useState(false);
   const [mobileChannelsOpen, setMobileChannelsOpen] = useState(false);
   const [mobileInfoOpen, setMobileInfoOpen] = useState(false);
+
+  // Rich Interactive Modals
+  const [selectedProfileTrader, setSelectedProfileTrader] = useState<TraderProfileModalData | null>(null);
+  const [selectedTradeDetail, setSelectedTradeDetail] = useState<AuditedTrade | null>(null);
+
+  // Audio Huddle Simulation State
+  const [isHuddleJoined, setIsHuddleJoined] = useState(false);
+  const [isHuddleMuted, setIsHuddleMuted] = useState(true);
 
   // Sync active channel if user level updates
   useEffect(() => {
@@ -218,85 +668,245 @@ export default function ForumPage() {
   // Current channel metadata
   const currentChannel = CHANNELS.find((c) => c.id === activeChannel) || CHANNELS[0];
   const isChannelUnlocked = user ? user.skill_level >= currentChannel.minLevel : false;
+  const currentMessages = messagesByChannel[activeChannel] || [];
 
-  // Chat message stream
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    {
-      id: '1',
-      author: {
+  // ==========================================
+  // Profile Lookup Handler
+  // ==========================================
+  const openTraderProfile = (nameOrUsername: string) => {
+    const isSelf =
+      user &&
+      (nameOrUsername === user.name ||
+        nameOrUsername === user.display_name ||
+        nameOrUsername === user.username ||
+        nameOrUsername === `@${user.username}` ||
+        nameOrUsername === 'Apex Trader');
+
+    if (isSelf && user) {
+      setSelectedProfileTrader({
+        name: user.display_name || user.name || 'Apex Trader',
+        username: user.username,
+        level: user.skill_level,
+        badge: user.tier_badge,
+        tierColor: user.tier_color || '#8B5CF6',
+        broker: user.broker_name || 'Verified Prop Trader',
+        winRate: user.win_rate,
+        profitFactor: user.profit_factor,
+        maxDrawdown: user.max_drawdown,
+        totalTrades: user.total_verified_trades,
+        tierHealth: user.tier_health,
+        tradingStyle: user.trading_style || 'Discipline & Risk Management',
+        bio: user.bio || 'Managing verified prop capital. Audited by PipBud Meritocracy Protocol.',
+        avatarBg: user.tier_color || '#8B5CF6',
+        avatarType: user.avatar_type,
+        avatarUrl: user.avatar_url,
+        isCurrentUser: true,
+        recentTrades: [
+          {
+            pair: 'GBP/USD',
+            direction: 'SHORT',
+            outcome: 'WIN',
+            profit: '+3.00%',
+            rr: '1:3.00',
+            date: 'Today, 08:30 UTC',
+          },
+          {
+            pair: 'EUR/USD',
+            direction: 'LONG',
+            outcome: 'WIN',
+            profit: '+2.50%',
+            rr: '1:2.50',
+            date: 'Yesterday, 14:15 UTC',
+          },
+        ],
+      });
+      return;
+    }
+
+    if (nameOrUsername.includes('Solomon') || nameOrUsername === 'solomon_kane') {
+      setSelectedProfileTrader({
         name: 'Solomon Kane',
+        username: 'solomon_kane',
         level: 7,
         badge: '🏛️ Level 7: Titan',
+        tierColor: '#C2410C',
         broker: 'Titan Syndicate Prime',
+        winRate: 68.4,
+        profitFactor: 2.85,
+        maxDrawdown: 2.1,
+        totalTrades: 512,
+        tierHealth: 99,
+        tradingStyle: 'Institutional Order Flow & Macro Bias',
+        bio: 'Head of Macro Execution at Titan Syndicate. Specializing in London/NY liquidity sweeps and Treasury-correlated FX positioning. 7-figure allocator since 2020.',
         avatarBg: '#C2410C',
-      },
-      content: 'London session open: Asia low swept aggressively into the 15m bullish Order Block on EUR/USD. DXY rejecting 104.20 key resistance level. High conviction long.',
-      reactions: { '🔥': 18, '🎯': 12, '🚀': 7 },
-      timestamp: '08:05 UTC',
-    },
-    {
-      id: '2',
-      author: {
+        recentTrades: [
+          {
+            pair: 'EUR/USD',
+            direction: 'LONG',
+            outcome: 'WIN',
+            profit: '+4.10%',
+            rr: '1:4.10',
+            date: 'Today, 08:05 UTC',
+          },
+          {
+            pair: 'GBP/JPY',
+            direction: 'SHORT',
+            outcome: 'WIN',
+            profit: '+3.80%',
+            rr: '1:3.80',
+            date: '2 days ago',
+          },
+        ],
+      });
+      return;
+    }
+
+    if (nameOrUsername.includes('Aisha') || nameOrUsername === 'aisha_fx') {
+      setSelectedProfileTrader({
         name: 'Aisha Bello',
+        username: 'aisha_fx',
         level: 6,
         badge: '👑 Level 6: Mentor',
+        tierColor: '#EA580C',
         broker: 'FTMO Master $200k',
+        winRate: 64.2,
+        profitFactor: 2.3,
+        maxDrawdown: 2.8,
+        totalTrades: 340,
+        tierHealth: 96,
+        tradingStyle: 'Algorithmic London Killzone & Market Profile',
+        bio: 'Full-time prop trader and community mentor. Author of the PipBud London Open Liquidity PineScript indicator. Managing $400k+ in verified allocations.',
         avatarBg: '#EA580C',
-      },
-      content: 'Here is the PineScript alert script for monitoring the London Killzone sweeps:',
-      codeSnippet: {
-        language: 'pinescript',
-        code: `//@version=5
-indicator("PipBud London Liquidity Sweep", overlay=true)
-asia_high = ta.highest(high, 24)
-asia_low = ta.lowest(low, 24)
-plot(asia_high, "Asia High", color=color.new(color.orange, 0))
-plot(asia_low, "Asia Low", color=color.new(color.blue, 0))
-alertcondition(ta.crossover(high, asia_high), "Asia High Swept", "PipBud Alert: High Liquidity Taken")`,
-      },
-      reactions: { '👏': 14, '🔥': 9 },
-      timestamp: '08:12 UTC',
-    },
-    {
-      id: '3',
-      author: {
+        recentTrades: [
+          {
+            pair: 'GBP/USD',
+            direction: 'SHORT',
+            outcome: 'WIN',
+            profit: '+3.00%',
+            rr: '1:3.00',
+            date: 'Today, 08:12 UTC',
+          },
+          {
+            pair: 'NAS100',
+            direction: 'LONG',
+            outcome: 'WIN',
+            profit: '+2.80%',
+            rr: '1:2.80',
+            date: 'Yesterday',
+          },
+        ],
+      });
+      return;
+    }
+
+    if (nameOrUsername.includes('Chidi') || nameOrUsername === 'chidi_alpha') {
+      setSelectedProfileTrader({
         name: 'Chidi Okonkwo',
+        username: 'chidi_alpha',
         level: 5,
         badge: '💎 Level 5: Alpha',
+        tierColor: '#F59E0B',
         broker: '5%ers High Stakes $100k',
+        winRate: 58.7,
+        profitFactor: 2.05,
+        maxDrawdown: 3.4,
+        totalTrades: 215,
+        tierHealth: 92,
+        tradingStyle: 'Supply & Demand + Volume Profile Nodes',
+        bio: 'Full-time quantitative scalper. Focused on US session indices and London EUR/USD session opens. Strict 1% risk rule.',
         avatarBg: '#F59E0B',
-      },
-      content: 'Closed 80% position at 1.08920 for +2.5R gain. Moving stop loss to breakeven + 5 pips.',
-      tradeEmbed: {
-        pair: 'EUR/USD',
-        direction: 'LONG',
-        setup: '15m Bullish Order Block (OB)',
-        entry: '1.08420',
-        sl: '1.08220',
-        tp: '1.08920',
-        rr: '1:2.50',
-        outcome: 'WIN',
-        profit: '+2.50% (+$2,500.00)',
-      },
-      reactions: { '🎯': 24, '🚀': 16, '💰': 19 },
-      timestamp: '08:35 UTC',
-    },
-    {
-      id: '4',
-      author: {
-        name: 'PipBud Sentinel',
-        level: 0,
-        badge: '🤖 Automated Governance',
-        broker: 'PipBud Engine',
-        avatarBg: '#DC2626',
-      },
-      content: '⚠️ DEMOTION NOTICE: Trader @emeka_scalp has been automatically removed from Level 3 (#consistent-flow) and re-assigned to Level 2. Reason: Maximum cumulative drawdown breached 9.0% threshold (hit 11.2%). 3 unmanaged trades logged without stop losses. Zero fake track records allowed in this syndicate.',
-      reactions: { '🛡️': 31, '⚖️': 28 },
-      timestamp: '09:02 UTC',
-      isDemotionNotice: true,
-    },
-  ]);
+        recentTrades: [
+          {
+            pair: 'EUR/USD',
+            direction: 'LONG',
+            outcome: 'WIN',
+            profit: '+2.50%',
+            rr: '1:2.50',
+            date: 'Today, 08:35 UTC',
+          },
+          {
+            pair: 'US30',
+            direction: 'SHORT',
+            outcome: 'WIN',
+            profit: '+3.20%',
+            rr: '1:3.20',
+            date: '3 days ago',
+          },
+        ],
+      });
+      return;
+    }
 
+    // PipBud Sentinel or fallback
+    setSelectedProfileTrader({
+      name: nameOrUsername,
+      username: nameOrUsername.toLowerCase().replace(/\s+/g, '_'),
+      level: 0,
+      badge: '🤖 Automated Governance',
+      tierColor: '#DC2626',
+      broker: 'PipBud Engine Core',
+      winRate: 100,
+      profitFactor: 9.99,
+      maxDrawdown: 0.0,
+      totalTrades: 48920,
+      tierHealth: 100,
+      tradingStyle: 'Cryptographic Audit & Anti-Drawdown Protocol',
+      bio: 'The autonomous watchdog monitoring every trade log, verifying broker fills, and demoting any trader exceeding risk parameters in real-time.',
+      avatarBg: '#DC2626',
+    });
+  };
+
+  // ==========================================
+  // Reaction Toggle Handler
+  // ==========================================
+  const handleToggleReaction = (msgId: string, emoji: string) => {
+    const userHasReacted = (userReactions[msgId] || []).includes(emoji);
+
+    setMessagesByChannel((prev) => {
+      const channelMsgs = prev[activeChannel] || [];
+      const updated = channelMsgs.map((m) => {
+        if (m.id !== msgId) return m;
+        const currentCount = m.reactions[emoji] || 0;
+        const newCount = userHasReacted ? Math.max(0, currentCount - 1) : currentCount + 1;
+        const nextReactions = { ...m.reactions };
+        if (newCount === 0) {
+          delete nextReactions[emoji];
+        } else {
+          nextReactions[emoji] = newCount;
+        }
+        return {
+          ...m,
+          reactions: nextReactions,
+        };
+      });
+
+      return {
+        ...prev,
+        [activeChannel]: updated,
+      };
+    });
+
+    setUserReactions((prev) => {
+      const currentList = prev[msgId] || [];
+      if (userHasReacted) {
+        return {
+          ...prev,
+          [msgId]: currentList.filter((e) => e !== emoji),
+        };
+      } else {
+        return {
+          ...prev,
+          [msgId]: [...currentList, emoji],
+        };
+      }
+    });
+
+    setActiveEmojiPickerMsgId(null);
+  };
+
+  // ==========================================
+  // Send Message Handler
+  // ==========================================
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
     if (!messageInput.trim() || !user || !isChannelUnlocked) return;
@@ -304,44 +914,77 @@ alertcondition(ta.crossover(high, asia_high), "Asia High Swept", "PipBud Alert: 
     const newMsg: ChatMessage = {
       id: Date.now().toString(),
       author: {
-        name: user.display_name || user.name,
+        name: user.display_name || user.name || `@${user.username}`,
+        username: user.username,
         level: user.skill_level,
         badge: user.tier_badge,
         broker: user.broker_name || 'Verified Prop Trader',
-        avatarBg: user.tier_color || '#C2410C',
+        avatarBg: user.tier_color || '#8B5CF6',
+        avatarType: user.avatar_type,
+        avatarUrl: user.avatar_url,
       },
       content: messageInput,
       reactions: { '🔥': 1 },
       timestamp: 'Just now',
     };
 
-    setMessages([...messages, newMsg]);
+    setMessagesByChannel((prev) => ({
+      ...prev,
+      [activeChannel]: [...(prev[activeChannel] || []), newMsg],
+    }));
+
+    // Auto add reaction for self
+    setUserReactions((prev) => ({
+      ...prev,
+      [newMsg.id]: ['🔥'],
+    }));
+
     setMessageInput('');
+    setShowComposerEmojiPicker(false);
   };
 
-  const handleReaction = (msgId: string, emoji: string) => {
-    setMessages(
-      messages.map((m) => {
-        if (m.id === msgId) {
-          const current = m.reactions[emoji] || 0;
-          return {
-            ...m,
-            reactions: {
-              ...m.reactions,
-              [emoji]: current + 1,
-            },
-          };
-        }
-        return m;
-      })
-    );
+  // ==========================================
+  // Attach Audited Trade Handler
+  // ==========================================
+  const handleAttachTradeConfirm = () => {
+    if (!user) return;
+
+    const tradeMsg: ChatMessage = {
+      id: Date.now().toString(),
+      author: {
+        name: user.display_name || user.name || `@${user.username}`,
+        username: user.username,
+        level: user.skill_level,
+        badge: user.tier_badge,
+        broker: user.broker_name || 'Verified Broker',
+        avatarBg: user.tier_color || '#8B5CF6',
+        avatarType: user.avatar_type,
+        avatarUrl: user.avatar_url,
+      },
+      content: customAttachNote.trim() || 'Sharing my latest audited trade from the PipBud Journal:',
+      tradeEmbed: selectedTradeToAttach,
+      reactions: { '🎯': 3, '🔥': 2 },
+      timestamp: 'Just now',
+    };
+
+    setMessagesByChannel((prev) => ({
+      ...prev,
+      [activeChannel]: [...(prev[activeChannel] || []), tradeMsg],
+    }));
+
+    setShowAttachModal(false);
+    setCustomAttachNote('');
   };
 
+  // ==========================================
+  // Simulate Drawdown Breach Handler
+  // ==========================================
   const handleSimulateDrawdownBreach = () => {
     const demotionMsg: ChatMessage = {
       id: Date.now().toString(),
       author: {
         name: 'PipBud Sentinel',
+        username: 'pipbud_sentinel',
         level: 0,
         badge: '🤖 Automated Governance',
         broker: 'Meritocracy Engine',
@@ -353,40 +996,14 @@ alertcondition(ta.crossover(high, asia_high), "Asia High Swept", "PipBud Alert: 
       isDemotionNotice: true,
     };
 
-    setMessages([...messages, demotionMsg]);
+    setMessagesByChannel((prev) => ({
+      ...prev,
+      [activeChannel]: [...(prev[activeChannel] || []), demotionMsg],
+      'demotions-log': [...(prev['demotions-log'] || []), demotionMsg],
+    }));
+
     setShowSimulateDemotionModal(false);
     if (mobileInfoOpen) setMobileInfoOpen(false);
-  };
-
-  const handleAttachTrade = () => {
-    if (!user) return;
-    const tradeMsg: ChatMessage = {
-      id: Date.now().toString(),
-      author: {
-        name: user.display_name || user.name,
-        level: user.skill_level,
-        badge: user.tier_badge,
-        broker: user.broker_name || 'Verified Broker',
-        avatarBg: user.tier_color || '#C2410C',
-      },
-      content: 'Sharing my latest audited trade from the PipBud Journal:',
-      tradeEmbed: {
-        pair: 'GBP/USD',
-        direction: 'SHORT',
-        setup: '15m Fair Value Gap (FVG)',
-        entry: '1.29850',
-        sl: '1.30050',
-        tp: '1.29250',
-        rr: '1:3.00',
-        outcome: 'WIN',
-        profit: '+3.00% (+$3,000.00)',
-      },
-      reactions: { '🎯': 3, '🔥': 2 },
-      timestamp: 'Just now',
-    };
-
-    setMessages([...messages, tradeMsg]);
-    setShowAttachModal(false);
   };
 
   const copyCodeToClipboard = (text: string) => {
@@ -398,6 +1015,7 @@ alertcondition(ta.crossover(high, asia_high), "Asia High Swept", "PipBud Alert: 
   const selectChannel = (channelName: string) => {
     setActiveChannel(channelName);
     setMobileChannelsOpen(false);
+    setActiveEmojiPickerMsgId(null);
   };
 
   // ==========================================
@@ -482,13 +1100,17 @@ alertcondition(ta.crossover(high, asia_high), "Asia High Swept", "PipBud Alert: 
   // ==========================================
   // Reusable Channels Sidebar & Drawer Content
   // ==========================================
-  const renderChannelsContent = (isMobile: boolean = false) => (
+  const renderChannelsContent = () => (
     <div className="flex flex-col h-full">
       {/* Authenticated Trader Status Card */}
       <div className="p-3.5 border-b border-[#E7E5E4] bg-[#FAFAF9] shrink-0 space-y-3">
-        <div className="flex items-center gap-2.5">
+        <div
+          onClick={() => openTraderProfile(user.display_name || user.name || user.username)}
+          className="flex items-center gap-2.5 p-1 -m-1 rounded-xl hover:bg-white cursor-pointer transition-all group"
+          title="Click to view your verified meritocracy profile"
+        >
           {user.avatar_type?.startsWith('mascot') || !user.avatar_type ? (
-            <div className="w-10 h-10 rounded-xl bg-white border border-[#FED7AA] p-1 flex items-center justify-center shrink-0 shadow-xs">
+            <div className="w-10 h-10 rounded-xl bg-white border border-[#FED7AA] p-1 flex items-center justify-center shrink-0 shadow-xs group-hover:scale-105 transition-transform">
               <Image
                 src="/icon-192.png"
                 alt="Avatar"
@@ -502,11 +1124,11 @@ alertcondition(ta.crossover(high, asia_high), "Asia High Swept", "PipBud Alert: 
             <img
               src={user.avatar_url}
               alt="Avatar"
-              className="w-10 h-10 rounded-xl object-cover shrink-0 shadow-xs border border-[#E7E5E4]"
+              className="w-10 h-10 rounded-xl object-cover shrink-0 shadow-xs border border-[#E7E5E4] group-hover:scale-105 transition-transform"
             />
           ) : (
             <div
-              className="w-10 h-10 rounded-xl text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-xs uppercase"
+              className="w-10 h-10 rounded-xl text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-xs uppercase group-hover:scale-105 transition-transform"
               style={{ backgroundColor: user.tier_color || '#1C1917' }}
             >
               {(user.display_name || user.username).slice(0, 2)}
@@ -514,7 +1136,7 @@ alertcondition(ta.crossover(high, asia_high), "Asia High Swept", "PipBud Alert: 
           )}
           <div className="overflow-hidden min-w-0 flex-1">
             <div className="flex items-center justify-between gap-1">
-              <span className="font-bold text-xs text-[#1C1917] truncate">
+              <span className="font-bold text-xs text-[#1C1917] truncate group-hover:text-[#C2410C] transition-colors">
                 {user.display_name || `@${user.username}`}
               </span>
               <div className="flex items-center gap-1 shrink-0">
@@ -526,7 +1148,8 @@ alertcondition(ta.crossover(high, asia_high), "Asia High Swept", "PipBud Alert: 
                 </span>
                 <Link
                   href="/settings"
-                  className="p-1 rounded-md text-[#78716C] hover:text-[#C2410C] hover:bg-white transition-colors"
+                  onClick={(e) => e.stopPropagation()}
+                  className="p-1 rounded-md text-[#78716C] hover:text-[#C2410C] hover:bg-[#F5F5F4] transition-colors"
                   title="Privacy & Identity Settings"
                 >
                   <Sliders className="w-3 h-3" />
@@ -719,14 +1342,6 @@ alertcondition(ta.crossover(high, asia_high), "Asia High Swept", "PipBud Alert: 
         </Link>
 
         <Link
-          href="/"
-          className="flex items-center gap-2 px-2.5 py-2 rounded-xl text-[#78716C] hover:bg-white hover:text-[#1C1917] font-medium transition-all"
-        >
-          <PipbudLogo size="sm" showWordmark={false} href={false} />
-          <span>Home Landing</span>
-        </Link>
-
-        <Link
           href="/settings"
           className="flex items-center justify-between px-2.5 py-2 rounded-xl text-[#1C1917] hover:bg-white hover:text-[#C2410C] font-semibold transition-all"
         >
@@ -816,18 +1431,22 @@ alertcondition(ta.crossover(high, asia_high), "Asia High Swept", "PipBud Alert: 
           </span>
         </div>
 
-        <div className="space-y-2 text-xs">
+        <div className="space-y-1.5 text-xs">
           {/* Authenticated Trader (You) */}
-          <div className="flex items-center gap-2 p-1.5 rounded-xl bg-[#FFF7ED] border border-[#FED7AA]">
+          <div
+            onClick={() => openTraderProfile(user.display_name || user.name || user.username)}
+            className="flex items-center gap-2 p-2 rounded-xl bg-[#FFF7ED] border border-[#FED7AA] cursor-pointer hover:bg-[#FFEDD5] transition-all"
+            title="Click to view your profile"
+          >
             <div
-              className="w-6 h-6 rounded-lg text-white text-[10px] font-bold flex items-center justify-center shrink-0"
+              className="w-7 h-7 rounded-lg text-white text-[10px] font-bold flex items-center justify-center shrink-0"
               style={{ backgroundColor: user.tier_color || '#1C1917' }}
             >
               {user.username.slice(0, 2).toUpperCase()}
             </div>
             <div className="truncate flex-1">
               <span className="font-bold text-[#1C1917] block text-[11px] truncate">
-                @{user.username} <span className="text-[#C2410C] font-normal">(You)</span>
+                {user.display_name || `@${user.username}`} <span className="text-[#C2410C] font-normal">(You)</span>
               </span>
               <span
                 className="text-[9px] font-semibold block truncate"
@@ -836,36 +1455,55 @@ alertcondition(ta.crossover(high, asia_high), "Asia High Swept", "PipBud Alert: 
                 {user.tier_badge}
               </span>
             </div>
+            <BadgeCheck className="w-3.5 h-3.5 text-[#0F766E] shrink-0" />
           </div>
 
-          <div className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-[#FAFAF9]">
-            <div className="w-6 h-6 rounded-lg bg-[#C2410C] text-white text-[10px] font-bold flex items-center justify-center shrink-0">
+          {/* Solomon Kane */}
+          <div
+            onClick={() => openTraderProfile('Solomon Kane')}
+            className="flex items-center gap-2 p-2 rounded-xl hover:bg-[#FAFAF9] cursor-pointer transition-colors"
+            title="Click to view Solomon Kane's audited profile"
+          >
+            <div className="w-7 h-7 rounded-lg bg-[#C2410C] text-white text-[10px] font-bold flex items-center justify-center shrink-0">
               SK
             </div>
-            <div className="truncate">
-              <span className="font-semibold text-[#1C1917] block text-[11px] truncate">Solomon Kane</span>
+            <div className="truncate flex-1">
+              <span className="font-semibold text-[#1C1917] block text-[11px] truncate hover:text-[#C2410C]">Solomon Kane</span>
               <span className="text-[9px] text-[#C2410C]">Level 7: Titan</span>
             </div>
+            <span className="w-2 h-2 rounded-full bg-[#15803D] shrink-0" />
           </div>
 
-          <div className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-[#FAFAF9]">
-            <div className="w-6 h-6 rounded-lg bg-[#EA580C] text-white text-[10px] font-bold flex items-center justify-center shrink-0">
+          {/* Aisha Bello */}
+          <div
+            onClick={() => openTraderProfile('Aisha Bello')}
+            className="flex items-center gap-2 p-2 rounded-xl hover:bg-[#FAFAF9] cursor-pointer transition-colors"
+            title="Click to view Aisha Bello's audited profile"
+          >
+            <div className="w-7 h-7 rounded-lg bg-[#EA580C] text-white text-[10px] font-bold flex items-center justify-center shrink-0">
               AB
             </div>
-            <div className="truncate">
-              <span className="font-semibold text-[#1C1917] block text-[11px] truncate">Aisha Bello</span>
+            <div className="truncate flex-1">
+              <span className="font-semibold text-[#1C1917] block text-[11px] truncate hover:text-[#C2410C]">Aisha Bello</span>
               <span className="text-[9px] text-[#EA580C]">Level 6: Mentor</span>
             </div>
+            <span className="w-2 h-2 rounded-full bg-[#15803D] shrink-0" />
           </div>
 
-          <div className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-[#FAFAF9]">
-            <div className="w-6 h-6 rounded-lg bg-[#F59E0B] text-white text-[10px] font-bold flex items-center justify-center shrink-0">
+          {/* Chidi Okonkwo */}
+          <div
+            onClick={() => openTraderProfile('Chidi Okonkwo')}
+            className="flex items-center gap-2 p-2 rounded-xl hover:bg-[#FAFAF9] cursor-pointer transition-colors"
+            title="Click to view Chidi Okonkwo's audited profile"
+          >
+            <div className="w-7 h-7 rounded-lg bg-[#F59E0B] text-white text-[10px] font-bold flex items-center justify-center shrink-0">
               CO
             </div>
-            <div className="truncate">
-              <span className="font-semibold text-[#1C1917] block text-[11px] truncate">Chidi Okonkwo</span>
+            <div className="truncate flex-1">
+              <span className="font-semibold text-[#1C1917] block text-[11px] truncate hover:text-[#C2410C]">Chidi Okonkwo</span>
               <span className="text-[9px] text-[#F59E0B]">Level 5: Alpha</span>
             </div>
+            <span className="w-2 h-2 rounded-full bg-[#15803D] shrink-0" />
           </div>
         </div>
       </div>
@@ -934,11 +1572,11 @@ alertcondition(ta.crossover(high, asia_high), "Asia High Swept", "PipBud Alert: 
             Web Journal
           </Link>
 
-          {/* User Account Chip */}
-          <Link
-            href="/settings"
-            className="px-2.5 py-1 rounded-xl bg-[#FAFAF9] border border-[#E7E5E4] hover:border-[#FED7AA] hover:bg-[#FFF7ED] transition-all flex items-center gap-1.5 shadow-xs active:scale-95"
-            title="Trader Identity & Privacy Settings"
+          {/* User Account Chip -> Opens User Profile Modal */}
+          <button
+            onClick={() => openTraderProfile(user.display_name || user.name || user.username)}
+            className="px-2.5 py-1 rounded-xl bg-[#FAFAF9] border border-[#E7E5E4] hover:border-[#FED7AA] hover:bg-[#FFF7ED] transition-all flex items-center gap-1.5 shadow-xs active:scale-95 text-left"
+            title="Trader Identity Profile"
           >
             <span
               className="w-2.5 h-2.5 rounded-full shrink-0"
@@ -948,7 +1586,7 @@ alertcondition(ta.crossover(high, asia_high), "Asia High Swept", "PipBud Alert: 
             <span className="text-xs font-medium text-[#44403C] hidden sm:inline max-w-[110px] truncate">
               {user.display_name || `@${user.username}`}
             </span>
-          </Link>
+          </button>
 
           {/* Telegram Bot Link */}
           <a
@@ -967,7 +1605,7 @@ alertcondition(ta.crossover(high, asia_high), "Asia High Swept", "PipBud Alert: 
       <div className="flex-1 flex overflow-hidden relative">
         {/* Desktop Left Sidebar: Channels List */}
         <aside className="w-64 bg-white border-r border-[#E7E5E4] hidden md:flex flex-col shrink-0 overflow-y-auto">
-          {renderChannelsContent(false)}
+          {renderChannelsContent()}
         </aside>
 
         {/* Mobile Sliding Channels Drawer (Offcanvas) */}
@@ -996,7 +1634,7 @@ alertcondition(ta.crossover(high, asia_high), "Asia High Swept", "PipBud Alert: 
               </div>
 
               <div className="flex-1 overflow-y-auto">
-                {renderChannelsContent(true)}
+                {renderChannelsContent()}
               </div>
             </div>
           </div>
@@ -1039,137 +1677,255 @@ alertcondition(ta.crossover(high, asia_high), "Asia High Swept", "PipBud Alert: 
             </div>
           </div>
 
-          {/* Messages Stream */}
-          <div className="flex-1 overflow-y-auto p-3 sm:p-5 space-y-3 sm:space-y-4">
-            {messages.map((msg) => (
-              <div
-                key={msg.id}
-                className={`flex items-start gap-2.5 sm:gap-3.5 ${
-                  msg.isDemotionNotice
-                    ? 'p-3 sm:p-4 rounded-2xl bg-[#FEF2F2] border border-[#FEE2E2]'
-                    : ''
-                }`}
-              >
-                <div
-                  className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl font-bold text-xs text-white flex items-center justify-center shrink-0 shadow-xs"
-                  style={{ backgroundColor: msg.author.avatarBg }}
-                >
-                  {msg.author.name
-                    .split(' ')
-                    .map((n) => n[0])
-                    .slice(0, 2)
-                    .join('')}
+          {/* Live Audio Huddle Bar (When in #live-audio-huddle) */}
+          {activeChannel === 'live-audio-huddle' && (
+            <div className="bg-gradient-to-r from-[#FFF7ED] via-[#FFEDD5] to-[#FEF3C7] border-b border-[#FED7AA] px-4 py-3 shrink-0 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-[#EA580C] text-white flex items-center justify-center shrink-0 shadow-xs relative">
+                  <Radio className="w-5 h-5 animate-pulse" />
+                  <span className="absolute -top-1 -right-1 w-3 h-3 bg-[#15803D] rounded-full border-2 border-white" />
                 </div>
-
-                <div className="flex-1 space-y-1.5 min-w-0">
-                  <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-                    <span className="font-bold text-xs text-[#1C1917] truncate">{msg.author.name}</span>
-                    <span
-                      className={`px-1.5 sm:px-2 py-0.2 rounded text-[9px] sm:text-[10px] font-bold truncate ${
-                        msg.isDemotionNotice
-                          ? 'bg-[#B91C1C] text-white'
-                          : 'bg-[#FFF7ED] text-[#C2410C] border border-[#FED7AA]'
-                      }`}
-                    >
-                      {msg.author.badge}
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs sm:text-sm font-bold text-[#1C1917]">
+                      Mentor Pre-London Audio Huddle
                     </span>
-                    <span className="text-[10px] text-[#78716C] hidden sm:inline">{msg.author.broker}</span>
-                    <span className="text-[9px] sm:text-[10px] text-[#A8A29E] ml-auto shrink-0">{msg.timestamp}</span>
+                    <span className="text-[10px] font-bold text-[#EA580C] bg-white/80 px-2 py-0.5 rounded-full border border-[#FED7AA]">
+                      Live (3 Active Speakers)
+                    </span>
                   </div>
-
-                  {/* Text content */}
-                  <p
-                    className={`text-xs sm:text-sm leading-relaxed break-words ${
-                      msg.isDemotionNotice ? 'text-[#991B1B] font-medium' : 'text-[#292524]'
-                    }`}
-                  >
-                    {msg.content}
+                  <p className="text-[11px] text-[#78716C]">
+                    Speaking: <strong className="text-[#1C1917]">Aisha Bello (Host)</strong>, <strong className="text-[#1C1917]">Solomon Kane</strong>, <strong className="text-[#1C1917]">PipBud AI</strong>
                   </p>
-
-                  {/* Code snippet */}
-                  {msg.codeSnippet && (
-                    <div className="bg-[#1C1917] text-[#FAFAF9] p-3 rounded-xl border border-[#292524] space-y-2 mt-2 max-w-xl">
-                      <div className="flex items-center justify-between text-[11px] text-[#A8A29E] pb-1.5 border-b border-[#292524]">
-                        <span className="font-mono">{msg.codeSnippet.language}</span>
-                        <button
-                          onClick={() => copyCodeToClipboard(msg.codeSnippet!.code)}
-                          className="flex items-center gap-1 hover:text-white transition-colors"
-                        >
-                          {copiedCode ? <Check className="w-3 h-3 text-[#15803D]" /> : <Copy className="w-3 h-3" />}
-                          <span>{copiedCode ? 'Copied' : 'Copy'}</span>
-                        </button>
-                      </div>
-                      <pre className="text-[10px] sm:text-[11px] leading-relaxed overflow-x-auto font-mono">
-                        {msg.codeSnippet.code}
-                      </pre>
-                    </div>
-                  )}
-
-                  {/* Embedded Audited Trade Card */}
-                  {msg.tradeEmbed && (
-                    <div className="bg-white p-3 rounded-xl border border-[#E7E5E4] shadow-xs max-w-lg space-y-2 mt-2">
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-1.5 truncate">
-                          <span
-                            className={`px-1.5 py-0.5 rounded text-[9px] font-bold shrink-0 ${
-                              msg.tradeEmbed.direction === 'LONG'
-                                ? 'bg-[#DCFCE7] text-[#15803D]'
-                                : 'bg-[#FEE2E2] text-[#B91C1C]'
-                            }`}
-                          >
-                            {msg.tradeEmbed.direction}
-                          </span>
-                          <span className="font-bold text-xs text-[#1C1917] truncate">{msg.tradeEmbed.pair}</span>
-                          <span className="text-[10px] text-[#78716C] truncate hidden sm:inline">{msg.tradeEmbed.setup}</span>
-                        </div>
-                        <span className="text-xs font-bold text-[#15803D] tabular-nums shrink-0">
-                          {msg.tradeEmbed.profit}
-                        </span>
-                      </div>
-
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-2 text-[10px] bg-[#FAFAF9] p-2 rounded-lg border border-[#E7E5E4] font-mono">
-                        <div>
-                          <span className="text-[#78716C] block text-[9px]">Entry</span>
-                          <span className="text-[#1C1917] font-semibold">{msg.tradeEmbed.entry}</span>
-                        </div>
-                        <div>
-                          <span className="text-[#78716C] block text-[9px]">SL</span>
-                          <span className="text-[#B91C1C] font-semibold">{msg.tradeEmbed.sl}</span>
-                        </div>
-                        <div>
-                          <span className="text-[#78716C] block text-[9px]">TP</span>
-                          <span className="text-[#15803D] font-semibold">{msg.tradeEmbed.tp}</span>
-                        </div>
-                        <div>
-                          <span className="text-[#78716C] block text-[9px]">R:R</span>
-                          <span className="text-[#C2410C] font-bold">{msg.tradeEmbed.rr}</span>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Emoji Reactions */}
-                  <div className="flex flex-wrap items-center gap-1.5 pt-1">
-                    {Object.entries(msg.reactions).map(([emoji, count]) => (
-                      <button
-                        key={emoji}
-                        onClick={() => handleReaction(msg.id, emoji)}
-                        className="px-2 py-0.5 rounded-full bg-white hover:bg-[#FFF7ED] border border-[#E7E5E4] text-[11px] text-[#44403C] flex items-center gap-1 transition-colors active:scale-95"
-                      >
-                        <span>{emoji}</span>
-                        <span className="font-medium text-[10px]">{count}</span>
-                      </button>
-                    ))}
-                    <button
-                      onClick={() => handleReaction(msg.id, '🔥')}
-                      className="px-1.5 py-0.5 rounded-full hover:bg-white text-[11px] text-[#78716C] active:scale-95"
-                    >
-                      +
-                    </button>
-                  </div>
                 </div>
               </div>
-            ))}
+
+              <div className="flex items-center gap-2 shrink-0">
+                {isHuddleJoined ? (
+                  <>
+                    <button
+                      onClick={() => setIsHuddleMuted(!isHuddleMuted)}
+                      className={`h-8 px-3 rounded-xl text-xs font-semibold inline-flex items-center gap-1.5 transition-all shadow-xs ${
+                        isHuddleMuted
+                          ? 'bg-[#FEE2E2] text-[#B91C1C] border border-[#FCA5A5]'
+                          : 'bg-[#DCFCE7] text-[#15803D] border border-[#86EFAC]'
+                      }`}
+                    >
+                      {isHuddleMuted ? <MicOff className="w-3.5 h-3.5" /> : <Mic className="w-3.5 h-3.5" />}
+                      <span>{isHuddleMuted ? 'Muted' : 'Speaking'}</span>
+                    </button>
+                    <button
+                      onClick={() => setIsHuddleJoined(false)}
+                      className="h-8 px-3 bg-[#DC2626] hover:bg-[#B91C1C] text-white rounded-xl text-xs font-semibold inline-flex items-center gap-1 transition-all shadow-xs active:scale-95"
+                    >
+                      <PhoneOff className="w-3.5 h-3.5" />
+                      <span>Leave Huddle</span>
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    onClick={() => {
+                      setIsHuddleJoined(true);
+                      setIsHuddleMuted(true);
+                    }}
+                    className="h-8 px-3.5 bg-[#EA580C] hover:bg-[#C2410C] text-white rounded-xl text-xs font-semibold inline-flex items-center gap-1.5 transition-all shadow-xs active:scale-95"
+                  >
+                    <Headphones className="w-3.5 h-3.5" />
+                    <span>Join Audio Huddle</span>
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Messages Stream */}
+          <div className="flex-1 overflow-y-auto p-3 sm:p-5 space-y-3 sm:space-y-4">
+            {currentMessages.length === 0 ? (
+              <div className="text-center py-16 text-[#A8A29E] space-y-2">
+                <Hash className="w-10 h-10 mx-auto text-[#D6D3D1]" />
+                <p className="text-sm font-semibold text-[#78716C]">Welcome to #{activeChannel}</p>
+                <p className="text-xs text-[#A8A29E]">No messages posted yet. Start the conversation!</p>
+              </div>
+            ) : (
+              currentMessages.map((msg) => (
+                <div
+                  key={msg.id}
+                  className={`flex items-start gap-2.5 sm:gap-3.5 ${
+                    msg.isDemotionNotice
+                      ? 'p-3 sm:p-4 rounded-2xl bg-[#FEF2F2] border border-[#FEE2E2]'
+                      : ''
+                  }`}
+                >
+                  {/* Clickable Author Avatar */}
+                  <button
+                    onClick={() => openTraderProfile(msg.author.name)}
+                    className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl font-bold text-xs text-white flex items-center justify-center shrink-0 shadow-xs hover:opacity-90 transition-opacity active:scale-95"
+                    style={{ backgroundColor: msg.author.avatarBg }}
+                    title={`View ${msg.author.name}'s Verified Profile`}
+                  >
+                    {msg.author.name
+                      .split(' ')
+                      .map((n) => n[0])
+                      .slice(0, 2)
+                      .join('')}
+                  </button>
+
+                  <div className="flex-1 space-y-1.5 min-w-0">
+                    <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                      <button
+                        onClick={() => openTraderProfile(msg.author.name)}
+                        className="font-bold text-xs text-[#1C1917] truncate hover:text-[#C2410C] hover:underline transition-colors text-left"
+                      >
+                        {msg.author.name}
+                      </button>
+                      <span
+                        className={`px-1.5 sm:px-2 py-0.2 rounded text-[9px] sm:text-[10px] font-bold truncate ${
+                          msg.isDemotionNotice
+                            ? 'bg-[#B91C1C] text-white'
+                            : 'bg-[#FFF7ED] text-[#C2410C] border border-[#FED7AA]'
+                        }`}
+                      >
+                        {msg.author.badge}
+                      </span>
+                      <span className="text-[10px] text-[#78716C] hidden sm:inline">{msg.author.broker}</span>
+                      <span className="text-[9px] sm:text-[10px] text-[#A8A29E] ml-auto shrink-0">{msg.timestamp}</span>
+                    </div>
+
+                    {/* Text content */}
+                    <p
+                      className={`text-xs sm:text-sm leading-relaxed break-words ${
+                        msg.isDemotionNotice ? 'text-[#991B1B] font-medium' : 'text-[#292524]'
+                      }`}
+                    >
+                      {msg.content}
+                    </p>
+
+                    {/* Code snippet */}
+                    {msg.codeSnippet && (
+                      <div className="bg-[#1C1917] text-[#FAFAF9] p-3 rounded-xl border border-[#292524] space-y-2 mt-2 max-w-xl">
+                        <div className="flex items-center justify-between text-[11px] text-[#A8A29E] pb-1.5 border-b border-[#292524]">
+                          <span className="font-mono">{msg.codeSnippet.language}</span>
+                          <button
+                            onClick={() => copyCodeToClipboard(msg.codeSnippet!.code)}
+                            className="flex items-center gap-1 hover:text-white transition-colors"
+                          >
+                            {copiedCode ? <Check className="w-3 h-3 text-[#15803D]" /> : <Copy className="w-3 h-3" />}
+                            <span>{copiedCode ? 'Copied' : 'Copy'}</span>
+                          </button>
+                        </div>
+                        <pre className="text-[10px] sm:text-[11px] leading-relaxed overflow-x-auto font-mono">
+                          {msg.codeSnippet.code}
+                        </pre>
+                      </div>
+                    )}
+
+                    {/* Embedded Audited Trade Card -> Click to open full breakdown */}
+                    {msg.tradeEmbed && (
+                      <div
+                        onClick={() => setSelectedTradeDetail(msg.tradeEmbed!)}
+                        className="bg-white p-3.5 rounded-2xl border border-[#E7E5E4] hover:border-[#FED7AA] shadow-xs hover:shadow-md cursor-pointer transition-all max-w-lg space-y-2.5 mt-2 group"
+                        title="Click to view full audited trade breakdown"
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-1.5 truncate">
+                            <span
+                              className={`px-1.5 py-0.5 rounded text-[9px] font-bold shrink-0 ${
+                                msg.tradeEmbed.direction === 'LONG'
+                                  ? 'bg-[#DCFCE7] text-[#15803D]'
+                                  : 'bg-[#FEE2E2] text-[#B91C1C]'
+                              }`}
+                            >
+                              {msg.tradeEmbed.direction}
+                            </span>
+                            <span className="font-bold text-xs text-[#1C1917] truncate">{msg.tradeEmbed.pair}</span>
+                            <span className="text-[10px] text-[#78716C] truncate hidden sm:inline">{msg.tradeEmbed.setup}</span>
+                          </div>
+                          <span className="text-xs font-bold text-[#15803D] tabular-nums shrink-0">
+                            {msg.tradeEmbed.profit}
+                          </span>
+                        </div>
+
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-2 text-[10px] bg-[#FAFAF9] p-2.5 rounded-xl border border-[#E7E5E4] font-mono">
+                          <div>
+                            <span className="text-[#78716C] block text-[9px]">Entry</span>
+                            <span className="text-[#1C1917] font-semibold">{msg.tradeEmbed.entry}</span>
+                          </div>
+                          <div>
+                            <span className="text-[#78716C] block text-[9px]">SL</span>
+                            <span className="text-[#B91C1C] font-semibold">{msg.tradeEmbed.sl}</span>
+                          </div>
+                          <div>
+                            <span className="text-[#78716C] block text-[9px]">TP</span>
+                            <span className="text-[#15803D] font-semibold">{msg.tradeEmbed.tp}</span>
+                          </div>
+                          <div>
+                            <span className="text-[#78716C] block text-[9px]">R:R</span>
+                            <span className="text-[#C2410C] font-bold">{msg.tradeEmbed.rr}</span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between text-[10px] pt-1 border-t border-[#F5F5F4] text-[#78716C]">
+                          <span className="flex items-center gap-1 text-[#0F766E] font-medium">
+                            <ShieldCheck className="w-3.5 h-3.5" />
+                            <span>Audited & Verified Log</span>
+                          </span>
+                          <span className="text-[#C2410C] font-semibold group-hover:translate-x-0.5 transition-transform flex items-center gap-0.5">
+                            Inspect Breakdown &rarr;
+                          </span>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Emoji Reactions Bar with Interactive Popover */}
+                    <div className="flex flex-wrap items-center gap-1.5 pt-1 relative">
+                      {Object.entries(msg.reactions).map(([emoji, count]) => {
+                        const hasReacted = (userReactions[msg.id] || []).includes(emoji);
+                        return (
+                          <button
+                            key={emoji}
+                            onClick={() => handleToggleReaction(msg.id, emoji)}
+                            className={`px-2 py-0.5 rounded-full text-[11px] flex items-center gap-1 transition-all active:scale-95 border ${
+                              hasReacted
+                                ? 'bg-[#FFF7ED] text-[#C2410C] border-[#FED7AA] font-bold shadow-xs'
+                                : 'bg-white hover:bg-[#FFF7ED] border-[#E7E5E4] text-[#44403C]'
+                            }`}
+                            title={hasReacted ? `You reacted ${emoji}. Click to remove` : `React ${emoji}`}
+                          >
+                            <span>{emoji}</span>
+                            <span className="font-medium text-[10px]">{count}</span>
+                          </button>
+                        );
+                      })}
+
+                      {/* Add Reaction Button & Popover */}
+                      <div className="relative">
+                        <button
+                          onClick={() => setActiveEmojiPickerMsgId(activeEmojiPickerMsgId === msg.id ? null : msg.id)}
+                          className="px-2 py-0.5 rounded-full bg-white hover:bg-[#FFF7ED] border border-[#E7E5E4] hover:border-[#FED7AA] text-[11px] text-[#78716C] active:scale-95 transition-all"
+                          title="Add reaction"
+                        >
+                          +
+                        </button>
+
+                        {activeEmojiPickerMsgId === msg.id && (
+                          <div className="absolute bottom-full left-0 mb-1.5 z-40 bg-white border border-[#E7E5E4] rounded-2xl p-1.5 shadow-xl flex items-center gap-1 flex-wrap max-w-[260px] animate-in fade-in zoom-in-95 duration-100">
+                            {FORUM_REACTION_EMOJIS.map((emoji) => (
+                              <button
+                                key={emoji}
+                                onClick={() => handleToggleReaction(msg.id, emoji)}
+                                className="w-7 h-7 rounded-lg hover:bg-[#FFF7ED] flex items-center justify-center text-sm transition-transform active:scale-125"
+                              >
+                                {emoji}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
 
             {/* Locked Channel Notice Banner inside Chat */}
             {!isChannelUnlocked && (
@@ -1196,7 +1952,25 @@ alertcondition(ta.crossover(high, asia_high), "Asia High Swept", "PipBud Alert: 
           </div>
 
           {/* Bottom Message Composer (Clean mobile docking) */}
-          <div className="p-2.5 sm:p-4 bg-white border-t border-[#E7E5E4] pb-[max(0.75rem,env(safe-area-inset-bottom))] md:pb-4 shrink-0">
+          <div className="p-2.5 sm:p-4 bg-white border-t border-[#E7E5E4] pb-[max(0.75rem,env(safe-area-inset-bottom))] md:pb-4 shrink-0 relative">
+            {/* Quick Composer Emoji Palette Popover */}
+            {showComposerEmojiPicker && (
+              <div className="absolute bottom-full left-4 mb-2 z-40 bg-white border border-[#E7E5E4] rounded-2xl p-2 shadow-xl flex items-center gap-1 flex-wrap max-w-xs sm:max-w-md animate-in fade-in zoom-in-95 duration-100">
+                {COMPOSER_EMOJIS.map((emoji) => (
+                  <button
+                    key={emoji}
+                    type="button"
+                    onClick={() => {
+                      setMessageInput((prev) => prev + emoji);
+                    }}
+                    className="w-8 h-8 rounded-xl hover:bg-[#FFF7ED] flex items-center justify-center text-base transition-transform active:scale-125"
+                  >
+                    {emoji}
+                  </button>
+                ))}
+              </div>
+            )}
+
             {isChannelUnlocked ? (
               <form onSubmit={handleSendMessage} className="space-y-1.5">
                 <div className="flex items-center gap-1.5 sm:gap-2">
@@ -1208,6 +1982,21 @@ alertcondition(ta.crossover(high, asia_high), "Asia High Swept", "PipBud Alert: 
                     className="flex-1 h-10 sm:h-11 px-3 sm:px-4 bg-[#FAFAF9] border border-[#E7E5E4] rounded-xl text-xs sm:text-sm focus:border-[#C2410C] focus:bg-white outline-hidden transition-all"
                   />
 
+                  {/* Smile Emoji Trigger */}
+                  <button
+                    type="button"
+                    onClick={() => setShowComposerEmojiPicker((prev) => !prev)}
+                    className={`h-10 sm:h-11 px-2.5 sm:px-3 rounded-xl text-xs font-medium inline-flex items-center gap-1 shrink-0 transition-all active:scale-95 border ${
+                      showComposerEmojiPicker
+                        ? 'bg-[#FFF7ED] text-[#C2410C] border-[#FED7AA]'
+                        : 'bg-[#FAFAF9] hover:bg-[#FFF7ED] border-[#E7E5E4] hover:border-[#FED7AA] text-[#78716C] hover:text-[#C2410C]'
+                    }`}
+                    title="Insert Emoji"
+                  >
+                    <Smile className="w-4 h-4" />
+                  </button>
+
+                  {/* Attach Trade Trigger */}
                   <button
                     type="button"
                     onClick={() => setShowAttachModal(true)}
@@ -1218,6 +2007,7 @@ alertcondition(ta.crossover(high, asia_high), "Asia High Swept", "PipBud Alert: 
                     <span className="hidden md:inline">Attach Trade</span>
                   </button>
 
+                  {/* Send Button */}
                   <button
                     type="submit"
                     className="h-10 sm:h-11 px-3.5 sm:px-5 bg-[#C2410C] hover:bg-[#EA580C] text-white rounded-xl text-xs font-medium inline-flex items-center gap-1.5 shadow-xs shrink-0 active:scale-95 transition-all"
@@ -1283,14 +2073,339 @@ alertcondition(ta.crossover(high, asia_high), "Asia High Swept", "PipBud Alert: 
         )}
       </div>
 
-      {/* Modal: Attach Trade Card */}
+      {/* ============================================================ */}
+      {/* MODAL 1: Trader Meritocracy Profile Modal                    */}
+      {/* ============================================================ */}
+      {selectedProfileTrader && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="bg-white rounded-3xl border border-[#E7E5E4] max-w-lg w-full max-h-[90vh] overflow-y-auto p-5 sm:p-6 shadow-2xl space-y-5 animate-in zoom-in-95 duration-200">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between pb-3 border-b border-[#E7E5E4]">
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4 text-[#0F766E]" />
+                <span className="text-xs font-bold text-[#1C1917] uppercase tracking-wider">
+                  Verified Trader Profile
+                </span>
+              </div>
+              <button
+                onClick={() => setSelectedProfileTrader(null)}
+                className="p-1 rounded-lg text-[#78716C] hover:text-[#1C1917] hover:bg-[#F5F5F4] transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Profile Hero Card */}
+            <div className="flex items-center gap-3.5 p-4 rounded-2xl bg-[#FAFAF9] border border-[#E7E5E4]">
+              {selectedProfileTrader.avatarType?.startsWith('mascot') || selectedProfileTrader.isCurrentUser ? (
+                <div className="w-14 h-14 rounded-2xl bg-white border border-[#FED7AA] p-1.5 flex items-center justify-center shrink-0 shadow-xs">
+                  <Image
+                    src="/icon-192.png"
+                    alt="Mascot Avatar"
+                    width={44}
+                    height={44}
+                    className="object-contain"
+                  />
+                </div>
+              ) : selectedProfileTrader.avatarUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={selectedProfileTrader.avatarUrl}
+                  alt={selectedProfileTrader.name}
+                  className="w-14 h-14 rounded-2xl object-cover shrink-0 shadow-xs border border-[#E7E5E4]"
+                />
+              ) : (
+                <div
+                  className="w-14 h-14 rounded-2xl text-white font-bold text-lg flex items-center justify-center shrink-0 shadow-xs uppercase"
+                  style={{ backgroundColor: selectedProfileTrader.tierColor }}
+                >
+                  {selectedProfileTrader.name.slice(0, 2)}
+                </div>
+              )}
+
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <h3 className="text-base sm:text-lg font-bold text-[#1C1917] truncate">
+                    {selectedProfileTrader.name}
+                  </h3>
+                  <span
+                    className="px-2 py-0.5 rounded text-[10px] font-bold text-white shrink-0"
+                    style={{ backgroundColor: selectedProfileTrader.tierColor }}
+                  >
+                    Level {selectedProfileTrader.level}
+                  </span>
+                </div>
+                <div className="text-xs font-semibold" style={{ color: selectedProfileTrader.tierColor }}>
+                  {selectedProfileTrader.badge}
+                </div>
+                <div className="text-[11px] text-[#78716C] flex items-center gap-1 truncate">
+                  <span>@{selectedProfileTrader.username}</span>
+                  <span>•</span>
+                  <span className="truncate">{selectedProfileTrader.broker}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* PipBud Privacy Shield Notice */}
+            <div className="p-3 bg-[#F0FDFA] rounded-2xl border border-[#CCFBF1] flex items-start gap-2.5 text-xs text-[#0F766E]">
+              <ShieldCheck className="w-4 h-4 shrink-0 mt-0.5 text-[#0F766E]" />
+              <div className="space-y-0.5">
+                <div className="font-bold">PipBud Identity Shield Protected</div>
+                <p className="text-[11px] text-[#115E59] leading-relaxed">
+                  Direct Telegram contact handles are masked by the meritocracy engine. Peer communications are strictly moderated through audited desk rooms to prevent unsolicited solicitation.
+                </p>
+              </div>
+            </div>
+
+            {/* Meritocracy Statistics Grid */}
+            <div className="space-y-2">
+              <div className="text-xs font-bold text-[#1C1917] uppercase tracking-wider flex items-center justify-between">
+                <span>Verified Trading Track Record</span>
+                <span className="text-[10px] text-[#15803D] font-mono bg-[#DCFCE7] px-2 py-0.5 rounded-full">
+                  Audited on-chain
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
+                <div className="bg-[#FAFAF9] p-2.5 rounded-xl border border-[#E7E5E4]">
+                  <span className="text-[10px] text-[#78716C] block">Win Rate</span>
+                  <span className="text-sm font-bold text-[#1C1917]">{selectedProfileTrader.winRate}%</span>
+                </div>
+                <div className="bg-[#FAFAF9] p-2.5 rounded-xl border border-[#E7E5E4]">
+                  <span className="text-[10px] text-[#78716C] block">Profit Factor</span>
+                  <span className="text-sm font-bold text-[#0F766E]">{selectedProfileTrader.profitFactor}</span>
+                </div>
+                <div className="bg-[#FAFAF9] p-2.5 rounded-xl border border-[#E7E5E4]">
+                  <span className="text-[10px] text-[#78716C] block">Max Drawdown</span>
+                  <span className="text-sm font-bold text-[#C2410C]">{selectedProfileTrader.maxDrawdown}%</span>
+                </div>
+                <div className="bg-[#FAFAF9] p-2.5 rounded-xl border border-[#E7E5E4]">
+                  <span className="text-[10px] text-[#78716C] block">Verified Trades</span>
+                  <span className="text-sm font-bold text-[#1C1917]">{selectedProfileTrader.totalTrades}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Trading Style & Bio */}
+            <div className="space-y-2 text-xs">
+              <div className="p-3 rounded-xl bg-[#FAFAF9] border border-[#E7E5E4] space-y-1">
+                <div className="text-[10px] font-bold text-[#78716C] uppercase">Strategy Specialization</div>
+                <div className="font-semibold text-[#1C1917]">{selectedProfileTrader.tradingStyle}</div>
+              </div>
+
+              <div className="p-3 rounded-xl bg-white border border-[#E7E5E4] space-y-1">
+                <div className="text-[10px] font-bold text-[#78716C] uppercase">Bio & Track Record Summary</div>
+                <p className="text-[11px] text-[#44403C] leading-relaxed">{selectedProfileTrader.bio}</p>
+              </div>
+            </div>
+
+            {/* Recent Audited Trades List */}
+            {selectedProfileTrader.recentTrades && selectedProfileTrader.recentTrades.length > 0 && (
+              <div className="space-y-2">
+                <div className="text-xs font-bold text-[#1C1917] uppercase tracking-wider">
+                  Recent Audited Setups
+                </div>
+                <div className="space-y-1.5">
+                  {selectedProfileTrader.recentTrades.map((t, idx) => (
+                    <div
+                      key={idx}
+                      className="p-2.5 rounded-xl bg-[#FAFAF9] border border-[#E7E5E4] flex items-center justify-between text-xs"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={`px-1.5 py-0.5 rounded text-[9px] font-bold ${
+                            t.direction === 'LONG' ? 'bg-[#DCFCE7] text-[#15803D]' : 'bg-[#FEE2E2] text-[#B91C1C]'
+                          }`}
+                        >
+                          {t.direction}
+                        </span>
+                        <span className="font-bold text-[#1C1917]">{t.pair}</span>
+                        <span className="text-[10px] text-[#78716C]">{t.date}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] text-[#78716C] font-mono">R:R {t.rr}</span>
+                        <span className="font-bold text-[#15803D]">{t.profit}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Modal Actions */}
+            <div className="pt-2 flex flex-col sm:flex-row items-center justify-end gap-2 border-t border-[#E7E5E4]">
+              {selectedProfileTrader.isCurrentUser ? (
+                <Link
+                  href="/settings"
+                  className="w-full sm:w-auto px-4 py-2 text-center rounded-xl text-xs font-semibold bg-[#FFF7ED] text-[#C2410C] border border-[#FED7AA] hover:bg-[#FFEDD5] transition-all"
+                >
+                  Edit Profile in Settings
+                </Link>
+              ) : (
+                <Link
+                  href="/journal"
+                  className="w-full sm:w-auto px-4 py-2 text-center rounded-xl text-xs font-semibold bg-[#FAFAF9] text-[#1C1917] border border-[#E7E5E4] hover:bg-[#F5F5F4] transition-all"
+                >
+                  View Performance in Journal
+                </Link>
+              )}
+              <button
+                onClick={() => setSelectedProfileTrader(null)}
+                className="w-full sm:w-auto px-5 py-2 rounded-xl text-xs font-semibold bg-[#1C1917] hover:bg-[#292524] text-white shadow-xs transition-all"
+              >
+                Close Profile
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ============================================================ */}
+      {/* MODAL 2: Audited Trade Verification Breakdown                */}
+      {/* ============================================================ */}
+      {selectedTradeDetail && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="bg-white rounded-3xl border border-[#E7E5E4] max-w-lg w-full max-h-[90vh] overflow-y-auto p-5 sm:p-6 shadow-2xl space-y-5 animate-in zoom-in-95 duration-200">
+            {/* Header */}
+            <div className="flex items-center justify-between pb-3 border-b border-[#E7E5E4]">
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="w-5 h-5 text-[#0F766E]" />
+                <div>
+                  <h3 className="text-sm sm:text-base font-bold text-[#1C1917]">
+                    Audited Trade Verification
+                  </h3>
+                  <span className="text-[10px] text-[#78716C] font-mono">
+                    Hash: {selectedTradeDetail.hash || 'pb-sha256-verified-4829'}
+                  </span>
+                </div>
+              </div>
+              <button
+                onClick={() => setSelectedTradeDetail(null)}
+                className="p-1 rounded-lg text-[#78716C] hover:text-[#1C1917] hover:bg-[#F5F5F4] transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Trade Hero Banner */}
+            <div className="p-4 rounded-2xl bg-[#FFF7ED] border border-[#FED7AA] flex items-center justify-between">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span
+                    className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                      selectedTradeDetail.direction === 'LONG'
+                        ? 'bg-[#DCFCE7] text-[#15803D]'
+                        : 'bg-[#FEE2E2] text-[#B91C1C]'
+                    }`}
+                  >
+                    {selectedTradeDetail.direction}
+                  </span>
+                  <span className="text-base font-bold text-[#1C1917]">{selectedTradeDetail.pair}</span>
+                </div>
+                <div className="text-xs text-[#78716C]">{selectedTradeDetail.setup}</div>
+              </div>
+              <div className="text-right">
+                <span className="text-lg font-bold text-[#15803D] block">{selectedTradeDetail.profit}</span>
+                <span className="text-[10px] font-semibold text-[#0F766E] bg-[#DCFCE7] px-2 py-0.5 rounded-full">
+                  WIN • R:R {selectedTradeDetail.rr}
+                </span>
+              </div>
+            </div>
+
+            {/* Execution Price Metrics */}
+            <div className="space-y-2">
+              <div className="text-xs font-bold text-[#1C1917] uppercase tracking-wider">
+                Execution Parameters
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center font-mono">
+                <div className="bg-[#FAFAF9] p-3 rounded-xl border border-[#E7E5E4]">
+                  <span className="text-[10px] text-[#78716C] block">Entry Price</span>
+                  <span className="text-xs font-bold text-[#1C1917]">{selectedTradeDetail.entry}</span>
+                </div>
+                <div className="bg-[#FAFAF9] p-3 rounded-xl border border-[#E7E5E4]">
+                  <span className="text-[10px] text-[#78716C] block">Stop Loss</span>
+                  <span className="text-xs font-bold text-[#B91C1C]">{selectedTradeDetail.sl}</span>
+                  <span className="text-[9px] text-[#78716C] block">{selectedTradeDetail.pipsRisk || '20 pips'}</span>
+                </div>
+                <div className="bg-[#FAFAF9] p-3 rounded-xl border border-[#E7E5E4]">
+                  <span className="text-[10px] text-[#78716C] block">Take Profit</span>
+                  <span className="text-xs font-bold text-[#15803D]">{selectedTradeDetail.tp}</span>
+                  <span className="text-[9px] text-[#78716C] block">{selectedTradeDetail.pipsTarget || '60 pips'}</span>
+                </div>
+                <div className="bg-[#FAFAF9] p-3 rounded-xl border border-[#E7E5E4]">
+                  <span className="text-[10px] text-[#78716C] block">R:R Ratio</span>
+                  <span className="text-xs font-bold text-[#C2410C]">{selectedTradeDetail.rr}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Confluence Checklist */}
+            <div className="space-y-2">
+              <div className="text-xs font-bold text-[#1C1917] uppercase tracking-wider">
+                Audited Confluence Checklist
+              </div>
+              <div className="p-3 bg-[#FAFAF9] rounded-2xl border border-[#E7E5E4] space-y-2 text-xs">
+                {(selectedTradeDetail.confluences || [
+                  'Higher timeframe bias confirmed on 4H chart',
+                  'London/NY session liquidity pool swept prior to entry',
+                  'Strict 1.0% risk parameter validated before fill',
+                  'Stop-loss confirmed by broker ticket fill timestamp',
+                ]).map((conf, i) => (
+                  <div key={i} className="flex items-center gap-2 text-[#44403C]">
+                    <CheckCircle className="w-3.5 h-3.5 text-[#15803D] shrink-0" />
+                    <span className="text-[11px]">{conf}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Cryptographic Proof Card */}
+            <div className="p-3 bg-[#1C1917] text-[#FAFAF9] rounded-2xl border border-[#292524] space-y-1.5 text-xs">
+              <div className="flex items-center justify-between text-[11px] text-[#A8A29E]">
+                <span className="font-mono flex items-center gap-1">
+                  <ShieldCheck className="w-3.5 h-3.5 text-[#0F766E]" />
+                  <span>PipBud Bot Engine Cryptographic Proof</span>
+                </span>
+                <span className="text-[10px] bg-[#0F766E] text-white px-2 py-0.5 rounded-full font-mono">
+                  VERIFIED
+                </span>
+              </div>
+              <div className="text-[10px] font-mono text-[#D6D3D1] space-y-0.5 pt-1">
+                <div>Ticket: {selectedTradeDetail.ticketId || '#8492041'}</div>
+                <div>Hash: {selectedTradeDetail.hash || 'pb-sha256-49281a98e01bf2'}</div>
+                <div>Session: {selectedTradeDetail.session || 'London Killzone'}</div>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="pt-2 flex justify-end gap-2 border-t border-[#E7E5E4]">
+              <Link
+                href="/journal"
+                className="px-4 py-2 rounded-xl text-xs font-semibold bg-[#FAFAF9] hover:bg-[#F5F5F4] text-[#1C1917] border border-[#E7E5E4] transition-all"
+              >
+                Inspect in Web Journal
+              </Link>
+              <button
+                onClick={() => setSelectedTradeDetail(null)}
+                className="px-5 py-2 rounded-xl text-xs font-semibold bg-[#C2410C] hover:bg-[#EA580C] text-white shadow-xs transition-all"
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ============================================================ */}
+      {/* MODAL 3: Attach Audited Trade from Journal                   */}
+      {/* ============================================================ */}
       {showAttachModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-150">
-          <div className="bg-white rounded-3xl border border-[#E7E5E4] max-w-md w-full p-5 sm:p-6 shadow-xl space-y-4">
+          <div className="bg-white rounded-3xl border border-[#E7E5E4] max-w-lg w-full max-h-[90vh] overflow-y-auto p-5 sm:p-6 shadow-2xl space-y-4 animate-in zoom-in-95 duration-200">
             <div className="flex items-center justify-between pb-3 border-b border-[#E7E5E4]">
               <h3 className="text-sm sm:text-base font-bold text-[#1C1917] flex items-center gap-1.5">
                 <Paperclip className="w-4 h-4 text-[#C2410C]" />
-                <span>Attach Audited Trade</span>
+                <span>Attach Audited Trade from Journal</span>
               </h3>
               <button
                 onClick={() => setShowAttachModal(false)}
@@ -1301,30 +2416,60 @@ alertcondition(ta.crossover(high, asia_high), "Asia High Swept", "PipBud Alert: 
             </div>
 
             <p className="text-xs text-[#44403C]">
-              Only trades logged with verifiable broker price levels and timestamps can be shared in verified desks.
+              Select a verified trade log from your PipBud account to share directly into <strong>#{activeChannel}</strong>. Only trades verified with broker hashes can be attached.
             </p>
 
-            {/* Selectable demo trade */}
-            <div
-              onClick={handleAttachTrade}
-              className="p-3.5 rounded-2xl border border-[#FED7AA] bg-[#FFF7ED] hover:bg-[#FFEDD5] cursor-pointer transition-all space-y-1.5 shadow-xs"
-            >
-              <div className="flex items-center justify-between">
-                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#DCFCE7] text-[#15803D]">
-                  SHORT • GBP/USD
-                </span>
-                <span className="font-bold text-xs text-[#15803D]">+3.00% (+$3,000.00)</span>
-              </div>
-              <div className="text-[11px] text-[#44403C]">
-                Setup: 15m Fair Value Gap (FVG) • R:R: 1:3.00 • Exit: 1.29250
-              </div>
-              <div className="text-[10px] text-[#78716C] pt-1 border-t border-[#FED7AA]/60 flex items-center justify-between">
-                <span>Broker: {user.broker_name || 'FTMO Master'}</span>
-                <span className="text-[#0F766E] font-medium">Verified by @PipBudBot</span>
-              </div>
+            {/* Selectable trades list */}
+            <div className="space-y-2 max-h-64 overflow-y-auto">
+              {AVAILABLE_JOURNAL_TRADES.map((trade, idx) => {
+                const isSelected = selectedTradeToAttach.hash === trade.hash;
+                return (
+                  <div
+                    key={idx}
+                    onClick={() => setSelectedTradeToAttach(trade)}
+                    className={`p-3 rounded-2xl border cursor-pointer transition-all space-y-1.5 ${
+                      isSelected
+                        ? 'border-[#C2410C] bg-[#FFF7ED] shadow-xs'
+                        : 'border-[#E7E5E4] hover:bg-[#FAFAF9]'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1.5">
+                        <span
+                          className={`px-1.5 py-0.5 rounded text-[9px] font-bold ${
+                            trade.direction === 'LONG' ? 'bg-[#DCFCE7] text-[#15803D]' : 'bg-[#FEE2E2] text-[#B91C1C]'
+                          }`}
+                        >
+                          {trade.direction}
+                        </span>
+                        <span className="font-bold text-xs text-[#1C1917]">{trade.pair}</span>
+                        <span className="text-[10px] text-[#78716C] hidden sm:inline">• {trade.setup}</span>
+                      </div>
+                      <span className="font-bold text-xs text-[#15803D]">{trade.profit}</span>
+                    </div>
+
+                    <div className="flex items-center justify-between text-[10px] text-[#78716C] font-mono pt-1 border-t border-[#E7E5E4]/60">
+                      <span>R:R {trade.rr} • Exit: {trade.tp}</span>
+                      <span className="text-[#0F766E] font-medium">Verified by @PipBudBot</span>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
 
-            <div className="pt-2 flex justify-end gap-2">
+            {/* Custom comment input */}
+            <div className="space-y-1 pt-1">
+              <label className="text-xs font-semibold text-[#1C1917]">Optional Note to Floor:</label>
+              <input
+                type="text"
+                value={customAttachNote}
+                onChange={(e) => setCustomAttachNote(e.target.value)}
+                placeholder="e.g. Clean 15m mitigation during London open..."
+                className="w-full h-10 px-3 bg-[#FAFAF9] border border-[#E7E5E4] rounded-xl text-xs focus:border-[#C2410C] focus:bg-white outline-hidden"
+              />
+            </div>
+
+            <div className="pt-2 flex justify-end gap-2 border-t border-[#E7E5E4]">
               <button
                 onClick={() => setShowAttachModal(false)}
                 className="px-4 py-2 rounded-xl text-xs font-medium text-[#78716C] hover:bg-[#F5F5F4]"
@@ -1332,8 +2477,8 @@ alertcondition(ta.crossover(high, asia_high), "Asia High Swept", "PipBud Alert: 
                 Cancel
               </button>
               <button
-                onClick={handleAttachTrade}
-                className="px-4 py-2 rounded-xl text-xs font-medium bg-[#C2410C] hover:bg-[#EA580C] text-white shadow-xs"
+                onClick={handleAttachTradeConfirm}
+                className="px-5 py-2 rounded-xl text-xs font-medium bg-[#C2410C] hover:bg-[#EA580C] text-white shadow-xs transition-all active:scale-95"
               >
                 Attach & Post
               </button>
@@ -1342,7 +2487,9 @@ alertcondition(ta.crossover(high, asia_high), "Asia High Swept", "PipBud Alert: 
         </div>
       )}
 
-      {/* Modal: Simulate Demotion Breach */}
+      {/* ============================================================ */}
+      {/* MODAL 4: Simulate Demotion Breach                           */}
+      {/* ============================================================ */}
       {showSimulateDemotionModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-150">
           <div className="bg-white rounded-3xl border border-[#FEE2E2] max-w-md w-full p-5 sm:p-6 shadow-xl space-y-4">
