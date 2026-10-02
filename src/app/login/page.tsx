@@ -14,8 +14,6 @@ import {
   MessageSquare,
   Sliders,
   ExternalLink,
-  Copy,
-  Check,
   KeyRound,
   Lock,
   Globe
@@ -27,13 +25,10 @@ function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTarget = searchParams?.get('redirect') || '/journal';
-  const { user, requestCode, verifyCode, loginWithTelegramWidget, logout } = useAuth();
+  const { user, verifyCode, loginWithTelegramWidget, logout } = useAuth();
 
   const [activeTab, setActiveTab] = useState<'bot' | 'widget' | 'code'>('bot');
-  const [usernameInput, setUsernameInput] = useState('');
   const [codeDigits, setCodeDigits] = useState(['', '', '', '', '', '']);
-  const [generatedCode, setGeneratedCode] = useState<string | null>(null);
-  const [copiedCode, setCopiedCode] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
@@ -131,30 +126,6 @@ function LoginForm() {
     }
   };
 
-  const handleRequestCode = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!usernameInput.trim()) {
-      setStatusMessage({ type: 'error', text: 'Please enter your Telegram username or ID.' });
-      return;
-    }
-
-    setIsLoading(true);
-    setStatusMessage(null);
-    try {
-      const res = await requestCode(usernameInput.trim());
-      if (res.code) {
-        setGeneratedCode(res.code);
-        setCodeDigits(res.code.split(''));
-      }
-      setStatusMessage({ type: 'success', text: res.message });
-      setTimeout(() => inputRefs.current[0]?.focus(), 150);
-    } catch (err: any) {
-      setStatusMessage({ type: 'error', text: err.message || 'Failed to request login code.' });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const handleVerifyCode = async (e: React.FormEvent) => {
     e.preventDefault();
     const fullCode = codeDigits.join('');
@@ -180,14 +151,6 @@ function LoginForm() {
     }
   };
 
-  const copyGeneratedCode = () => {
-    if (generatedCode) {
-      navigator.clipboard.writeText(generatedCode);
-      setCopiedCode(true);
-      setTimeout(() => setCopiedCode(false), 2000);
-    }
-  };
-
   return (
     <div className="min-h-screen bg-[#FAFAF9] flex flex-col justify-between pt-16 pb-24 md:pb-12 px-4 sm:px-6">
       {/* Top Bar */}
@@ -208,7 +171,7 @@ function LoginForm() {
           <div className="text-center space-y-2 mb-6">
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-[#F5F5F4] border border-[#E7E5E4] text-[#44403C] mx-auto">
               <ShieldCheck className="w-3.5 h-3.5 text-[#0F766E]" />
-              <span>Authentication</span>
+              <span>Verified Telegram Authentication</span>
             </div>
             <h1 className="text-xl sm:text-2xl font-bold text-[#1C1917] tracking-tight">
               {user ? 'Trader Session' : 'Sign In to PipBud'}
@@ -216,7 +179,7 @@ function LoginForm() {
             <p className="text-xs text-[#78716C] max-w-sm mx-auto">
               {user
                 ? `Active account: @${user.username}. Access granted based on verified broker track record.`
-                : 'Access your verified journal, analytics terminal, and community channels.'}
+                : 'Access your verified journal, analytics terminal, and community channels via Telegram.'}
             </p>
           </div>
 
@@ -371,7 +334,7 @@ function LoginForm() {
                       <span>Direct Telegram Authorization</span>
                     </div>
                     <p className="text-xs text-[#78716C] leading-relaxed">
-                      Launch @{botUsername} in Telegram to receive a direct session authorization link.
+                      Launch @{botUsername} in Telegram to verify your Telegram identity and receive a secure web sign-in link.
                     </p>
                   </div>
 
@@ -388,7 +351,7 @@ function LoginForm() {
 
                   <div className="pt-1 text-center">
                     <span className="text-[11px] text-[#A8A29E]">
-                      Links your verified trading track record without passwords.
+                      Enforces verified Telegram account ownership. No passwords required.
                     </span>
                   </div>
                 </div>
@@ -420,38 +383,15 @@ function LoginForm() {
               {/* TAB 3: 6-Digit One-Time Code Input */}
               {activeTab === 'code' && (
                 <div className="space-y-4">
-                  {/* Generated Code Display */}
-                  {generatedCode && (
-                    <div className="p-4 bg-[#FAFAF9] border border-[#E7E5E4] rounded-2xl space-y-2">
-                      <div className="flex items-center justify-between text-xs font-semibold text-[#1C1917]">
-                        <span>Verification Code</span>
-                        <button
-                          type="button"
-                          onClick={copyGeneratedCode}
-                          className="text-[11px] text-[#0F766E] hover:underline flex items-center gap-1 font-medium"
-                        >
-                          {copiedCode ? <Check className="w-3.5 h-3.5 text-[#0F766E]" /> : <Copy className="w-3.5 h-3.5" />}
-                          <span>{copiedCode ? 'Copied' : 'Copy'}</span>
-                        </button>
-                      </div>
-                      <div className="text-center py-1">
-                        <span className="text-2xl font-mono font-bold tracking-widest text-[#1C1917]">
-                          {generatedCode}
-                        </span>
-                      </div>
-                      <div className="text-center">
-                        <a
-                          href={`https://t.me/${botUsername}?start=login_${generatedCode}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-[11px] text-[#0F766E] hover:underline inline-flex items-center gap-1 font-medium"
-                        >
-                          <span>Confirm link in @{botUsername}</span>
-                          <ExternalLink className="w-3 h-3 opacity-70" />
-                        </a>
-                      </div>
+                  <div className="p-4 bg-[#FAFAF9] border border-[#E7E5E4] rounded-2xl space-y-1.5">
+                    <div className="flex items-center gap-2 text-[#1C1917] font-semibold text-xs">
+                      <KeyRound className="w-3.5 h-3.5 text-[#0F766E]" />
+                      <span>Code Verification</span>
                     </div>
-                  )}
+                    <p className="text-xs text-[#78716C] leading-relaxed">
+                      Enter the 6-digit access code generated by sending <strong>/login</strong> to @{botUsername} on Telegram.
+                    </p>
+                  </div>
 
                   {/* Verify Code Form */}
                   <form onSubmit={handleVerifyCode} className="space-y-4">
@@ -490,31 +430,16 @@ function LoginForm() {
                     </button>
                   </form>
 
-                  {/* Request Code Section */}
-                  <div className="pt-3 border-t border-[#E7E5E4]">
-                    <form onSubmit={handleRequestCode} className="space-y-3">
-                      <div>
-                        <label className="block text-[11px] font-medium text-[#78716C] mb-1">
-                          Request new code by username:
-                        </label>
-                        <div className="flex gap-2">
-                          <input
-                            type="text"
-                            value={usernameInput}
-                            onChange={(e) => setUsernameInput(e.target.value)}
-                            placeholder="@username"
-                            className="flex-1 h-9 px-3 rounded-lg border border-[#E7E5E4] text-xs text-[#1C1917] bg-[#FAFAF9] outline-hidden focus:border-[#1C1917]"
-                          />
-                          <button
-                            type="submit"
-                            disabled={isLoading}
-                            className="px-3 h-9 bg-[#FAFAF9] hover:bg-[#F5F5F4] border border-[#E7E5E4] rounded-lg text-xs font-medium text-[#1C1917] transition-all disabled:opacity-50 shrink-0"
-                          >
-                            Request
-                          </button>
-                        </div>
-                      </div>
-                    </form>
+                  <div className="pt-2 text-center">
+                    <a
+                      href={`https://t.me/${botUsername}?start=login`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-[#0F766E] hover:underline inline-flex items-center gap-1 font-medium"
+                    >
+                      <span>Need a code? Open @{botUsername} in Telegram</span>
+                      <ExternalLink className="w-3 h-3 opacity-70" />
+                    </a>
                   </div>
                 </div>
               )}
