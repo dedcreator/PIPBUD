@@ -11,7 +11,6 @@ interface Feature {
   lightColor: string;
   iconBg: string;
   iconColor: string;
-  image: string;
   badge: string;
 }
 
@@ -28,7 +27,6 @@ const features: Feature[] = [
     lightColor: 'from-purple-50 to-purple-100/30',
     iconBg: 'bg-purple-100',
     iconColor: 'text-purple-600',
-    image: '/api/placeholder/400/300',
     badge: 'AI-Powered',
   },
   {
@@ -39,7 +37,6 @@ const features: Feature[] = [
     lightColor: 'from-blue-50 to-blue-100/30',
     iconBg: 'bg-blue-100',
     iconColor: 'text-blue-600',
-    image: '/api/placeholder/400/300',
     badge: 'Real-time',
   },
   {
@@ -50,7 +47,6 @@ const features: Feature[] = [
     lightColor: 'from-rose-50 to-rose-100/30',
     iconBg: 'bg-rose-100',
     iconColor: 'text-rose-600',
-    image: '/api/placeholder/400/300',
     badge: 'Behavioral',
   },
   {
@@ -61,7 +57,6 @@ const features: Feature[] = [
     lightColor: 'from-emerald-50 to-emerald-100/30',
     iconBg: 'bg-emerald-100',
     iconColor: 'text-emerald-600',
-    image: '/api/placeholder/400/300',
     badge: 'Professional',
   },
   {
@@ -72,7 +67,6 @@ const features: Feature[] = [
     lightColor: 'from-amber-50 to-amber-100/30',
     iconBg: 'bg-amber-100',
     iconColor: 'text-amber-600',
-    image: '/api/placeholder/400/300',
     badge: 'Protection',
   },
   {
@@ -83,7 +77,6 @@ const features: Feature[] = [
     lightColor: 'from-cyan-50 to-cyan-100/30',
     iconBg: 'bg-cyan-100',
     iconColor: 'text-cyan-600',
-    image: '/api/placeholder/400/300',
     badge: 'Integration',
   },
 ];

@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import PipbudLogo from '@/components/PipbudLogo';
-import { useAuth, BrokerConnectPayload } from '@/context/AuthContext';
+import { useAuth, BrokerConnectPayload, getApiBase } from '@/context/AuthContext';
 import {
   MessageSquare,
   ShieldCheck,
@@ -685,6 +685,52 @@ export default function ForumPage() {
     }
   }, [user]);
 
+  // Fetch live messages from Django backend
+  useEffect(() => {
+    const fetchChannelMessages = async () => {
+      try {
+        const apiBase = getApiBase();
+        const token = localStorage.getItem('pipbud_token') || user?.token;
+        const res = await fetch(`${apiBase}/api/forum/channels/${activeChannel}/messages/`, {
+          headers: {
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            ...(user?.id ? { 'X-Trader-Id': user.id } : {}),
+          },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.messages && Array.isArray(data.messages) && data.messages.length > 0) {
+            const mapped: ChatMessage[] = data.messages.map((m: any) => ({
+              id: m.id,
+              author: {
+                name: m.author?.name || m.author?.username || 'Trader',
+                username: m.author?.username || 'trader',
+                level: m.author?.skill_level || 1,
+                badge: m.author?.badge || '🌱 Novice',
+                broker: m.author?.broker || 'Live Trader',
+                avatarBg: m.author?.tier_color || '#1C1917',
+                avatarUrl: m.author?.avatar_url,
+              },
+              content: m.content || '',
+              chartUrl: m.chart_url,
+              codeSnippet: m.code_snippet,
+              codeLanguage: m.code_language,
+              reactions: m.reactions || {},
+              timestamp: m.timestamp || 'Recent',
+            }));
+            setMessagesByChannel((prev) => ({
+              ...prev,
+              [activeChannel]: mapped,
+            }));
+          }
+        }
+      } catch {
+        // Fall back gracefully to preset channel messages
+      }
+    };
+    fetchChannelMessages();
+  }, [activeChannel, user]);
+
   // Current channel metadata
   const currentChannel = CHANNELS.find((c) => c.id === activeChannel) || CHANNELS[0];
   const isChannelUnlocked = user ? user.skill_level >= currentChannel.minLevel : false;
@@ -936,6 +982,22 @@ export default function ForumPage() {
       }));
     }
 
+    if (user && msgId) {
+      try {
+        const apiBase = getApiBase();
+        const token = localStorage.getItem('pipbud_token') || user.token;
+        fetch(`${apiBase}/api/forum/messages/${msgId}/react/`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            'X-Trader-Id': user.id,
+          },
+          body: JSON.stringify({ emoji }),
+        }).catch(() => {});
+      } catch {}
+    }
+
     setActiveEmojiPickerMsgId(null);
   };
 
@@ -946,6 +1008,7 @@ export default function ForumPage() {
     e.preventDefault();
     if (!messageInput.trim() || !user || !isChannelUnlocked) return;
 
+    const contentToSend = messageInput.trim();
     const newMsgId = Date.now().toString();
     const newMsg: ChatMessage = {
       id: newMsgId,
@@ -959,7 +1022,7 @@ export default function ForumPage() {
         avatarType: user.avatar_type,
         avatarUrl: user.avatar_url,
       },
-      content: messageInput,
+      content: contentToSend,
       reactions: { '🔥': 1 },
       timestamp: 'Just now',
     };
@@ -977,6 +1040,23 @@ export default function ForumPage() {
 
     setMessageInput('');
     setShowComposerEmojiPicker(false);
+
+    // Save to backend API
+    try {
+      const apiBase = getApiBase();
+      const token = localStorage.getItem('pipbud_token') || user.token;
+      fetch(`${apiBase}/api/forum/channels/${activeChannel}/messages/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          'X-Trader-Id': user.id,
+        },
+        body: JSON.stringify({
+          content: contentToSend,
+        }),
+      }).catch(() => {});
+    } catch {}
   };
 
   // ==========================================
