@@ -304,13 +304,116 @@ export default function CommunityFeed({ onSwitchToPublic }: { onSwitchToPublic?:
   const [activeReplyPostId, setActiveReplyPostId] = useState<string | null>(null);
   const [replyInputText, setReplyInputText] = useState('');
 
-  // Simulate smooth skeleton loading on initial mount
+  // Top Verified Posters State (backed by live Django leaderboard)
+  const [topPosters, setTopPosters] = useState<
+    Array<{
+      name: string;
+      badge: string;
+      level: number;
+      tierColor: string;
+      winRate: string;
+      broker: string;
+    }>
+  >([
+    {
+      name: 'Sarah Sterling',
+      badge: 'Elite Alpha',
+      level: 5,
+      tierColor: '#8B5CF6',
+      winRate: '68.4%',
+      broker: 'FTMO ($200k)',
+    },
+    {
+      name: 'Elena Rostova',
+      badge: 'Master Mentor',
+      level: 6,
+      tierColor: '#DC2626',
+      winRate: '74.8%',
+      broker: 'Institutional Desk',
+    },
+    {
+      name: 'Solomon Kane',
+      badge: 'Titan Syndicate',
+      level: 7,
+      tierColor: '#C2410C',
+      winRate: '68.4%',
+      broker: 'Titan Prime ($1.5M)',
+    },
+    {
+      name: 'Tariq Al-Mansoor',
+      badge: 'Funded Pro',
+      level: 4,
+      tierColor: '#C2410C',
+      winRate: '63.0%',
+      broker: 'FundedNext ($100k)',
+    },
+  ]);
+
+  // Fetch posts from Django backend on mount and filter changes
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 450);
-    return () => clearTimeout(timer);
-  }, []);
+    let isMounted = true;
+
+    async function loadCommunityPosts() {
+      try {
+        const apiBase = getApiBase();
+        const params = new URLSearchParams();
+        if (selectedCategory !== 'all' && selectedCategory !== 'my') {
+          params.append('category', selectedCategory);
+        } else if (selectedCategory === 'my') {
+          params.append('category', 'mine');
+        }
+        if (searchQuery.trim()) {
+          params.append('search', searchQuery.trim());
+        }
+
+        const res = await fetch(`${apiBase}/api/community/posts/?${params.toString()}`, {
+          headers: {
+            'Content-Type': 'application/json',
+            ...(user?.id ? { 'X-Trader-Id': user.id } : {}),
+            ...(user?.token ? { Authorization: `Bearer ${user.token}` } : {}),
+          },
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          if (isMounted && data.posts && Array.isArray(data.posts) && data.posts.length > 0) {
+            setPosts(data.posts);
+          }
+        }
+
+        // Also fetch top performers from backend
+        try {
+          const topRes = await fetch(`${apiBase}/api/traders/top-performers/`);
+          if (topRes.ok) {
+            const topData = await topRes.json();
+            if (isMounted && topData.traders && Array.isArray(topData.traders) && topData.traders.length > 0) {
+              setTopPosters(
+                topData.traders.map((t: any) => ({
+                  name: t.name,
+                  badge: t.badge,
+                  level: t.level,
+                  tierColor: t.tierColor,
+                  winRate: `${t.winRate}%`,
+                  broker: t.broker,
+                }))
+              );
+            }
+          }
+        } catch {
+          // Keep defaults
+        }
+      } catch (err) {
+        console.warn('Community feed backend offline or unreachable, using local store:', err);
+      } finally {
+        if (isMounted) setIsLoading(false);
+      }
+    }
+
+    loadCommunityPosts();
+    return () => {
+      isMounted = false;
+    };
+  }, [selectedCategory, searchQuery, user?.id, user?.token]);
 
   // Filtered Posts
   const filteredPosts = posts.filter((post) => {
@@ -332,12 +435,15 @@ export default function CommunityFeed({ onSwitchToPublic }: { onSwitchToPublic?:
     return matchesCategory && matchesSearch;
   });
 
-  // Handle Upvote
-  const handleToggleUpvote = (postId: string) => {
+  // Handle Upvote with optimistic update & backend sync
+  const handleToggleUpvote = async (postId: string) => {
+    const targetPost = posts.find((p) => p.id === postId);
+    const willUpvote = targetPost ? !targetPost.hasUpvoted : true;
+
+    // Optimistic UI update
     setPosts((prev) =>
       prev.map((p) => {
         if (p.id !== postId) return p;
-        const willUpvote = !p.hasUpvoted;
         return {
           ...p,
           hasUpvoted: willUpvote,
@@ -345,10 +451,34 @@ export default function CommunityFeed({ onSwitchToPublic }: { onSwitchToPublic?:
         };
       })
     );
+
+    try {
+      const apiBase = getApiBase();
+      const res = await fetch(`${apiBase}/api/community/posts/${postId}/upvote/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(user?.id ? { 'X-Trader-Id': user.id } : {}),
+          ...(user?.token ? { Authorization: `Bearer ${user.token}` } : {}),
+        },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setPosts((prev) =>
+          prev.map((p) =>
+            p.id === postId
+              ? { ...p, upvotes: data.upvotes, hasUpvoted: data.hasUpvoted }
+              : p
+          )
+        );
+      }
+    } catch {
+      // Keep optimistic state if network fails
+    }
   };
 
-  // Handle Publish Post
-  const handleCreatePost = (e: React.FormEvent) => {
+  // Handle Publish Post with backend sync
+  const handleCreatePost = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newPostTitle.trim() || !newPostContent.trim()) return;
 
@@ -357,6 +487,62 @@ export default function CommunityFeed({ onSwitchToPublic }: { onSwitchToPublic?:
       .map((t) => t.trim().replace(/^#/, ''))
       .filter(Boolean);
 
+    const setupPayload =
+      newPostCategory === 'setup' && newPostEntry
+        ? {
+            pair: newPostPair,
+            direction: newPostDirection,
+            entry: newPostEntry,
+            sl: newPostSL,
+            tp: newPostTP,
+            rr:
+              newPostEntry && newPostSL && newPostTP
+                ? (
+                    Math.abs(Number(newPostTP) - Number(newPostEntry)) /
+                    Math.abs(Number(newPostEntry) - Number(newPostSL))
+                  ).toFixed(1)
+                : '2.5',
+          }
+        : undefined;
+
+    // Attempt backend creation
+    try {
+      const apiBase = getApiBase();
+      const res = await fetch(`${apiBase}/api/community/posts/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(user?.id ? { 'X-Trader-Id': user.id } : {}),
+          ...(user?.token ? { Authorization: `Bearer ${user.token}` } : {}),
+        },
+        body: JSON.stringify({
+          category: newPostCategory,
+          title: newPostTitle.trim(),
+          content: newPostContent.trim(),
+          tags: parsedTags.length > 0 ? parsedTags : [newPostCategory === 'question' ? 'Q&A' : 'General'],
+          setupData: setupPayload,
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.post) {
+          setPosts((prev) => [data.post, ...prev]);
+          setNewPostTitle('');
+          setNewPostContent('');
+          setNewPostTags('');
+          setNewPostEntry('');
+          setNewPostSL('');
+          setNewPostTP('');
+          setIsComposerOpen(false);
+          return;
+        }
+      }
+    } catch {
+      // Fallback to local creation if backend offline
+    }
+
+    // Local fallback
     const createdPost: CommunityPost = {
       id: `post-${Date.now()}`,
       category: newPostCategory,
@@ -372,17 +558,7 @@ export default function CommunityFeed({ onSwitchToPublic }: { onSwitchToPublic?:
         winRate: user?.win_rate || 0,
       },
       tags: parsedTags.length > 0 ? parsedTags : [newPostCategory === 'question' ? 'Q&A' : 'General'],
-      setupData:
-        newPostCategory === 'setup' && newPostEntry
-          ? {
-              pair: newPostPair,
-              direction: newPostDirection,
-              entry: newPostEntry,
-              sl: newPostSL,
-              tp: newPostTP,
-              rr: '2.5',
-            }
-          : undefined,
+      setupData: setupPayload,
       upvotes: 1,
       hasUpvoted: true,
       replies: [],
@@ -399,10 +575,46 @@ export default function CommunityFeed({ onSwitchToPublic }: { onSwitchToPublic?:
     setIsComposerOpen(false);
   };
 
-  // Handle Submit Reply / Answer
-  const handleAddReply = (postId: string) => {
+  // Handle Submit Reply with backend sync
+  const handleAddReply = async (postId: string) => {
     if (!replyInputText.trim() || !user) return;
 
+    const replyContent = replyInputText.trim();
+    setReplyInputText('');
+
+    // Attempt backend creation
+    try {
+      const apiBase = getApiBase();
+      const res = await fetch(`${apiBase}/api/community/posts/${postId}/replies/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(user?.id ? { 'X-Trader-Id': user.id } : {}),
+          ...(user?.token ? { Authorization: `Bearer ${user.token}` } : {}),
+        },
+        body: JSON.stringify({ content: replyContent }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.reply) {
+          setPosts((prev) =>
+            prev.map((p) => {
+              if (p.id !== postId) return p;
+              return {
+                ...p,
+                replies: [...p.replies, data.reply],
+              };
+            })
+          );
+          return;
+        }
+      }
+    } catch {
+      // Fallback to local reply
+    }
+
+    // Local fallback
     const newReply: PostReply = {
       id: `reply-${Date.now()}`,
       author: {
@@ -413,7 +625,7 @@ export default function CommunityFeed({ onSwitchToPublic }: { onSwitchToPublic?:
         tierColor: user.tier_color || '#1C1917',
         broker: user.broker_name || 'Verified Trader',
       },
-      content: replyInputText.trim(),
+      content: replyContent,
       timestamp: 'Just now',
       upvotes: 1,
       isVerifiedAnswer: user.skill_level >= 4,
@@ -428,8 +640,6 @@ export default function CommunityFeed({ onSwitchToPublic }: { onSwitchToPublic?:
         };
       })
     );
-
-    setReplyInputText('');
   };
 
   // Trader Profile Modal State & Handler
@@ -437,6 +647,51 @@ export default function CommunityFeed({ onSwitchToPublic }: { onSwitchToPublic?:
 
   const openTraderProfile = (nameOrUsername: string) => {
     const clean = (nameOrUsername || '').toLowerCase().trim();
+
+    // Asynchronously fetch freshest audited profile from Django backend to update stats
+    (async () => {
+      try {
+        const apiBase = getApiBase();
+        const res = await fetch(`${apiBase}/api/traders/${encodeURIComponent(clean)}/profile/`, {
+          headers: {
+            'Content-Type': 'application/json',
+            ...(user?.id ? { 'X-Trader-Id': user.id } : {}),
+            ...(user?.token ? { Authorization: `Bearer ${user.token}` } : {}),
+          },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.profile) {
+            setSelectedProfileTrader((prev) => {
+              if (!prev) return prev;
+              return {
+                ...prev,
+                name: data.profile.name,
+                username: data.profile.username,
+                level: data.profile.level,
+                badge: data.profile.badge,
+                tierColor: data.profile.tierColor,
+                broker: data.profile.broker,
+                winRate: data.profile.winRate,
+                profitFactor: data.profile.profitFactor,
+                maxDrawdown: data.profile.maxDrawdown,
+                totalTrades: data.profile.totalTrades,
+                tierHealth: data.profile.tierHealth,
+                tradingStyle: data.profile.tradingStyle,
+                bio: data.profile.bio,
+                avatarBg: data.profile.tierColor,
+                avatarType: data.profile.avatarType,
+                avatarUrl: data.profile.avatarUrl,
+                isCurrentUser: data.profile.isCurrentUser,
+                recentTrades: data.profile.recentTrades || prev.recentTrades,
+              };
+            });
+          }
+        }
+      } catch {
+        // Fallback silently
+      }
+    })();
 
     // Check if it's the currently authenticated user
     if (
@@ -1426,40 +1681,7 @@ export default function CommunityFeed({ onSwitchToPublic }: { onSwitchToPublic?:
               </div>
 
               <div className="space-y-2">
-                {[
-                  {
-                    name: 'Sarah Sterling',
-                    badge: 'Elite Alpha',
-                    level: 5,
-                    tierColor: '#8B5CF6',
-                    winRate: '68.4%',
-                    broker: 'FTMO ($200k)',
-                  },
-                  {
-                    name: 'Elena Rostova',
-                    badge: 'Master Mentor',
-                    level: 6,
-                    tierColor: '#DC2626',
-                    winRate: '74.8%',
-                    broker: 'Institutional Desk',
-                  },
-                  {
-                    name: 'Solomon Kane',
-                    badge: 'Titan Syndicate',
-                    level: 7,
-                    tierColor: '#C2410C',
-                    winRate: '68.4%',
-                    broker: 'Titan Prime ($1.5M)',
-                  },
-                  {
-                    name: 'Tariq Al-Mansoor',
-                    badge: 'Funded Pro',
-                    level: 4,
-                    tierColor: '#C2410C',
-                    winRate: '63.0%',
-                    broker: 'FundedNext ($100k)',
-                  },
-                ].map((trader) => (
+                {topPosters.map((trader) => (
                   <button
                     key={trader.name}
                     type="button"
