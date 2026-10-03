@@ -6,10 +6,13 @@ export default function manifest(): MetadataRoute.Manifest {
     short_name: 'PipBud',
     description: 'Log trades instantly on Telegram. Verified 7-tier trader forum & web journal analytics.',
     start_url: '/',
+    id: '/',
+    scope: '/',
     display: 'standalone',
     background_color: '#FAFAF9',
     theme_color: '#C2410C',
     orientation: 'portrait-primary',
+    categories: ['finance', 'business', 'productivity'],
     icons: [
       {
         src: '/icon-192.png',
@@ -22,6 +25,12 @@ export default function manifest(): MetadataRoute.Manifest {
         sizes: '512x512',
         type: 'image/png',
         purpose: 'any',
+      },
+      {
+        src: '/icon-512.png',
+        sizes: '512x512',
+        type: 'image/png',
+        purpose: 'maskable',
       },
       {
         src: '/apple-touch-icon.png',

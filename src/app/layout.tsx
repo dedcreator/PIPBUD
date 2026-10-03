@@ -5,6 +5,7 @@ import { Analytics } from '@vercel/analytics/react';
 import { AuthProvider } from '@/context/AuthContext';
 import MobileNavDock from '@/components/MobileNavDock';
 import InstallAppBanner from '@/components/InstallAppBanner';
+import PWASplashScreen from '@/components/PWASplashScreen';
 
 const poppins = Poppins({
   subsets: ['latin'],
@@ -37,6 +38,19 @@ export const metadata: Metadata = {
     capable: true,
     statusBarStyle: 'default',
     title: 'PipBud',
+    startupImage: [
+      {
+        url: '/splash/apple-splash-universal.png',
+      },
+      {
+        url: '/splash/apple-splash-1179-2556.png',
+        media: '(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3)',
+      },
+      {
+        url: '/splash/apple-splash-1290-2796.png',
+        media: '(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3)',
+      },
+    ],
   },
   formatDetection: {
     telephone: false,
@@ -74,6 +88,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth">
       <body className={`${poppins.variable} ${inter.variable} bg-[#FAFAF9] text-[#1C1917] antialiased selection:bg-[#FED7AA] selection:text-[#9A3412]`}>
+        <PWASplashScreen />
         <AuthProvider>
           <div className="min-h-screen flex flex-col">
             {children}
