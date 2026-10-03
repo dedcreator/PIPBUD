@@ -48,22 +48,49 @@ export default function Home() {
     return <CommunityFeed onSwitchToPublic={() => setShowPublicSite(true)} />;
   }
 
-  // Public Landing Page (with return pill if authenticated trader is browsing public site)
+  // Public Landing Page (with convenient return to feed controls for authenticated traders)
   return (
     <main className="min-h-screen bg-[#FAFAF9] text-[#1C1917] selection:bg-[#FED7AA] selection:text-[#9A3412]">
+      <Navbar onReturnToFeed={() => setShowPublicSite(false)} />
+
+      {/* Prominent Top Banner right below Navbar */}
       {user && showPublicSite && (
-        <div className="fixed bottom-6 right-6 z-50 animate-in fade-in slide-in-from-bottom-4 duration-200">
-          <button
-            onClick={() => setShowPublicSite(false)}
-            className="px-4 py-2.5 rounded-full bg-[#1C1917] hover:bg-[#292524] text-white text-xs font-semibold shadow-lg inline-flex items-center gap-2 transition-all active:scale-95 border border-[#44403C]"
-          >
-            <MessageSquare className="w-4 h-4 text-[#C2410C]" />
-            <span>Return to Community Feed</span>
-          </button>
+        <div className="pt-16">
+          <div className="bg-[#1C1917] text-white px-4 sm:px-6 py-2.5 flex flex-wrap items-center justify-between gap-2 border-b border-[#292524] shadow-md relative z-30">
+            <div className="flex items-center gap-2.5 text-xs">
+              <span className="w-2 h-2 rounded-full bg-[#10B981] animate-pulse shrink-0" />
+              <span className="text-[#A8A29E] hidden sm:inline">You are viewing the Public Marketing Site as</span>
+              <span className="font-bold text-[#FAFAF9]">@{user.username}</span>
+              <span
+                className="px-1.5 py-0.2 rounded text-[10px] font-bold text-white shrink-0"
+                style={{ backgroundColor: user.tier_color || '#C2410C' }}
+              >
+                Level {user.skill_level}
+              </span>
+            </div>
+            <button
+              onClick={() => setShowPublicSite(false)}
+              className="h-8 px-4 bg-[#C2410C] hover:bg-[#EA580C] text-white rounded-xl text-xs font-bold inline-flex items-center gap-1.5 shadow-xs transition-all active:scale-95 cursor-pointer ml-auto"
+            >
+              <MessageSquare className="w-3.5 h-3.5" />
+              <span>Return to Community Feed &rarr;</span>
+            </button>
+          </div>
         </div>
       )}
 
-      <Navbar />
+      {/* Convenient Floating Button (safe above mobile nav dock) */}
+      {user && showPublicSite && (
+        <div className="fixed bottom-20 sm:bottom-6 right-4 sm:right-6 z-40 animate-in fade-in slide-in-from-bottom-4 duration-200">
+          <button
+            onClick={() => setShowPublicSite(false)}
+            className="px-4 py-2.5 rounded-full bg-[#1C1917] hover:bg-[#292524] text-white text-xs font-semibold shadow-xl inline-flex items-center gap-2 transition-all active:scale-95 border border-[#44403C] cursor-pointer"
+          >
+            <MessageSquare className="w-4 h-4 text-[#C2410C]" />
+            <span>Return to Feed</span>
+          </button>
+        </div>
+      )}
       <HeroSection />
       <TiersSection />
       <AntiShortfallSection />

@@ -2,11 +2,15 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Menu, X, Send, User, ShieldCheck } from 'lucide-react';
+import { Menu, X, Send, User, ShieldCheck, MessageSquare } from 'lucide-react';
 import PipbudLogo from './PipbudLogo';
 import { useAuth } from '@/context/AuthContext';
 
-export default function Navbar() {
+interface NavbarProps {
+  onReturnToFeed?: () => void;
+}
+
+export default function Navbar({ onReturnToFeed }: NavbarProps = {}) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const { user } = useAuth();
@@ -43,6 +47,20 @@ export default function Navbar() {
 
             {user ? (
               <>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (onReturnToFeed) {
+                      onReturnToFeed();
+                    } else {
+                      window.location.href = '/';
+                    }
+                  }}
+                  className="text-xs sm:text-sm font-bold text-[#C2410C] hover:text-[#EA580C] transition-all flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#FFF7ED] border border-[#FED7AA] shadow-2xs active:scale-95 cursor-pointer"
+                >
+                  <MessageSquare className="w-3.5 h-3.5" />
+                  <span>Community Feed</span>
+                </button>
                 <Link
                   href="/journal"
                   className="text-xs sm:text-sm font-semibold text-[#1C1917] hover:text-[#C2410C] transition-colors flex items-center gap-1.5"
@@ -137,17 +155,35 @@ export default function Navbar() {
       {mobileOpen && (
         <div className="md:hidden bg-white border-b border-[#E7E5E4] px-4 pt-3 pb-5 space-y-3 shadow-md animate-in slide-in-from-top-2 duration-150">
           {user && (
-            <div className="p-3 bg-[#FAFAF9] rounded-xl border border-[#E7E5E4] flex items-center justify-between">
-              <div>
-                <span className="text-[10px] text-[#78716C] block">Logged In Trader</span>
-                <span className="text-xs font-bold text-[#1C1917]">@{user.username}</span>
+            <div className="space-y-2">
+              <div className="p-3 bg-[#FAFAF9] rounded-xl border border-[#E7E5E4] flex items-center justify-between">
+                <div>
+                  <span className="text-[10px] text-[#78716C] block">Logged In Trader</span>
+                  <span className="text-xs font-bold text-[#1C1917]">@{user.username}</span>
+                </div>
+                <span
+                  className="px-2 py-0.5 rounded-full text-[10px] font-bold text-white shadow-xs"
+                  style={{ backgroundColor: user.tier_color || '#C2410C' }}
+                >
+                  {user.tier_badge}
+                </span>
               </div>
-              <span
-                className="px-2 py-0.5 rounded-full text-[10px] font-bold text-white shadow-xs"
-                style={{ backgroundColor: user.tier_color || '#C2410C' }}
+
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileOpen(false);
+                  if (onReturnToFeed) {
+                    onReturnToFeed();
+                  } else {
+                    window.location.href = '/';
+                  }
+                }}
+                className="w-full h-11 px-4 rounded-xl bg-[#C2410C] hover:bg-[#EA580C] text-white font-bold text-xs inline-flex items-center justify-center gap-2 shadow-xs transition-all active:scale-95 cursor-pointer"
               >
-                {user.tier_badge}
-              </span>
+                <MessageSquare className="w-4 h-4" />
+                <span>Return to Community Feed</span>
+              </button>
             </div>
           )}
 

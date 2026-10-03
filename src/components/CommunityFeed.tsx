@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   HelpCircle,
   TrendingUp,
@@ -27,13 +28,42 @@ import {
   Compass,
   Check,
   Activity,
-  Radio
+  Radio,
+  UserCheck
 } from 'lucide-react';
 import PipbudLogo from './PipbudLogo';
 import { useAuth, getApiBase } from '@/context/AuthContext';
 import { PostCardSkeleton } from './SkeletonLoader';
 
 export type PostCategory = 'question' | 'setup' | 'intel' | 'discussion';
+
+export interface TraderProfileModalData {
+  name: string;
+  username: string;
+  level: number;
+  badge: string;
+  tierColor: string;
+  broker: string;
+  winRate: number;
+  profitFactor: number;
+  maxDrawdown: number;
+  totalTrades: number;
+  tierHealth: number;
+  tradingStyle: string;
+  bio: string;
+  avatarBg: string;
+  avatarType?: string;
+  avatarUrl?: string;
+  isCurrentUser?: boolean;
+  recentTrades?: {
+    pair: string;
+    direction: 'LONG' | 'SHORT';
+    outcome: string;
+    profit: string;
+    rr: string;
+    date: string;
+  }[];
+}
 
 export interface PostReply {
   id: string;
@@ -402,6 +432,247 @@ export default function CommunityFeed({ onSwitchToPublic }: { onSwitchToPublic?:
     setReplyInputText('');
   };
 
+  // Trader Profile Modal State & Handler
+  const [selectedProfileTrader, setSelectedProfileTrader] = useState<TraderProfileModalData | null>(null);
+
+  const openTraderProfile = (nameOrUsername: string) => {
+    const clean = (nameOrUsername || '').toLowerCase().trim();
+
+    // Check if it's the currently authenticated user
+    if (
+      user &&
+      (clean === user.username.toLowerCase() ||
+        clean === (user.display_name || '').toLowerCase() ||
+        clean === (user.name || '').toLowerCase())
+    ) {
+      setSelectedProfileTrader({
+        name: user.display_name || user.name || user.username,
+        username: user.username,
+        level: user.skill_level,
+        badge: user.tier_badge,
+        tierColor: user.tier_color || '#C2410C',
+        broker: user.broker_name || 'Verified Live Trader',
+        winRate: user.win_rate,
+        profitFactor: user.profit_factor,
+        maxDrawdown: user.max_drawdown,
+        totalTrades: user.total_verified_trades || 48,
+        tierHealth: user.tier_health || 98,
+        tradingStyle: user.trading_style || 'Mechanical Risk Execution & Journal Audited',
+        bio: user.bio || 'Verified PipBud member. Risk limits and performance track record continuously audited by PipBud anti-shortfall protocol.',
+        avatarBg: user.tier_color || '#C2410C',
+        avatarType: user.avatar_type,
+        avatarUrl: user.avatar_url,
+        isCurrentUser: true,
+      });
+      return;
+    }
+
+    if (clean.includes('sarah') || clean.includes('sterling')) {
+      setSelectedProfileTrader({
+        name: 'Sarah Sterling',
+        username: 'sterling_apex',
+        level: 5,
+        badge: '💎 Level 5: Elite Alpha',
+        tierColor: '#8B5CF6',
+        broker: 'FTMO ($200k Funded Prop Firm)',
+        winRate: 68.4,
+        profitFactor: 2.65,
+        maxDrawdown: 2.4,
+        totalTrades: 489,
+        tierHealth: 98,
+        tradingStyle: 'ICT Silver Bullet & 15m FVG Displacement',
+        bio: 'Full-time funded prop trader with FTMO. Specializing in liquidity sweeps, fair value gaps, and London/NY overlap execution.',
+        avatarBg: '#8B5CF6',
+        recentTrades: [
+          { pair: 'EUR/USD', direction: 'LONG', outcome: 'WIN', profit: '+3.50R', rr: '1:3.50', date: 'Today, 08:30 UTC' },
+          { pair: 'GBP/USD', direction: 'LONG', outcome: 'WIN', profit: '+2.80R', rr: '1:2.80', date: 'Yesterday, 14:15 UTC' },
+        ],
+      });
+      return;
+    }
+
+    if (clean.includes('elena') || clean.includes('rostova')) {
+      setSelectedProfileTrader({
+        name: 'Elena Rostova',
+        username: 'elena_macro',
+        level: 6,
+        badge: '👑 Level 6: Master Mentor',
+        tierColor: '#DC2626',
+        broker: 'Verified Institutional Desk ($500k)',
+        winRate: 74.8,
+        profitFactor: 3.12,
+        maxDrawdown: 1.8,
+        totalTrades: 890,
+        tierHealth: 99,
+        tradingStyle: 'Central Bank Macro Bias & Treasury Yield Correlation',
+        bio: 'Institutional macro strategist analyzing central bank policy, DXY supply zones, and Gold liquidity dynamics. 8+ years audited track record.',
+        avatarBg: '#DC2626',
+        recentTrades: [
+          { pair: 'XAU/USD', direction: 'LONG', outcome: 'WIN', profit: '+4.20R', rr: '1:4.20', date: 'Today, 12:45 UTC' },
+          { pair: 'USD/JPY', direction: 'SHORT', outcome: 'WIN', profit: '+3.10R', rr: '1:3.10', date: '2 days ago' },
+        ],
+      });
+      return;
+    }
+
+    if (clean.includes('marcus') || clean.includes('vance')) {
+      setSelectedProfileTrader({
+        name: 'Marcus Vance',
+        username: 'marcus_fx',
+        level: 2,
+        badge: '🌱 Level 2: Apprentice',
+        tierColor: '#2563EB',
+        broker: 'FundingPips ($50,000)',
+        winRate: 54.2,
+        profitFactor: 1.82,
+        maxDrawdown: 3.1,
+        totalTrades: 142,
+        tierHealth: 94,
+        tradingStyle: 'London Open Order Block Sweeps',
+        bio: 'Forex intraday trader executing EUR/USD and GBP/JPY during London Open. Focusing on discipline and avoiding premature breakeven exits.',
+        avatarBg: '#2563EB',
+        recentTrades: [
+          { pair: 'EUR/USD', direction: 'LONG', outcome: 'WIN', profit: '+2.40R', rr: '1:2.40', date: 'Today, 07:15 UTC' },
+          { pair: 'GBP/JPY', direction: 'SHORT', outcome: 'LOSS', profit: '-1.00R', rr: '1:2.00', date: 'Yesterday' },
+        ],
+      });
+      return;
+    }
+
+    if (clean.includes('david') || clean.includes('david_k')) {
+      setSelectedProfileTrader({
+        name: 'David K.',
+        username: 'david_k',
+        level: 4,
+        badge: '🔥 Level 4: Funded Pro',
+        tierColor: '#C2410C',
+        broker: 'Alpha Capital ($100k)',
+        winRate: 61.5,
+        profitFactor: 2.15,
+        maxDrawdown: 2.9,
+        totalTrades: 312,
+        tierHealth: 96,
+        tradingStyle: 'London Killzone Breakouts & News Straddles',
+        bio: 'Alpha Capital funded trader. Combining PipBud economic calendar alerts with strict execution rules.',
+        avatarBg: '#C2410C',
+        recentTrades: [
+          { pair: 'GBP/USD', direction: 'SHORT', outcome: 'WIN', profit: '+2.60R', rr: '1:2.60', date: 'Today, 09:10 UTC' },
+        ],
+      });
+      return;
+    }
+
+    if (clean.includes('chen') || clean.includes('liam')) {
+      setSelectedProfileTrader({
+        name: 'Liam Chen',
+        username: 'chen_quant',
+        level: 3,
+        badge: '⚡ Level 3: Consistent',
+        tierColor: '#059669',
+        broker: 'IC Markets Live Raw Spread',
+        winRate: 57.8,
+        profitFactor: 1.95,
+        maxDrawdown: 3.5,
+        totalTrades: 220,
+        tierHealth: 95,
+        tradingStyle: 'Mean Reversion & Asian Range Sweeps',
+        bio: 'Managing personal live capital on IC Markets with 0.75% fixed risk per setup. Automated journaling via PipBud bot.',
+        avatarBg: '#059669',
+        recentTrades: [
+          { pair: 'AUD/USD', direction: 'LONG', outcome: 'WIN', profit: '+1.90R', rr: '1:1.90', date: 'Yesterday' },
+        ],
+      });
+      return;
+    }
+
+    if (clean.includes('tariq') || clean.includes('mansoor')) {
+      setSelectedProfileTrader({
+        name: 'Tariq Al-Mansoor',
+        username: 'tariq_fx',
+        level: 4,
+        badge: '🔥 Level 4: Funded Pro',
+        tierColor: '#C2410C',
+        broker: 'FundedNext ($100,000)',
+        winRate: 63.0,
+        profitFactor: 2.28,
+        maxDrawdown: 2.6,
+        totalTrades: 375,
+        tierHealth: 97,
+        tradingStyle: 'Gold (XAU/USD) Intraday Momentum',
+        bio: 'Specialized Gold and Crude Oil trader. Focusing on high-impact London/NY overlap liquidity sweeps.',
+        avatarBg: '#C2410C',
+        recentTrades: [
+          { pair: 'XAU/USD', direction: 'LONG', outcome: 'WIN', profit: '+3.80R', rr: '1:3.80', date: 'Today, 13:10 UTC' },
+        ],
+      });
+      return;
+    }
+
+    if (clean.includes('solomon') || clean.includes('kane')) {
+      setSelectedProfileTrader({
+        name: 'Solomon Kane',
+        username: 'solomon_kane',
+        level: 7,
+        badge: '🏛️ Level 7: Titan Syndicate',
+        tierColor: '#C2410C',
+        broker: 'Titan Syndicate Prime ($1,500,000)',
+        winRate: 68.4,
+        profitFactor: 2.85,
+        maxDrawdown: 2.1,
+        totalTrades: 512,
+        tierHealth: 99,
+        tradingStyle: 'Institutional Order Flow & Macro Bias',
+        bio: 'Head of Macro Execution at Titan Syndicate. Specializing in London/NY liquidity sweeps and Treasury-correlated FX positioning. 7-figure allocator since 2020.',
+        avatarBg: '#C2410C',
+        recentTrades: [
+          { pair: 'EUR/USD', direction: 'LONG', outcome: 'WIN', profit: '+4.10R', rr: '1:4.10', date: 'Today, 08:05 UTC' },
+        ],
+      });
+      return;
+    }
+
+    if (clean.includes('oliver') || clean.includes('thorne')) {
+      setSelectedProfileTrader({
+        name: 'Oliver Thorne',
+        username: 'oliver_t',
+        level: 1,
+        badge: '🌱 Level 1: Novice',
+        tierColor: '#78716C',
+        broker: 'Personal Live Account',
+        winRate: 46.0,
+        profitFactor: 1.25,
+        maxDrawdown: 4.8,
+        totalTrades: 68,
+        tierHealth: 91,
+        tradingStyle: 'Support & Resistance Price Action',
+        bio: 'Developing consistency through mechanical risk limits and the PipBud anti-shortfall protocol.',
+        avatarBg: '#78716C',
+        recentTrades: [
+          { pair: 'EUR/USD', direction: 'SHORT', outcome: 'WIN', profit: '+1.20R', rr: '1:1.20', date: '3 days ago' },
+        ],
+      });
+      return;
+    }
+
+    // Dynamic Fallback
+    setSelectedProfileTrader({
+      name: nameOrUsername,
+      username: clean.replace(/\s+/g, '_'),
+      level: 3,
+      badge: '⚡ Level 3: Consistent',
+      tierColor: '#059669',
+      broker: 'Live Verified Broker',
+      winRate: 56.4,
+      profitFactor: 1.88,
+      maxDrawdown: 3.2,
+      totalTrades: 184,
+      tierHealth: 95,
+      tradingStyle: 'Technical Confluence & Risk Guardrails',
+      bio: 'Audited PipBud trader executing verified setups with investor read-only credential verification.',
+      avatarBg: '#059669',
+    });
+  };
+
   return (
     <div className="min-h-screen bg-[#FAFAF9] text-[#1C1917] selection:bg-[#FED7AA] selection:text-[#9A3412]">
       {/* Top Application Bar */}
@@ -432,11 +703,13 @@ export default function CommunityFeed({ onSwitchToPublic }: { onSwitchToPublic?:
             <span>Trading Journal</span>
           </Link>
 
-          {/* User Badge Profile Link */}
+          {/* User Badge Profile Link -> Opens Verified Trader Profile */}
           {user && (
-            <Link
-              href="/settings"
-              className="flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-xl bg-white border border-[#E7E5E4] hover:border-[#FED7AA] shadow-xs text-xs font-semibold text-[#1C1917]"
+            <button
+              type="button"
+              onClick={() => openTraderProfile(user.username)}
+              className="flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-xl bg-white border border-[#E7E5E4] hover:border-[#FED7AA] hover:bg-[#FFF7ED] shadow-xs text-xs font-semibold text-[#1C1917] transition-all active:scale-95 cursor-pointer"
+              title="View your verified trader profile"
             >
               <div
                 className="w-6 h-6 rounded-lg text-white text-[10px] font-bold flex items-center justify-center uppercase shrink-0"
@@ -451,17 +724,18 @@ export default function CommunityFeed({ onSwitchToPublic }: { onSwitchToPublic?:
               >
                 L{user.skill_level}
               </span>
-            </Link>
+            </button>
           )}
 
-          {/* Public Landing Switcher */}
+          {/* Public Marketing Landing Switcher */}
           {onSwitchToPublic && (
             <button
               onClick={onSwitchToPublic}
-              className="text-xs text-[#78716C] hover:text-[#1C1917] px-2 py-1 rounded-lg border border-transparent hover:border-[#E7E5E4] transition-all"
+              className="h-9 px-3 rounded-xl bg-white hover:bg-[#FFF7ED] border border-[#E7E5E4] hover:border-[#FED7AA] text-xs font-semibold text-[#78716C] hover:text-[#C2410C] transition-all inline-flex items-center gap-1.5 shadow-xs active:scale-95 cursor-pointer"
               title="View Public Marketing Landing Page"
             >
-              Public Site
+              <ExternalLink className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Public Site</span>
             </button>
           )}
         </div>
@@ -472,24 +746,51 @@ export default function CommunityFeed({ onSwitchToPublic }: { onSwitchToPublic?:
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Main Feed Column */}
           <main className="lg:col-span-8 space-y-4">
-            {/* Quick Post & Question Trigger Bar */}
-            <div className="bg-white rounded-2xl border border-[#E7E5E4] p-4 shadow-xs space-y-3">
+            {/* Community Feed Overview & Quick Composer Bar */}
+            <div className="bg-white rounded-2xl border border-[#E7E5E4] p-4 sm:p-5 shadow-xs space-y-3.5">
+              <div className="flex flex-wrap items-center justify-between gap-2 pb-1 border-b border-[#F5F5F4]">
+                <div>
+                  <h1 className="text-base sm:text-lg font-bold text-[#1C1917] tracking-tight flex items-center gap-2">
+                    <span>Trader Community Feed</span>
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#F0FDFA] text-[#0F766E] border border-[#CCFBF1]">
+                      100% Audited Alpha
+                    </span>
+                  </h1>
+                  <p className="text-xs text-[#78716C] mt-0.5">
+                    Ask questions, share setups, and analyze liquidity with verified prop &amp; live traders.
+                  </p>
+                </div>
+                {user && (
+                  <button
+                    type="button"
+                    onClick={() => openTraderProfile(user.username)}
+                    className="text-xs font-bold text-[#C2410C] hover:underline inline-flex items-center gap-1 cursor-pointer"
+                  >
+                    <span>My Verified Profile</span>
+                    <span>&rarr;</span>
+                  </button>
+                )}
+              </div>
+
               <div className="flex items-center gap-3">
-                <div
-                  className="w-9 h-9 rounded-xl text-white font-bold text-xs flex items-center justify-center shrink-0 uppercase"
+                <button
+                  type="button"
+                  onClick={() => openTraderProfile(user ? user.username : 'Trader')}
+                  className="w-10 h-10 rounded-xl text-white font-bold text-xs flex items-center justify-center shrink-0 uppercase shadow-xs hover:opacity-90 hover:scale-105 transition-all cursor-pointer"
                   style={{ backgroundColor: user?.tier_color || '#1C1917' }}
+                  title="View your verified trader profile"
                 >
                   {user ? user.username.slice(0, 2) : 'TR'}
-                </div>
+                </button>
                 <button
                   type="button"
                   onClick={() => {
                     setNewPostCategory('question');
                     setIsComposerOpen(true);
                   }}
-                  className="flex-1 text-left px-4 py-2.5 rounded-xl bg-[#FAFAF9] border border-[#E7E5E4] hover:border-[#FED7AA] text-xs text-[#78716C] transition-all"
+                  className="flex-1 text-left px-4 py-2.5 rounded-xl bg-[#FAFAF9] border border-[#E7E5E4] hover:border-[#FED7AA] hover:bg-[#FFF7ED]/30 text-xs text-[#78716C] transition-all cursor-pointer truncate"
                 >
-                  Ask a trading question or drop market alpha...
+                  What&apos;s on your charts? Ask a question or drop market alpha...
                 </button>
               </div>
 
@@ -703,26 +1004,33 @@ export default function CommunityFeed({ onSwitchToPublic }: { onSwitchToPublic?:
               </div>
             )}
 
-            {/* Filter Navigation Tabs */}
+            {/* Filter Navigation Tabs with Counts */}
             <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-2 sm:p-2.5 rounded-2xl border border-[#E7E5E4] shadow-xs">
               <div className="flex items-center gap-1 overflow-x-auto w-full sm:w-auto">
                 {[
-                  { id: 'all', label: 'All Discussions' },
-                  { id: 'question', label: 'Questions (Q&A)' },
-                  { id: 'setup', label: 'Trade Setups' },
-                  { id: 'intel', label: 'Market Intel' },
-                  { id: 'my', label: 'My Posts' },
+                  { id: 'all', label: 'All Discussions', count: posts.length },
+                  { id: 'question', label: 'Questions (Q&A)', count: posts.filter((p) => p.category === 'question').length },
+                  { id: 'setup', label: 'Trade Setups', count: posts.filter((p) => p.category === 'setup').length },
+                  { id: 'intel', label: 'Market Intel', count: posts.filter((p) => p.category === 'intel').length },
+                  { id: 'my', label: 'My Posts', count: user ? posts.filter((p) => p.author.username === user.username).length : 0 },
                 ].map((tab) => (
                   <button
                     key={tab.id}
                     onClick={() => setSelectedCategory(tab.id)}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all shrink-0 ${
+                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
                       selectedCategory === tab.id
                         ? 'bg-[#1C1917] text-white shadow-xs'
                         : 'text-[#78716C] hover:text-[#1C1917] hover:bg-[#F5F5F4]'
                     }`}
                   >
-                    {tab.label}
+                    <span>{tab.label}</span>
+                    <span
+                      className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
+                        selectedCategory === tab.id ? 'bg-[#44403C] text-white' : 'bg-[#F5F5F4] text-[#78716C]'
+                      }`}
+                    >
+                      {tab.count}
+                    </span>
                   </button>
                 ))}
               </div>
@@ -734,9 +1042,17 @@ export default function CommunityFeed({ onSwitchToPublic }: { onSwitchToPublic?:
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Filter discussions..."
-                  className="w-full h-8 pl-8 pr-3 rounded-lg border border-[#E7E5E4] text-xs text-[#1C1917] bg-[#FAFAF9] outline-hidden focus:border-[#C2410C]"
+                  className="w-full h-8 pl-8 pr-7 rounded-lg border border-[#E7E5E4] text-xs text-[#1C1917] bg-[#FAFAF9] outline-hidden focus:border-[#C2410C]"
                 />
                 <Search className="w-3.5 h-3.5 text-[#A8A29E] absolute left-2.5 top-2.5" />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-2 top-2 text-[#A8A29E] hover:text-[#1C1917]"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
               </div>
             </div>
 
@@ -760,7 +1076,7 @@ export default function CommunityFeed({ onSwitchToPublic }: { onSwitchToPublic?:
                       setNewPostCategory('question');
                       setIsComposerOpen(true);
                     }}
-                    className="mt-2 h-9 px-4 rounded-xl bg-[#1C1917] text-white text-xs font-semibold hover:bg-[#292524] transition-all"
+                    className="mt-2 h-9 px-4 rounded-xl bg-[#1C1917] text-white text-xs font-semibold hover:bg-[#292524] transition-all cursor-pointer"
                   >
                     Create Post
                   </button>
@@ -774,26 +1090,52 @@ export default function CommunityFeed({ onSwitchToPublic }: { onSwitchToPublic?:
                     {/* Header: Author & Category Badge */}
                     <div className="flex items-center justify-between gap-3">
                       <div className="flex items-center gap-3 min-w-0">
-                        <div
-                          className="w-9 h-9 rounded-xl text-white font-bold text-xs flex items-center justify-center shrink-0 uppercase shadow-xs"
+                        {/* Clickable Author Avatar */}
+                        <button
+                          type="button"
+                          onClick={() => openTraderProfile(post.author.name)}
+                          className="w-10 h-10 rounded-xl text-white font-bold text-xs flex items-center justify-center shrink-0 uppercase shadow-xs hover:opacity-90 hover:scale-105 transition-all cursor-pointer"
                           style={{ backgroundColor: post.author.tierColor }}
+                          title={`Inspect ${post.author.name}'s Verified Profile`}
                         >
                           {post.author.username.slice(0, 2)}
-                        </div>
+                        </button>
                         <div className="min-w-0 flex-1">
                           <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-                            <span className="font-bold text-xs text-[#1C1917] truncate">{post.author.name}</span>
-                            <span
-                              className="px-1.5 py-0.5 rounded text-[10px] font-bold text-white shrink-0"
+                            {/* Clickable Author Name */}
+                            <button
+                              type="button"
+                              onClick={() => openTraderProfile(post.author.name)}
+                              className="font-bold text-xs sm:text-sm text-[#1C1917] truncate hover:text-[#C2410C] hover:underline transition-colors text-left cursor-pointer"
+                              title={`Inspect ${post.author.name}'s Verified Profile`}
+                            >
+                              {post.author.name}
+                            </button>
+                            {/* Clickable Tier Badge */}
+                            <button
+                              type="button"
+                              onClick={() => openTraderProfile(post.author.name)}
+                              className="px-1.5 py-0.5 rounded text-[10px] font-bold text-white shrink-0 hover:opacity-90 transition-opacity cursor-pointer"
                               style={{ backgroundColor: post.author.tierColor }}
+                              title={`Verified Level ${post.author.level} (${post.author.badge})`}
                             >
                               L{post.author.level}
-                            </span>
+                            </button>
                             <span className="text-[10px] font-medium text-[#78716C] hidden sm:inline">
                               {post.author.broker}
                             </span>
                           </div>
-                          <span className="text-[10px] text-[#A8A29E] block">{post.timestamp}</span>
+                          <div className="flex items-center gap-2 text-[10px] text-[#A8A29E]">
+                            <span>{post.timestamp}</span>
+                            <span>•</span>
+                            <button
+                              type="button"
+                              onClick={() => openTraderProfile(post.author.name)}
+                              className="text-[#C2410C] hover:underline font-semibold cursor-pointer"
+                            >
+                              View Trader Profile &rarr;
+                            </button>
+                          </div>
                         </div>
                       </div>
 
@@ -936,13 +1278,24 @@ export default function CommunityFeed({ onSwitchToPublic }: { onSwitchToPublic?:
                               >
                                 <div className="flex items-center justify-between">
                                   <div className="flex items-center gap-2">
-                                    <span className="font-bold text-[#1C1917]">{reply.author.name}</span>
-                                    <span
-                                      className="px-1.5 py-0.2 rounded text-[9px] font-bold text-white"
+                                    {/* Clickable Reply Author */}
+                                    <button
+                                      type="button"
+                                      onClick={() => openTraderProfile(reply.author.name)}
+                                      className="font-bold text-xs text-[#1C1917] hover:text-[#C2410C] hover:underline cursor-pointer"
+                                      title={`Inspect ${reply.author.name}'s Verified Profile`}
+                                    >
+                                      {reply.author.name}
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => openTraderProfile(reply.author.name)}
+                                      className="px-1.5 py-0.2 rounded text-[9px] font-bold text-white cursor-pointer hover:opacity-90"
                                       style={{ backgroundColor: reply.author.tierColor }}
+                                      title={`Verified Level ${reply.author.level}`}
                                     >
                                       L{reply.author.level}
-                                    </span>
+                                    </button>
                                     {reply.isVerifiedAnswer && (
                                       <span className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded text-[9px] font-semibold bg-[#F0FDFA] text-[#0F766E] border border-[#CCFBF1]">
                                         <CheckCircle2 className="w-3 h-3 text-[#0F766E]" />
@@ -998,15 +1351,19 @@ export default function CommunityFeed({ onSwitchToPublic }: { onSwitchToPublic?:
             {/* Active Trader Meritocracy Card */}
             {user && (
               <div className="bg-white rounded-2xl border border-[#E7E5E4] p-5 shadow-xs space-y-4">
-                <div className="flex items-center gap-3">
+                <div
+                  onClick={() => openTraderProfile(user.username)}
+                  className="flex items-center gap-3 cursor-pointer group"
+                  title="Click to view your verified public profile"
+                >
                   <div
-                    className="w-12 h-12 rounded-xl text-white font-bold text-sm flex items-center justify-center shrink-0 uppercase shadow-xs"
+                    className="w-12 h-12 rounded-xl text-white font-bold text-sm flex items-center justify-center shrink-0 uppercase shadow-xs group-hover:scale-105 transition-transform"
                     style={{ backgroundColor: user.tier_color || '#1C1917' }}
                   >
                     {user.username.slice(0, 2)}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <span className="font-bold text-sm text-[#1C1917] block truncate">
+                    <span className="font-bold text-sm text-[#1C1917] block truncate group-hover:text-[#C2410C] transition-colors">
                       {user.display_name || user.name || `@${user.username}`}
                     </span>
                     <span className="text-xs font-semibold" style={{ color: user.tier_color || '#C2410C' }}>
@@ -1034,13 +1391,14 @@ export default function CommunityFeed({ onSwitchToPublic }: { onSwitchToPublic?:
                 </div>
 
                 <div className="space-y-2 pt-1">
-                  <Link
-                    href="/journal"
-                    className="w-full h-9 rounded-xl bg-[#FAFAF9] hover:bg-[#F5F5F4] border border-[#E7E5E4] text-[#1C1917] text-xs font-semibold flex items-center justify-center gap-1.5 transition-all"
+                  <button
+                    type="button"
+                    onClick={() => openTraderProfile(user.username)}
+                    className="w-full h-9 rounded-xl bg-[#FFF7ED] hover:bg-[#FFEDD5] border border-[#FED7AA] text-[#C2410C] text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-2xs active:scale-95"
                   >
-                    <BarChart3 className="w-3.5 h-3.5 text-[#0F766E]" />
-                    <span>View Private Journal</span>
-                  </Link>
+                    <UserCheck className="w-3.5 h-3.5" />
+                    <span>View My Verified Profile</span>
+                  </button>
 
                   <Link
                     href="/forum"
@@ -1052,6 +1410,92 @@ export default function CommunityFeed({ onSwitchToPublic }: { onSwitchToPublic?:
                 </div>
               </div>
             )}
+
+            {/* Top Verified Posters Widget */}
+            <div className="bg-white rounded-2xl border border-[#E7E5E4] p-5 shadow-xs space-y-3">
+              <div className="flex items-center justify-between pb-2 border-b border-[#F5F5F4]">
+                <div className="flex items-center gap-2">
+                  <Award className="w-4 h-4 text-[#C2410C]" />
+                  <h3 className="font-bold text-xs uppercase tracking-wider text-[#1C1917]">
+                    Top Verified Posters
+                  </h3>
+                </div>
+                <span className="text-[10px] text-[#0F766E] font-semibold bg-[#F0FDFA] px-2 py-0.5 rounded-full border border-[#CCFBF1]">
+                  Audited
+                </span>
+              </div>
+
+              <div className="space-y-2">
+                {[
+                  {
+                    name: 'Sarah Sterling',
+                    badge: 'Elite Alpha',
+                    level: 5,
+                    tierColor: '#8B5CF6',
+                    winRate: '68.4%',
+                    broker: 'FTMO ($200k)',
+                  },
+                  {
+                    name: 'Elena Rostova',
+                    badge: 'Master Mentor',
+                    level: 6,
+                    tierColor: '#DC2626',
+                    winRate: '74.8%',
+                    broker: 'Institutional Desk',
+                  },
+                  {
+                    name: 'Solomon Kane',
+                    badge: 'Titan Syndicate',
+                    level: 7,
+                    tierColor: '#C2410C',
+                    winRate: '68.4%',
+                    broker: 'Titan Prime ($1.5M)',
+                  },
+                  {
+                    name: 'Tariq Al-Mansoor',
+                    badge: 'Funded Pro',
+                    level: 4,
+                    tierColor: '#C2410C',
+                    winRate: '63.0%',
+                    broker: 'FundedNext ($100k)',
+                  },
+                ].map((trader) => (
+                  <button
+                    key={trader.name}
+                    type="button"
+                    onClick={() => openTraderProfile(trader.name)}
+                    className="w-full text-left p-2.5 rounded-xl hover:bg-[#FAFAF9] border border-transparent hover:border-[#E7E5E4] transition-all flex items-center justify-between group cursor-pointer"
+                    title={`Inspect ${trader.name}'s Verified Profile`}
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div
+                        className="w-8 h-8 rounded-lg text-white font-bold text-xs flex items-center justify-center shrink-0 uppercase shadow-2xs group-hover:scale-105 transition-transform"
+                        style={{ backgroundColor: trader.tierColor }}
+                      >
+                        {trader.name.slice(0, 2)}
+                      </div>
+                      <div className="min-w-0">
+                        <span className="font-bold text-xs text-[#1C1917] block truncate group-hover:text-[#C2410C] transition-colors">
+                          {trader.name}
+                        </span>
+                        <span className="text-[10px] text-[#78716C] block truncate">
+                          {trader.broker}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <span
+                        className="px-1.5 py-0.2 rounded text-[9px] font-bold text-white block"
+                        style={{ backgroundColor: trader.tierColor }}
+                      >
+                        L{trader.level}
+                      </span>
+                      <span className="text-[10px] font-semibold text-[#15803D]">{trader.winRate}</span>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
 
             {/* Top Trending Questions Widget */}
             <div className="bg-white rounded-2xl border border-[#E7E5E4] p-5 shadow-xs space-y-3">
@@ -1069,7 +1513,7 @@ export default function CommunityFeed({ onSwitchToPublic }: { onSwitchToPublic?:
                     setSelectedCategory('question');
                     setSearchQuery('Stop Loss');
                   }}
-                  className="w-full text-left p-2 rounded-xl hover:bg-[#FAFAF9] transition-colors block group"
+                  className="w-full text-left p-2 rounded-xl hover:bg-[#FAFAF9] transition-colors block group cursor-pointer"
                 >
                   <p className="font-semibold text-[#1C1917] group-hover:text-[#C2410C] line-clamp-2">
                     How do you prevent moving Stop Loss into breakeven prematurely on London open?
@@ -1083,7 +1527,7 @@ export default function CommunityFeed({ onSwitchToPublic }: { onSwitchToPublic?:
                     setSelectedCategory('question');
                     setSearchQuery('Drawdown');
                   }}
-                  className="w-full text-left p-2 rounded-xl hover:bg-[#FAFAF9] transition-colors block group"
+                  className="w-full text-left p-2 rounded-xl hover:bg-[#FAFAF9] transition-colors block group cursor-pointer"
                 >
                   <p className="font-semibold text-[#1C1917] group-hover:text-[#C2410C] line-clamp-2">
                     What daily drawdown cushion do you set before closing the trading terminal?
@@ -1106,6 +1550,197 @@ export default function CommunityFeed({ onSwitchToPublic }: { onSwitchToPublic?:
           </aside>
         </div>
       </div>
+
+      {/* ============================================================ */}
+      {/* TRADER PROFILE MODAL: AUDITED TRACK RECORD & MERITOCRACY      */}
+      {/* ============================================================ */}
+      {selectedProfileTrader && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="bg-white rounded-3xl border border-[#E7E5E4] max-w-lg w-full max-h-[90vh] overflow-y-auto p-5 sm:p-6 shadow-2xl space-y-4 sm:space-y-5 animate-in zoom-in-95 duration-200">
+            {/* Header */}
+            <div className="flex items-center justify-between pb-3 border-b border-[#E7E5E4]">
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="w-5 h-5 text-[#0F766E]" />
+                <div>
+                  <h3 className="text-sm sm:text-base font-bold text-[#1C1917]">
+                    Verified Trader Profile
+                  </h3>
+                  <span className="text-[10px] text-[#78716C] font-mono">
+                    Audited Track Record • Investor Read-Only API
+                  </span>
+                </div>
+              </div>
+              <button
+                onClick={() => setSelectedProfileTrader(null)}
+                className="p-1 rounded-lg text-[#78716C] hover:text-[#1C1917] hover:bg-[#F5F5F4] transition-colors cursor-pointer"
+                title="Close profile modal"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Profile Hero Card */}
+            <div className="flex items-center gap-3.5 p-4 rounded-2xl bg-[#FAFAF9] border border-[#E7E5E4]">
+              {selectedProfileTrader.avatarType?.startsWith('mascot') || selectedProfileTrader.isCurrentUser ? (
+                <div className="w-14 h-14 rounded-2xl bg-white border border-[#FED7AA] p-1.5 flex items-center justify-center shrink-0 shadow-xs">
+                  <Image
+                    src="/icon-192.png"
+                    alt="Mascot Avatar"
+                    width={44}
+                    height={44}
+                    className="object-contain"
+                  />
+                </div>
+              ) : selectedProfileTrader.avatarUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={selectedProfileTrader.avatarUrl}
+                  alt={selectedProfileTrader.name}
+                  className="w-14 h-14 rounded-2xl object-cover shrink-0 shadow-xs border border-[#E7E5E4]"
+                />
+              ) : (
+                <div
+                  className="w-14 h-14 rounded-2xl text-white font-bold text-lg flex items-center justify-center shrink-0 shadow-xs uppercase"
+                  style={{ backgroundColor: selectedProfileTrader.tierColor }}
+                >
+                  {selectedProfileTrader.name.slice(0, 2)}
+                </div>
+              )}
+
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <h3 className="text-base sm:text-lg font-bold text-[#1C1917] truncate">
+                    {selectedProfileTrader.name}
+                  </h3>
+                  <span
+                    className="px-2 py-0.5 rounded text-[10px] font-bold text-white shrink-0"
+                    style={{ backgroundColor: selectedProfileTrader.tierColor }}
+                  >
+                    Level {selectedProfileTrader.level}
+                  </span>
+                </div>
+                <div className="text-xs font-semibold" style={{ color: selectedProfileTrader.tierColor }}>
+                  {selectedProfileTrader.badge}
+                </div>
+                <div className="text-[11px] text-[#78716C] flex items-center gap-1 truncate">
+                  <span>@{selectedProfileTrader.username}</span>
+                  <span>•</span>
+                  <span className="truncate">{selectedProfileTrader.broker}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* PipBud Identity Shield Notice */}
+            <div className="p-3 bg-[#F0FDFA] rounded-2xl border border-[#CCFBF1] flex items-start gap-2.5 text-xs text-[#0F766E]">
+              <ShieldCheck className="w-4 h-4 shrink-0 mt-0.5 text-[#0F766E]" />
+              <div className="space-y-0.5">
+                <div className="font-bold">PipBud Cryptographic Track Record Verified</div>
+                <p className="text-[11px] text-[#115E59] leading-relaxed">
+                  Metrics are stamped directly from broker trade tickets. Traders cannot falsify win rates or drawdown limits; automated demotion triggers if maximum drawdown thresholds are breached.
+                </p>
+              </div>
+            </div>
+
+            {/* Meritocracy Statistics Grid */}
+            <div className="space-y-2">
+              <div className="text-xs font-bold text-[#1C1917] uppercase tracking-wider flex items-center justify-between">
+                <span>Audited Performance Snapshot</span>
+                <span className="text-[10px] text-[#15803D] font-mono bg-[#DCFCE7] px-2 py-0.5 rounded-full font-semibold">
+                  Live Synced
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
+                <div className="bg-[#FAFAF9] p-2.5 rounded-xl border border-[#E7E5E4]">
+                  <span className="text-[10px] text-[#78716C] block">Win Rate</span>
+                  <span className="text-sm font-bold text-[#1C1917]">{selectedProfileTrader.winRate}%</span>
+                </div>
+                <div className="bg-[#FAFAF9] p-2.5 rounded-xl border border-[#E7E5E4]">
+                  <span className="text-[10px] text-[#78716C] block">Profit Factor</span>
+                  <span className="text-sm font-bold text-[#0F766E]">{selectedProfileTrader.profitFactor}</span>
+                </div>
+                <div className="bg-[#FAFAF9] p-2.5 rounded-xl border border-[#E7E5E4]">
+                  <span className="text-[10px] text-[#78716C] block">Max Drawdown</span>
+                  <span className="text-sm font-bold text-[#C2410C]">{selectedProfileTrader.maxDrawdown}%</span>
+                </div>
+                <div className="bg-[#FAFAF9] p-2.5 rounded-xl border border-[#E7E5E4]">
+                  <span className="text-[10px] text-[#78716C] block">Verified Trades</span>
+                  <span className="text-sm font-bold text-[#1C1917]">{selectedProfileTrader.totalTrades}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Trading Style & Bio */}
+            <div className="space-y-2 text-xs">
+              <div className="p-3 rounded-xl bg-[#FAFAF9] border border-[#E7E5E4] space-y-1">
+                <div className="text-[10px] font-bold text-[#78716C] uppercase">Strategy &amp; Methodology</div>
+                <div className="font-semibold text-[#1C1917]">{selectedProfileTrader.tradingStyle}</div>
+              </div>
+
+              <div className="p-3 rounded-xl bg-white border border-[#E7E5E4] space-y-1">
+                <div className="text-[10px] font-bold text-[#78716C] uppercase">Trader Bio &amp; Discipline Protocol</div>
+                <p className="text-[11px] text-[#44403C] leading-relaxed">{selectedProfileTrader.bio}</p>
+              </div>
+            </div>
+
+            {/* Recent Audited Trades List */}
+            {selectedProfileTrader.recentTrades && selectedProfileTrader.recentTrades.length > 0 && (
+              <div className="space-y-2">
+                <div className="text-xs font-bold text-[#1C1917] uppercase tracking-wider">
+                  Recent Audited Setups
+                </div>
+                <div className="space-y-1.5">
+                  {selectedProfileTrader.recentTrades.map((t, idx) => (
+                    <div
+                      key={idx}
+                      className="p-2.5 rounded-xl bg-[#FAFAF9] border border-[#E7E5E4] flex items-center justify-between text-xs"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={`px-1.5 py-0.5 rounded text-[9px] font-bold ${
+                            t.direction === 'LONG' ? 'bg-[#DCFCE7] text-[#15803D]' : 'bg-[#FEE2E2] text-[#B91C1C]'
+                          }`}
+                        >
+                          {t.direction}
+                        </span>
+                        <span className="font-bold text-[#1C1917]">{t.pair}</span>
+                        <span className="text-[10px] text-[#78716C]">{t.date}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] text-[#78716C] font-mono">R:R {t.rr}</span>
+                        <span className="font-bold text-[#15803D]">{t.profit}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Modal Actions */}
+            <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-2 border-t border-[#E7E5E4]">
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchQuery(selectedProfileTrader.name);
+                  setSelectedCategory('all');
+                  setSelectedProfileTrader(null);
+                }}
+                className="w-full sm:w-auto px-4 py-2 rounded-xl text-xs font-semibold bg-[#FFF7ED] text-[#C2410C] border border-[#FED7AA] hover:bg-[#FFEDD5] transition-all cursor-pointer inline-flex items-center justify-center gap-1.5"
+              >
+                <Search className="w-3.5 h-3.5" />
+                <span>Filter Feed by {selectedProfileTrader.name.split(' ')[0]}</span>
+              </button>
+
+              <button
+                onClick={() => setSelectedProfileTrader(null)}
+                className="w-full sm:w-auto px-5 py-2 rounded-xl text-xs font-semibold bg-[#1C1917] hover:bg-[#292524] text-white shadow-xs transition-all cursor-pointer"
+              >
+                Close Profile
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -2009,15 +2009,18 @@ export default function ForumPage() {
                       >
                         {msg.author.name}
                       </button>
-                      <span
-                        className={`px-1.5 sm:px-2 py-0.2 rounded text-[9px] sm:text-[10px] font-bold truncate ${
+                      <button
+                        type="button"
+                        onClick={() => openTraderProfile(msg.author.name)}
+                        className={`px-1.5 sm:px-2 py-0.2 rounded text-[9px] sm:text-[10px] font-bold truncate cursor-pointer hover:opacity-90 ${
                           msg.isDemotionNotice
                             ? 'bg-[#B91C1C] text-white'
                             : 'bg-[#FFF7ED] text-[#C2410C] border border-[#FED7AA]'
                         }`}
+                        title={`View ${msg.author.name}'s Verified Profile`}
                       >
                         {msg.author.badge}
-                      </span>
+                      </button>
                       {msg.messageType === 'question' && (
                         <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold bg-[#EFF6FF] text-[#1D4ED8] border border-[#BFDBFE]">
                           <HelpCircle className="w-2.5 h-2.5" />
@@ -2031,7 +2034,14 @@ export default function ForumPage() {
                     {/* Quoted Reply Preview */}
                     {msg.replyTo && (
                       <div className="flex items-center gap-1.5 text-[11px] text-[#78716C] bg-[#F5F5F4] px-2.5 py-1 rounded-lg border-l-2 border-[#C2410C] mb-1">
-                        <span className="font-semibold text-[#1C1917] shrink-0">Replying to {msg.replyTo.authorName}:</span>
+                        <button
+                          type="button"
+                          onClick={() => openTraderProfile(msg.replyTo!.authorName)}
+                          className="font-semibold text-[#1C1917] shrink-0 hover:text-[#C2410C] hover:underline cursor-pointer"
+                          title={`View ${msg.replyTo.authorName}'s Verified Profile`}
+                        >
+                          Replying to {msg.replyTo.authorName}:
+                        </button>
                         <span className="truncate italic text-[#78716C]">&quot;{msg.replyTo.preview}&quot;</span>
                       </div>
                     )}
