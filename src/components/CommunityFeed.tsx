@@ -8,6 +8,7 @@ import {
   TrendingUp,
   MessageSquare,
   ArrowUp,
+  Heart,
   Share2,
   Bookmark,
   CheckCircle2,
@@ -1859,9 +1860,9 @@ export default function CommunityFeed({ onSwitchToPublic }: { onSwitchToPublic?:
                       </div>
                     </div>
 
-                    {/* Expandable Answers & Replies Thread with Vertical Connector Line */}
+                    {/* Substack-Style Discussion & Answers Thread */}
                     {activeReplyPostId === post.id && (
-                      <div className="pt-4 border-t border-[#E7E5E4] space-y-3 bg-[#FAFAF9]/60 -mx-5 -mb-5 p-5 rounded-b-2xl animate-in slide-in-from-top-2 duration-200">
+                      <div className="pt-4 border-t border-[#E7E5E4] space-y-4 bg-[#FAFAF9]/60 -mx-5 -mb-5 p-5 rounded-b-2xl animate-in slide-in-from-top-2 duration-200">
                         <div className="flex items-center justify-between pb-1">
                           <h3 className="text-xs font-bold text-[#1C1917] uppercase tracking-wider flex items-center gap-1.5">
                             <MessageSquare className="w-3.5 h-3.5 text-[#C2410C]" />
@@ -1869,32 +1870,33 @@ export default function CommunityFeed({ onSwitchToPublic }: { onSwitchToPublic?:
                               {post.category === 'question' ? 'Verified Answers' : 'Discussion Thread'} ({post.replies.length})
                             </span>
                           </h3>
-                          <span className="text-[10px] text-[#78716C] hidden sm:inline">
-                            Press <kbd className="px-1.5 py-0.5 rounded bg-white border border-[#E7E5E4] font-mono text-[9px]">Cmd+Enter</kbd> to reply
+                          <span className="text-[10px] text-[#78716C] hidden sm:inline font-mono">
+                            Substack Desk Thread
                           </span>
                         </div>
 
                         {post.replies.length === 0 ? (
-                          <div className="text-center py-5 bg-white rounded-xl border border-dashed border-[#E7E5E4] space-y-1">
-                            <p className="text-xs font-semibold text-[#1C1917]">No responses yet</p>
+                          <div className="text-center py-6 bg-white rounded-2xl border border-dashed border-[#E7E5E4] space-y-1">
+                            <p className="text-xs font-semibold text-[#1C1917]">No comments yet</p>
                             <p className="text-[11px] text-[#78716C]">
-                              Be the first trader to provide analysis or answer this inquiry.
+                              Be the first trader to join the discussion or share analysis.
                             </p>
                           </div>
                         ) : (
-                          /* Visual Thread Line Container */
-                          <div className="relative pl-4 sm:pl-5 space-y-2.5 before:absolute before:left-2 sm:before:left-2.5 before:top-2 before:bottom-3 before:w-0.5 before:bg-[#E7E5E4] before:rounded-full">
+                          /* Visual Thread Line Container with Continuous Connector */
+                          <div className="relative pl-3.5 sm:pl-5 space-y-1 before:absolute before:left-2 sm:before:left-2.5 before:top-2 before:bottom-3 before:w-[2px] before:bg-[#E7E5E4] before:rounded-full">
                             {post.replies.map((reply) => (
                               <div
                                 key={reply.id}
-                                className={`relative p-3.5 rounded-2xl border text-xs space-y-2 transition-all duration-150 group ${
+                                className={`relative pl-3 sm:pl-4 transition-all duration-150 group ${
                                   reply.isVerifiedAnswer
-                                    ? 'bg-white border-[#CCFBF1] shadow-2xs'
-                                    : 'bg-white border-[#E7E5E4] hover:border-[#D6D3D1]'
+                                    ? 'p-3.5 sm:p-4 rounded-2xl bg-white border border-[#CCFBF1] shadow-2xs my-2'
+                                    : 'py-3 sm:py-3.5 border-b border-[#F5F5F4] last:border-b-0 space-y-2'
                                 }`}
                               >
-                                <div className="flex items-center justify-between">
-                                  <div className="flex items-center gap-2">
+                                {/* Substack Author Byline Header */}
+                                <div className="flex items-center justify-between gap-2">
+                                  <div className="flex items-center gap-2 flex-wrap">
                                     <TraderAvatar
                                       name={reply.author.name}
                                       username={reply.author.username}
@@ -1907,16 +1909,16 @@ export default function CommunityFeed({ onSwitchToPublic }: { onSwitchToPublic?:
                                     <button
                                       type="button"
                                       onClick={() => openTraderProfile(reply.author.name)}
-                                      className="font-bold text-xs text-[#1C1917] hover:text-[#C2410C] hover:underline cursor-pointer"
+                                      className="font-bold text-xs sm:text-[13px] text-[#1C1917] hover:text-[#C2410C] hover:underline cursor-pointer tracking-tight"
                                       title={`Inspect ${reply.author.name}'s Verified Profile`}
                                     >
                                       {reply.author.name}
                                     </button>
                                     <span
-                                      className="px-1.5 py-0.2 rounded text-[9px] font-bold text-white shrink-0"
+                                      className="px-1.5 py-0.2 rounded text-[9px] font-bold text-white shrink-0 shadow-2xs"
                                       style={{ backgroundColor: reply.author.tierColor }}
                                     >
-                                      L{reply.author.level}
+                                      Level {reply.author.level}
                                     </span>
                                     {reply.isVerifiedAnswer && (
                                       <span className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded text-[9px] font-semibold bg-[#F0FDFA] text-[#0F766E] border border-[#CCFBF1]">
@@ -1924,66 +1926,71 @@ export default function CommunityFeed({ onSwitchToPublic }: { onSwitchToPublic?:
                                         <span>Funded Pro Answer</span>
                                       </span>
                                     )}
+                                    <span className="text-[#A8A29E] text-xs">·</span>
+                                    <span className="text-[11px] text-[#A8A29E] font-medium">{reply.timestamp}</span>
                                   </div>
-                                  <span className="text-[10px] text-[#A8A29E]">{reply.timestamp}</span>
                                 </div>
 
-                                <p className="text-[#44403C] leading-relaxed whitespace-pre-line pl-0.5">
+                                {/* Comment Content */}
+                                <p className="text-xs sm:text-[13px] text-[#292524] leading-relaxed whitespace-pre-line pl-0.5">
                                   {reply.content}
                                 </p>
 
-                                {/* Micro Action Bar for Comments (Upvote + Reply Chip + Copy) */}
-                                <div className="flex items-center justify-between pt-1.5 border-t border-[#F5F5F4] text-[11px]">
-                                  <div className="flex items-center gap-2">
-                                    {/* Tactile Reply Upvote */}
-                                    <button
-                                      type="button"
-                                      onClick={() => handleToggleReplyUpvote(post.id, reply.id)}
-                                      className={`h-6 px-2 rounded-lg flex items-center gap-1 font-semibold text-[10px] transition-all duration-150 active:scale-125 cursor-pointer ${
-                                        reply.hasUpvoted
-                                          ? 'bg-[#FFF7ED] text-[#C2410C] border border-[#FED7AA]'
-                                          : 'bg-[#FAFAF9] hover:bg-[#F5F5F4] text-[#78716C] border border-[#E7E5E4]'
+                                {/* Substack Action Bar (Heart, Reply, Share) */}
+                                <div className="flex items-center gap-4 pt-1 text-xs text-[#78716C]">
+                                  {/* Heart Upvote */}
+                                  <button
+                                    type="button"
+                                    onClick={() => handleToggleReplyUpvote(post.id, reply.id)}
+                                    className={`flex items-center gap-1.5 transition-all duration-150 active:scale-125 cursor-pointer font-medium text-[11px] ${
+                                      reply.hasUpvoted
+                                        ? 'text-[#E11D48] font-bold'
+                                        : 'hover:text-[#E11D48] text-[#78716C]'
+                                    }`}
+                                    title={reply.hasUpvoted ? 'Unlike comment' : 'Like comment'}
+                                  >
+                                    <Heart
+                                      className={`w-3.5 h-3.5 transition-transform ${
+                                        reply.hasUpvoted ? 'fill-[#E11D48] text-[#E11D48] scale-110' : ''
                                       }`}
-                                      title={reply.hasUpvoted ? 'Remove upvote' : 'Upvote this reply'}
-                                    >
-                                      <ArrowUp className="w-2.5 h-2.5" />
-                                      <span>{reply.upvotes}</span>
-                                    </button>
+                                    />
+                                    <span className="tabular-nums">{reply.upvotes}</span>
+                                  </button>
 
-                                    {/* Direct Reply Target Trigger */}
-                                    <button
-                                      type="button"
-                                      onClick={() => {
-                                        setReplyingToAuthor({
-                                          postId: post.id,
-                                          username: reply.author.username,
-                                          name: reply.author.name,
-                                        });
-                                        setReplyInputText((prev) =>
-                                          prev.includes(`@${reply.author.username}`)
-                                            ? prev
-                                            : `@${reply.author.username} ${prev}`
-                                        );
-                                      }}
-                                      className="h-6 px-2 rounded-lg bg-transparent hover:bg-[#FFF7ED] text-[#78716C] hover:text-[#C2410C] font-semibold text-[10px] flex items-center gap-1 transition-all active:scale-95 cursor-pointer"
-                                    >
-                                      <MessageSquare className="w-2.5 h-2.5" />
-                                      <span>Reply</span>
-                                    </button>
-                                  </div>
+                                  {/* Reply Trigger */}
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setReplyingToAuthor({
+                                        postId: post.id,
+                                        username: reply.author.username,
+                                        name: reply.author.name,
+                                      });
+                                      setReplyInputText((prev) =>
+                                        prev.includes(`@${reply.author.username}`)
+                                          ? prev
+                                          : `@${reply.author.username} ${prev}`
+                                      );
+                                    }}
+                                    className="flex items-center gap-1.5 hover:text-[#1C1917] transition-colors cursor-pointer font-medium text-[11px]"
+                                  >
+                                    <MessageSquare className="w-3.5 h-3.5" />
+                                    <span>Reply</span>
+                                  </button>
 
+                                  {/* Share / Copy */}
                                   <button
                                     type="button"
                                     onClick={async () => {
                                       if (navigator.clipboard) {
                                         await navigator.clipboard.writeText(reply.content);
-                                        triggerToast('Reply text copied 📋');
+                                        triggerToast('Comment copied to clipboard 📋');
                                       }
                                     }}
-                                    className="text-[10px] text-[#A8A29E] hover:text-[#1C1917] transition-colors cursor-pointer"
-                                    title="Copy text"
+                                    className="text-[11px] text-[#A8A29E] hover:text-[#1C1917] transition-colors cursor-pointer ml-auto"
+                                    title="Copy comment text"
                                   >
-                                    Copy
+                                    Share
                                   </button>
                                 </div>
                               </div>
@@ -1991,9 +1998,8 @@ export default function CommunityFeed({ onSwitchToPublic }: { onSwitchToPublic?:
                           </div>
                         )}
 
-                        {/* Reply Form Container */}
-                        <div className="space-y-2 pt-2">
-                          {/* Active Replying To Chip */}
+                        {/* Substack-Style Elevated Composer Card */}
+                        <div className="mt-4 bg-white rounded-2xl border border-[#E7E5E4] p-3.5 sm:p-4 shadow-xs space-y-3">
                           {replyingToAuthor && replyingToAuthor.postId === post.id && (
                             <div className="flex items-center justify-between px-3 py-1.5 rounded-xl bg-[#FFF7ED] border border-[#FED7AA] text-xs text-[#C2410C] animate-in fade-in duration-100">
                               <div className="flex items-center gap-1.5 truncate">
@@ -2006,31 +2012,14 @@ export default function CommunityFeed({ onSwitchToPublic }: { onSwitchToPublic?:
                                 type="button"
                                 onClick={() => setReplyingToAuthor(null)}
                                 className="p-0.5 hover:bg-[#FED7AA]/50 rounded text-[#9A3412] transition-colors cursor-pointer"
-                                title="Cancel replying to user"
+                                title="Cancel replying"
                               >
                                 <X className="w-3.5 h-3.5" />
                               </button>
                             </div>
                           )}
 
-                          {/* Quick Emoji Reaction Pill Tray */}
-                          <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5">
-                            <span className="text-[10px] font-semibold text-[#78716C] uppercase mr-0.5">Quick:</span>
-                            {['🔥', '🎯', '🚀', '💡', '👏', '❤️'].map((emoji) => (
-                              <button
-                                key={emoji}
-                                type="button"
-                                onClick={() => setReplyInputText((prev) => (prev ? `${prev} ${emoji}` : emoji))}
-                                className="w-6 h-6 rounded-lg bg-white hover:bg-[#FFF7ED] border border-[#E7E5E4] hover:border-[#FED7AA] flex items-center justify-center text-xs transition-transform active:scale-125 cursor-pointer shadow-2xs"
-                                title={`Insert ${emoji}`}
-                              >
-                                {emoji}
-                              </button>
-                            ))}
-                          </div>
-
-                          {/* Input Bar */}
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-start gap-2.5">
                             {user && (
                               <TraderAvatar
                                 name={user.display_name || user.username}
@@ -2041,32 +2030,57 @@ export default function CommunityFeed({ onSwitchToPublic }: { onSwitchToPublic?:
                                 size="xs"
                               />
                             )}
-                            <input
-                              type="text"
-                              value={replyInputText}
-                              onChange={(e) => setReplyInputText(e.target.value)}
-                              placeholder={
-                                post.category === 'question'
-                                  ? 'Write a verified answer...'
-                                  : 'Contribute to this discussion...'
-                              }
-                              className="flex-1 h-10 px-3.5 rounded-xl border border-[#E7E5E4] text-xs text-[#1C1917] bg-white outline-hidden focus:border-[#C2410C] focus:ring-1 focus:ring-[#C2410C]/20 shadow-2xs transition-all"
-                              onKeyDown={(e) => {
-                                if (e.key === 'Enter' && (e.metaKey || e.ctrlKey || !e.shiftKey)) {
-                                  e.preventDefault();
-                                  handleAddReply(post.id);
+                            <div className="flex-1 space-y-2.5">
+                              <textarea
+                                rows={2}
+                                value={replyInputText}
+                                onChange={(e) => setReplyInputText(e.target.value)}
+                                placeholder={
+                                  post.category === 'question'
+                                    ? 'Write an answer or technical perspective...'
+                                    : 'Write a thoughtful comment...'
                                 }
-                              }}
-                            />
-                            <button
-                              type="button"
-                              onClick={() => handleAddReply(post.id)}
-                              disabled={!replyInputText.trim()}
-                              className="px-4 h-10 bg-[#1C1917] hover:bg-[#292524] disabled:opacity-50 text-white text-xs font-semibold rounded-xl transition-all shrink-0 active:scale-95 cursor-pointer shadow-xs inline-flex items-center gap-1.5"
-                            >
-                              <Send className="w-3.5 h-3.5" />
-                              <span>{post.category === 'question' ? 'Answer' : 'Reply'}</span>
-                            </button>
+                                className="w-full p-2.5 rounded-xl border border-[#E7E5E4] text-xs text-[#1C1917] bg-[#FAFAF9] placeholder-[#A8A29E] outline-hidden focus:border-[#C2410C] focus:bg-white focus:ring-1 focus:ring-[#C2410C]/20 transition-all resize-none leading-relaxed"
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+                                    e.preventDefault();
+                                    handleAddReply(post.id);
+                                  }
+                                }}
+                              />
+
+                              <div className="flex items-center justify-between gap-2 flex-wrap pt-0.5">
+                                {/* Quick reaction chips */}
+                                <div className="flex items-center gap-1">
+                                  {['🔥', '🎯', '🚀', '💡', '👏', '❤️'].map((emoji) => (
+                                    <button
+                                      key={emoji}
+                                      type="button"
+                                      onClick={() => setReplyInputText((prev) => (prev ? `${prev} ${emoji}` : emoji))}
+                                      className="w-6 h-6 rounded-lg bg-[#FAFAF9] hover:bg-[#FFF7ED] border border-[#E7E5E4] hover:border-[#FED7AA] flex items-center justify-center text-xs transition-transform active:scale-125 cursor-pointer"
+                                      title={`Insert ${emoji}`}
+                                    >
+                                      {emoji}
+                                    </button>
+                                  ))}
+                                </div>
+
+                                <div className="flex items-center gap-2 ml-auto">
+                                  <span className="text-[10px] text-[#A8A29E] hidden sm:inline font-mono">
+                                    Cmd+Enter
+                                  </span>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleAddReply(post.id)}
+                                    disabled={!replyInputText.trim()}
+                                    className="px-4 py-2 bg-[#1C1917] hover:bg-[#C2410C] disabled:opacity-40 text-white text-xs font-bold rounded-xl transition-all shrink-0 active:scale-95 cursor-pointer shadow-xs inline-flex items-center gap-1.5"
+                                  >
+                                    <Send className="w-3 h-3" />
+                                    <span>{post.category === 'question' ? 'Post Answer' : 'Post Comment'}</span>
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </div>

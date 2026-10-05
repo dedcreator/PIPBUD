@@ -46,7 +46,13 @@ import {
   AlertTriangle,
   FileDown,
   LineChart,
-  Info
+  Info,
+  BookOpen,
+  PenLine,
+  FileText,
+  CheckSquare,
+  BadgeCheck,
+  Brain
 } from 'lucide-react';
 
 export interface JournalTrade {
@@ -191,6 +197,21 @@ export default function JournalPage() {
   const [formPreThesis, setFormPreThesis] = useState('');
   const [formPostReview, setFormPostReview] = useState('');
   const [formRulesFollowed, setFormRulesFollowed] = useState(true);
+  const [notepadTab, setNotepadTab] = useState<'thesis' | 'mindset' | 'lessons'>('thesis');
+  const [logModalMobileTab, setLogModalMobileTab] = useState<'params' | 'notes'>('params');
+  const [autopsyMobileTab, setAutopsyMobileTab] = useState<'telemetry' | 'notepad'>('telemetry');
+
+  // Live Risk/Reward calculation
+  const liveRR = useMemo(() => {
+    const entry = parseFloat(formEntry);
+    const sl = parseFloat(formSL);
+    const tp = parseFloat(formTP);
+    if (!entry || !sl || !tp) return null;
+    const risk = Math.abs(entry - sl);
+    const reward = Math.abs(tp - entry);
+    if (risk === 0) return null;
+    return (reward / risk).toFixed(2);
+  }, [formEntry, formSL, formTP]);
 
   // Auto-sync handler
   const handleSyncNow = async () => {
@@ -735,10 +756,10 @@ export default function JournalPage() {
                 <h2 className="text-base font-bold text-[#1C1917]">Performance Analytics & Edge Diagnostics</h2>
               </div>
 
-              <div className="flex flex-wrap items-center gap-1.5 bg-[#FAFAF9] p-1 rounded-2xl border border-[#E7E5E4]">
+              <div className="flex items-center gap-1.5 overflow-x-auto bg-[#FAFAF9] p-1 rounded-2xl border border-[#E7E5E4] max-w-full">
                 <button
                   onClick={() => setActiveAnalyticsTab('equity')}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold shrink-0 transition-all ${
                     activeAnalyticsTab === 'equity'
                       ? 'bg-[#C2410C] text-white shadow-xs'
                       : 'text-[#78716C] hover:text-[#1C1917]'
@@ -748,17 +769,17 @@ export default function JournalPage() {
                 </button>
                 <button
                   onClick={() => setActiveAnalyticsTab('calendar')}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold shrink-0 transition-all ${
                     activeAnalyticsTab === 'calendar'
                       ? 'bg-[#C2410C] text-white shadow-xs'
                       : 'text-[#78716C] hover:text-[#1C1917]'
                   }`}
                 >
-                  P&L Calendar
+                  P&amp;L Calendar
                 </button>
                 <button
                   onClick={() => setActiveAnalyticsTab('setups')}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold shrink-0 transition-all ${
                     activeAnalyticsTab === 'setups'
                       ? 'bg-[#C2410C] text-white shadow-xs'
                       : 'text-[#78716C] hover:text-[#1C1917]'
@@ -768,23 +789,23 @@ export default function JournalPage() {
                 </button>
                 <button
                   onClick={() => setActiveAnalyticsTab('sessions')}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold shrink-0 transition-all ${
                     activeAnalyticsTab === 'sessions'
                       ? 'bg-[#C2410C] text-white shadow-xs'
                       : 'text-[#78716C] hover:text-[#1C1917]'
                   }`}
                 >
-                  Sessions & Hours
+                  Sessions &amp; Hours
                 </button>
                 <button
                   onClick={() => setActiveAnalyticsTab('psychology')}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold shrink-0 transition-all ${
                     activeAnalyticsTab === 'psychology'
                       ? 'bg-[#C2410C] text-white shadow-xs'
                       : 'text-[#78716C] hover:text-[#1C1917]'
                   }`}
                 >
-                  Psychology & Errors
+                  Psychology &amp; Errors
                 </button>
               </div>
             </div>
@@ -1222,8 +1243,8 @@ export default function JournalPage() {
               </div>
             </div>
 
-            {/* Ledger Table */}
-            <div className="overflow-x-auto">
+            {/* Desktop / Tablet Ledger Table (hidden on mobile md:block) */}
+            <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-left text-xs">
                 <thead className="bg-[#F5F5F4] text-[#78716C] font-semibold uppercase tracking-wider text-[10px] border-b border-[#E7E5E4]">
                   <tr>
@@ -1256,54 +1277,145 @@ export default function JournalPage() {
                     filteredTrades.map((t) => (
                       <tr
                         key={t.id}
-                      onClick={() => setSelectedAutopsyTrade(t)}
-                      className="hover:bg-[#FFF7ED]/30 transition-colors cursor-pointer group"
-                    >
-                      {/* Ticket & Pair */}
-                      <td className="py-3.5 px-4 whitespace-nowrap">
-                        <div className="flex items-center gap-2">
+                        onClick={() => setSelectedAutopsyTrade(t)}
+                        className="hover:bg-[#FFF7ED]/30 transition-colors cursor-pointer group"
+                      >
+                        {/* Ticket & Pair */}
+                        <td className="py-3.5 px-4 whitespace-nowrap">
+                          <div className="flex items-center gap-2">
+                            <span
+                              className={`px-1.5 py-0.5 rounded text-[9px] font-bold ${
+                                t.direction === 'LONG'
+                                  ? 'bg-[#DCFCE7] text-[#15803D]'
+                                  : 'bg-[#FEE2E2] text-[#B91C1C]'
+                              }`}
+                            >
+                              {t.direction}
+                            </span>
+                            <div>
+                              <span className="font-bold text-[#1C1917] block">{t.pair}</span>
+                              <span className="font-mono text-[10px] text-[#78716C]">#{t.ticketId}</span>
+                            </div>
+                          </div>
+                        </td>
+
+                        {/* Setup & Timeframe */}
+                        <td className="py-3.5 px-4 whitespace-nowrap">
+                          <span className="font-medium text-[#44403C] block">{t.setupType}</span>
+                          <span className="text-[10px] text-[#78716C] font-mono">{t.timeframe}</span>
+                        </td>
+
+                        {/* Entry & Exit Price */}
+                        <td className="py-3.5 px-4 whitespace-nowrap font-mono text-[11px]">
+                          <span className="text-[#1C1917] block">{t.entryPrice}</span>
+                          <span className="text-[#78716C] text-[10px]">&rarr; {t.exitPrice}</span>
+                        </td>
+
+                        {/* SL & TP */}
+                        <td className="py-3.5 px-4 whitespace-nowrap font-mono text-[10px]">
+                          <span className="text-[#B91C1C] block">SL: {t.stopLoss}</span>
+                          <span className="text-[#15803D] block">TP: {t.takeProfit}</span>
+                        </td>
+
+                        {/* R:R */}
+                        <td className="py-3.5 px-4 whitespace-nowrap font-mono">
+                          <span className="font-bold text-[#1C1917] block">{t.realizedRR >= 0 ? `+${t.realizedRR}R` : `${t.realizedRR}R`}</span>
+                          <span className="text-[10px] text-[#78716C]">Plan: {t.riskReward}R</span>
+                        </td>
+
+                        {/* Outcome Badge */}
+                        <td className="py-3.5 px-4 whitespace-nowrap">
                           <span
-                            className={`px-1.5 py-0.5 rounded text-[9px] font-bold ${
-                              t.direction === 'LONG'
+                            className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                              t.outcome === 'WIN'
                                 ? 'bg-[#DCFCE7] text-[#15803D]'
-                                : 'bg-[#FEE2E2] text-[#B91C1C]'
+                                : t.outcome === 'LOSS'
+                                ? 'bg-[#FEE2E2] text-[#B91C1C]'
+                                : 'bg-[#F5F5F4] text-[#78716C]'
                             }`}
                           >
-                            {t.direction}
+                            {t.outcome}
                           </span>
-                          <div>
-                            <span className="font-bold text-[#1C1917] block">{t.pair}</span>
-                            <span className="font-mono text-[10px] text-[#78716C]">#{t.ticketId}</span>
-                          </div>
-                        </div>
-                      </td>
+                        </td>
 
-                      {/* Setup & Timeframe */}
-                      <td className="py-3.5 px-4 whitespace-nowrap">
-                        <span className="font-medium text-[#44403C] block">{t.setupType}</span>
-                        <span className="text-[10px] text-[#78716C] font-mono">{t.timeframe}</span>
-                      </td>
+                        {/* Realized P&L */}
+                        <td className="py-3.5 px-4 whitespace-nowrap font-mono">
+                          <span
+                            className={`font-bold block ${
+                              t.profitDollar > 0
+                                ? 'text-[#15803D]'
+                                : t.profitDollar < 0
+                                ? 'text-[#B91C1C]'
+                                : 'text-[#78716C]'
+                            }`}
+                          >
+                            {t.profitDollar > 0 ? `+$${t.profitDollar.toFixed(2)}` : t.profitDollar < 0 ? `-$${Math.abs(t.profitDollar).toFixed(2)}` : '$0.00'}
+                          </span>
+                          <span className="text-[10px] text-[#78716C]">
+                            {t.profitPercent > 0 ? `+${t.profitPercent}%` : `${t.profitPercent}%`}
+                          </span>
+                        </td>
 
-                      {/* Entry & Exit Price */}
-                      <td className="py-3.5 px-4 whitespace-nowrap font-mono text-[11px]">
-                        <span className="text-[#1C1917] block">{t.entryPrice}</span>
-                        <span className="text-[#78716C] text-[10px]">&rarr; {t.exitPrice}</span>
-                      </td>
+                        {/* Session & Tag */}
+                        <td className="py-3.5 px-4 whitespace-nowrap">
+                          <span className="text-[#44403C] block text-[11px]">{t.session}</span>
+                          <span className="text-[10px] text-[#C2410C] font-medium">{t.mistakeTag || 'Followed Plan'}</span>
+                        </td>
 
-                      {/* SL & TP */}
-                      <td className="py-3.5 px-4 whitespace-nowrap font-mono text-[10px]">
-                        <span className="text-[#B91C1C] block">SL: {t.stopLoss}</span>
-                        <span className="text-[#15803D] block">TP: {t.takeProfit}</span>
-                      </td>
+                        {/* Inspect Action */}
+                        <td className="py-3.5 px-4 text-right whitespace-nowrap">
+                          <button
+                            type="button"
+                            className="px-2.5 py-1 rounded-lg bg-white text-[#78716C] group-hover:text-[#C2410C] border border-[#E7E5E4] group-hover:border-[#FED7AA] transition-colors inline-flex items-center gap-1 text-[11px]"
+                          >
+                            <span>Autopsy</span>
+                            <ExternalLink className="w-3 h-3" />
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
 
-                      {/* R:R */}
-                      <td className="py-3.5 px-4 whitespace-nowrap font-mono">
-                        <span className="font-bold text-[#1C1917] block">{t.realizedRR >= 0 ? `+${t.realizedRR}R` : `${t.realizedRR}R`}</span>
-                        <span className="text-[10px] text-[#78716C]">Plan: {t.riskReward}R</span>
-                      </td>
+            {/* Mobile Trade Cards Feed (md:hidden) */}
+            <div className="md:hidden divide-y divide-[#E7E5E4]">
+              {filteredTrades.length === 0 ? (
+                <div className="py-12 px-4 text-center space-y-2">
+                  <p className="font-bold text-sm text-[#1C1917]">No Verified Trades Logged</p>
+                  <p className="text-xs text-[#78716C] leading-relaxed">
+                    {trades.length === 0
+                      ? 'Your journal ledger updates automatically when you sync trades or tap "+ Log Trade".'
+                      : 'No trades match your active filter criteria.'}
+                  </p>
+                </div>
+              ) : (
+                filteredTrades.map((t) => (
+                  <div
+                    key={t.id}
+                    onClick={() => {
+                      setAutopsyMobileTab('telemetry');
+                      setSelectedAutopsyTrade(t);
+                    }}
+                    className="p-4 hover:bg-[#FFF7ED]/40 active:bg-[#FFF7ED]/70 transition-colors cursor-pointer space-y-2.5"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                            t.direction === 'LONG'
+                              ? 'bg-[#DCFCE7] text-[#15803D]'
+                              : 'bg-[#FEE2E2] text-[#B91C1C]'
+                          }`}
+                        >
+                          {t.direction}
+                        </span>
+                        <span className="font-bold text-sm text-[#1C1917]">{t.pair}</span>
+                        <span className="text-[10px] text-[#78716C] font-mono">#{t.ticketId}</span>
+                      </div>
 
-                      {/* Outcome Badge */}
-                      <td className="py-3.5 px-4 whitespace-nowrap">
+                      <div className="flex items-center gap-2">
                         <span
                           className={`px-2 py-0.5 rounded text-[10px] font-bold ${
                             t.outcome === 'WIN'
@@ -1315,12 +1427,8 @@ export default function JournalPage() {
                         >
                           {t.outcome}
                         </span>
-                      </td>
-
-                      {/* Realized P&L */}
-                      <td className="py-3.5 px-4 whitespace-nowrap font-mono">
                         <span
-                          className={`font-bold block ${
+                          className={`font-mono font-bold text-xs ${
                             t.profitDollar > 0
                               ? 'text-[#15803D]'
                               : t.profitDollar < 0
@@ -1328,376 +1436,859 @@ export default function JournalPage() {
                               : 'text-[#78716C]'
                           }`}
                         >
-                          {t.profitDollar > 0 ? `+$${t.profitDollar.toFixed(2)}` : t.profitDollar < 0 ? `-$${Math.abs(t.profitDollar).toFixed(2)}` : '$0.00'}
+                          {t.profitDollar > 0
+                            ? `+$${t.profitDollar.toFixed(2)}`
+                            : t.profitDollar < 0
+                            ? `-$${Math.abs(t.profitDollar).toFixed(2)}`
+                            : '$0.00'}
                         </span>
-                        <span className="text-[10px] text-[#78716C]">
-                          {t.profitPercent > 0 ? `+${t.profitPercent}%` : `${t.profitPercent}%`}
+                      </div>
+                    </div>
+
+                    {/* Mobile Sub-telemetry Row */}
+                    <div className="flex items-center justify-between text-xs text-[#78716C] bg-[#FAFAF9] p-2.5 rounded-xl border border-[#E7E5E4]/60 font-mono">
+                      <div>
+                        <span className="text-[9px] block text-[#A8A29E]">Entry &rarr; Exit</span>
+                        <span className="text-[#1C1917] font-semibold text-[11px]">{t.entryPrice} &rarr; {t.exitPrice}</span>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-[9px] block text-[#A8A29E]">Realized R:R</span>
+                        <span className="text-[#C2410C] font-bold text-[11px]">
+                          {t.realizedRR >= 0 ? `+${t.realizedRR}R` : `${t.realizedRR}R`}
                         </span>
-                      </td>
+                      </div>
+                    </div>
 
-                      {/* Session & Tag */}
-                      <td className="py-3.5 px-4 whitespace-nowrap">
-                        <span className="text-[#44403C] block text-[11px]">{t.session}</span>
-                        <span className="text-[10px] text-[#C2410C] font-medium">{t.mistakeTag || 'Followed Plan'}</span>
-                      </td>
-
-                      {/* Inspect Action */}
-                      <td className="py-3.5 px-4 text-right whitespace-nowrap">
-                        <button
-                          type="button"
-                          className="px-2.5 py-1 rounded-lg bg-white text-[#78716C] group-hover:text-[#C2410C] border border-[#E7E5E4] group-hover:border-[#FED7AA] transition-colors inline-flex items-center gap-1 text-[11px]"
-                        >
-                          <span>Autopsy</span>
-                          <ExternalLink className="w-3 h-3" />
-                        </button>
-                      </td>
-                    </tr>
-                  ))
-                )}
-                </tbody>
-              </table>
+                    <div className="flex items-center justify-between text-[11px] pt-0.5 text-[#78716C]">
+                      <span className="truncate max-w-[210px]">
+                        {t.setupType} • {t.timeframe} • {t.session}
+                      </span>
+                      <span className="text-[#C2410C] font-semibold flex items-center gap-0.5 shrink-0">
+                        <span>Autopsy</span>
+                        <ChevronRight className="w-3 h-3" />
+                      </span>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </div>
+      )}
+
+      {/* Mobile Floating Action Button (FAB) for instant one-touch logging */}
+      {user && (
+        <button
+          type="button"
+          onClick={() => {
+            setLogModalMobileTab('params');
+            setIsLogModalOpen(true);
+          }}
+          className="sm:hidden fixed bottom-6 right-5 z-40 h-13 w-13 rounded-2xl bg-[#C2410C] hover:bg-[#EA580C] text-white shadow-xl shadow-[#C2410C]/40 flex items-center justify-center transition-transform active:scale-90 border border-white/20 cursor-pointer"
+          title="Log Trade"
+        >
+          <Plus className="w-6 h-6" />
+        </button>
       )}
 
       {/* DETAILED TRADE AUTOPSY INSPECTOR MODAL */}
       {selectedAutopsyTrade && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-          <div className="bg-white rounded-3xl border border-[#E7E5E4] max-w-xl w-full p-6 sm:p-7 shadow-2xl space-y-5 animate-in fade-in-50 zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/65 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="bg-white rounded-3xl border border-[#E7E5E4] max-w-4xl w-full shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
             {/* Header */}
-            <div className="flex items-center justify-between pb-3 border-b border-[#E7E5E4]">
-              <div className="flex items-center gap-2.5">
+            <div className="px-6 py-4 bg-gradient-to-r from-[#1C1917] via-[#292524] to-[#1C1917] text-white flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-3">
                 <span
-                  className={`px-2 py-0.5 rounded text-xs font-bold ${
+                  className={`px-2.5 py-1 rounded-lg text-xs font-bold font-mono ${
                     selectedAutopsyTrade.direction === 'LONG'
-                      ? 'bg-[#DCFCE7] text-[#15803D]'
-                      : 'bg-[#FEE2E2] text-[#B91C1C]'
+                      ? 'bg-[#15803D] text-white shadow-xs'
+                      : 'bg-[#B91C1C] text-white shadow-xs'
                   }`}
                 >
                   {selectedAutopsyTrade.direction}
                 </span>
-                <h3 className="text-base sm:text-lg font-bold text-[#1C1917]">
-                  {selectedAutopsyTrade.pair} Trade Autopsy
-                </h3>
-                <span className="font-mono text-xs text-[#78716C]">
-                  #{selectedAutopsyTrade.ticketId}
-                </span>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-base font-bold text-white tracking-tight">
+                      {selectedAutopsyTrade.pair} Trade Autopsy
+                    </h3>
+                    <span className="font-mono text-xs text-[#A8A29E]">
+                      #{selectedAutopsyTrade.ticketId}
+                    </span>
+                  </div>
+                  <p className="text-xs text-[#A8A29E] flex items-center gap-2">
+                    <span>{selectedAutopsyTrade.setupType}</span>
+                    <span>•</span>
+                    <span>{selectedAutopsyTrade.timeframe}</span>
+                    <span>•</span>
+                    <span>{selectedAutopsyTrade.session}</span>
+                  </p>
+                </div>
               </div>
               <button
                 onClick={() => setSelectedAutopsyTrade(null)}
-                className="w-8 h-8 rounded-lg flex items-center justify-center text-[#78716C] hover:text-[#1C1917] hover:bg-[#F5F5F4]"
+                className="w-8 h-8 rounded-xl bg-white/10 hover:bg-white/20 text-[#D6D3D1] hover:text-white flex items-center justify-center transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            {/* Price Ladder Visualization */}
-            <div className="grid grid-cols-4 gap-2 text-center p-3 rounded-2xl bg-[#FAFAF9] border border-[#E7E5E4] text-xs">
-              <div>
-                <span className="text-[10px] text-[#78716C] block">Entry Price</span>
-                <span className="font-bold font-mono text-[#1C1917] text-xs">{selectedAutopsyTrade.entryPrice}</span>
-              </div>
-              <div>
-                <span className="text-[10px] text-[#B91C1C] block">Stop Loss</span>
-                <span className="font-bold font-mono text-[#B91C1C] text-xs">{selectedAutopsyTrade.stopLoss}</span>
-              </div>
-              <div>
-                <span className="text-[10px] text-[#15803D] block">Take Profit</span>
-                <span className="font-bold font-mono text-[#15803D] text-xs">{selectedAutopsyTrade.takeProfit}</span>
-              </div>
-              <div>
-                <span className="text-[10px] text-[#C2410C] block">Exit Price</span>
-                <span className="font-bold font-mono text-[#C2410C] text-xs">{selectedAutopsyTrade.exitPrice}</span>
-              </div>
-            </div>
-
-            {/* Stats Row */}
-            <div className="grid grid-cols-3 gap-2.5 text-xs">
-              <div className="p-3 rounded-xl bg-[#FAFAF9] border border-[#E7E5E4]">
-                <span className="text-[#78716C] block text-[10px]">Realized Return</span>
-                <span
-                  className={`text-sm font-bold font-mono ${
-                    selectedAutopsyTrade.profitDollar >= 0 ? 'text-[#15803D]' : 'text-[#B91C1C]'
+            {/* Mobile Tab Switcher (Visible on < lg, hidden on desktop lg+) */}
+            <div className="lg:hidden flex items-center p-2.5 bg-[#F5F5F4] border-b border-[#E7E5E4] shrink-0">
+              <div className="grid grid-cols-2 gap-1.5 w-full bg-[#E7E5E4]/70 p-1 rounded-xl text-xs font-bold">
+                <button
+                  type="button"
+                  onClick={() => setAutopsyMobileTab('telemetry')}
+                  className={`py-2 rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+                    autopsyMobileTab === 'telemetry'
+                      ? 'bg-white text-[#C2410C] shadow-xs'
+                      : 'text-[#78716C]'
                   }`}
                 >
-                  {selectedAutopsyTrade.profitDollar >= 0
-                    ? `+$${selectedAutopsyTrade.profitDollar.toFixed(2)} (+${selectedAutopsyTrade.profitPercent}%)`
-                    : `-$${Math.abs(selectedAutopsyTrade.profitDollar).toFixed(2)} (${selectedAutopsyTrade.profitPercent}%)`}
-                </span>
-              </div>
-
-              <div className="p-3 rounded-xl bg-[#FAFAF9] border border-[#E7E5E4]">
-                <span className="text-[#78716C] block text-[10px]">Realized R:R</span>
-                <span className="text-sm font-bold font-mono text-[#1C1917]">
-                  {selectedAutopsyTrade.realizedRR}R (Target: {selectedAutopsyTrade.riskReward}R)
-                </span>
-              </div>
-
-              <div className="p-3 rounded-xl bg-[#FAFAF9] border border-[#E7E5E4]">
-                <span className="text-[#78716C] block text-[10px]">Holding Time</span>
-                <span className="text-sm font-bold font-mono text-[#1C1917] flex items-center gap-1">
-                  <Clock className="w-3 h-3 text-[#C2410C]" />
-                  <span>{selectedAutopsyTrade.holdingTime}</span>
-                </span>
+                  <Activity className="w-3.5 h-3.5" />
+                  <span>Telemetry</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAutopsyMobileTab('notepad')}
+                  className={`py-2 rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+                    autopsyMobileTab === 'notepad'
+                      ? 'bg-white text-[#C2410C] shadow-xs'
+                      : 'text-[#78716C]'
+                  }`}
+                >
+                  <BookOpen className="w-3.5 h-3.5" />
+                  <span>Notepad Notes</span>
+                </button>
               </div>
             </div>
 
-            {/* Pre-Trade Thesis & Post-Trade Retrospective */}
-            <div className="space-y-3 text-xs">
-              <div>
-                <span className="font-bold text-[#C2410C] block mb-1">Pre-Trade Entry Thesis:</span>
-                <p className="p-3 rounded-xl bg-[#FAFAF9] border border-[#E7E5E4] text-[#44403C] leading-relaxed">
-                  {selectedAutopsyTrade.preTradeThesis}
-                </p>
+            {/* Two-Column Body */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 flex-1 min-h-0 overflow-y-auto">
+              {/* Left Panel: Telemetry & Price Ladder */}
+              <div className={`lg:col-span-5 p-4 sm:p-6 space-y-4 border-b lg:border-b-0 lg:border-r border-[#E7E5E4] bg-white ${autopsyMobileTab === 'telemetry' ? 'block' : 'hidden lg:block'}`}>
+                <span className="text-[11px] font-bold uppercase tracking-wider text-[#78716C] flex items-center gap-1.5 pb-2 border-b border-[#F5F5F4]">
+                  <Activity className="w-3.5 h-3.5 text-[#C2410C]" />
+                  Execution Telemetry
+                </span>
+
+                {/* Price Ladder */}
+                <div className="grid grid-cols-2 gap-2 text-center p-3 rounded-2xl bg-[#FAFAF9] border border-[#E7E5E4] text-xs font-mono">
+                  <div className="p-2 rounded-xl bg-white border border-[#E7E5E4]">
+                    <span className="text-[10px] text-[#78716C] block font-sans">Entry Price</span>
+                    <span className="font-bold text-[#1C1917] text-xs">{selectedAutopsyTrade.entryPrice}</span>
+                  </div>
+                  <div className="p-2 rounded-xl bg-white border border-[#E7E5E4]">
+                    <span className="text-[10px] text-[#B91C1C] block font-sans">Stop Loss</span>
+                    <span className="font-bold text-[#B91C1C] text-xs">{selectedAutopsyTrade.stopLoss}</span>
+                  </div>
+                  <div className="p-2 rounded-xl bg-white border border-[#E7E5E4]">
+                    <span className="text-[10px] text-[#15803D] block font-sans">Take Profit</span>
+                    <span className="font-bold text-[#15803D] text-xs">{selectedAutopsyTrade.takeProfit}</span>
+                  </div>
+                  <div className="p-2 rounded-xl bg-white border border-[#E7E5E4]">
+                    <span className="text-[10px] text-[#C2410C] block font-sans">Exit Price</span>
+                    <span className="font-bold text-[#C2410C] text-xs">{selectedAutopsyTrade.exitPrice}</span>
+                  </div>
+                </div>
+
+                {/* Return Stats */}
+                <div className="space-y-2">
+                  <div className="p-3.5 rounded-2xl bg-[#FAFAF9] border border-[#E7E5E4] flex items-center justify-between">
+                    <div>
+                      <span className="text-[10px] text-[#78716C] block">Realized Net Return</span>
+                      <span
+                        className={`text-lg font-bold font-mono ${
+                          selectedAutopsyTrade.profitDollar >= 0 ? 'text-[#15803D]' : 'text-[#B91C1C]'
+                        }`}
+                      >
+                        {selectedAutopsyTrade.profitDollar >= 0
+                          ? `+$${selectedAutopsyTrade.profitDollar.toFixed(2)} (+${selectedAutopsyTrade.profitPercent}%)`
+                          : `-$${Math.abs(selectedAutopsyTrade.profitDollar).toFixed(2)} (${selectedAutopsyTrade.profitPercent}%)`}
+                      </span>
+                    </div>
+                    <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${
+                      selectedAutopsyTrade.outcome === 'WIN'
+                        ? 'bg-[#DCFCE7] text-[#15803D]'
+                        : selectedAutopsyTrade.outcome === 'LOSS'
+                        ? 'bg-[#FEE2E2] text-[#B91C1C]'
+                        : 'bg-[#F5F5F4] text-[#78716C]'
+                    }`}>
+                      {selectedAutopsyTrade.outcome}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div className="p-3 rounded-xl bg-[#FAFAF9] border border-[#E7E5E4]">
+                      <span className="text-[#78716C] block text-[10px]">Realized R:R</span>
+                      <span className="font-bold font-mono text-sm text-[#1C1917]">
+                        {selectedAutopsyTrade.realizedRR}R
+                      </span>
+                      <span className="text-[10px] text-[#A8A29E] block">Target: {selectedAutopsyTrade.riskReward}R</span>
+                    </div>
+                    <div className="p-3 rounded-xl bg-[#FAFAF9] border border-[#E7E5E4]">
+                      <span className="text-[#78716C] block text-[10px]">Holding Time</span>
+                      <span className="font-bold font-mono text-sm text-[#1C1917] flex items-center gap-1 mt-0.5">
+                        <Clock className="w-3.5 h-3.5 text-[#C2410C]" />
+                        <span>{selectedAutopsyTrade.holdingTime}</span>
+                      </span>
+                      <span className="text-[10px] text-[#A8A29E] block">{selectedAutopsyTrade.date}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Audit Record */}
+                <div className="p-3 rounded-xl bg-[#F0FDFA] border border-[#CCFBF1] flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-[#0F766E]" />
+                    <span className="text-[#0F766E] font-semibold">Rules Strictly Followed</span>
+                  </div>
+                  <span className="text-[10px] text-[#0F766E] font-mono">PASS (100%)</span>
+                </div>
               </div>
 
-              <div>
-                <span className="font-bold text-[#15803D] block mb-1">Post-Trade Retrospective:</span>
-                <p className="p-3 rounded-xl bg-[#FAFAF9] border border-[#E7E5E4] text-[#44403C] leading-relaxed">
-                  {selectedAutopsyTrade.postTradeReview}
-                </p>
-              </div>
-            </div>
+              {/* Right Panel: Ruled High-Level Trade Notepad Display */}
+              <div className={`lg:col-span-7 p-4 sm:p-6 bg-[#FAF8F5] flex flex-col space-y-3 ${autopsyMobileTab === 'notepad' ? 'flex' : 'hidden lg:flex'}`}>
+                <div className="flex items-center justify-between pb-2 border-b border-[#E7E5E4]">
+                  <div className="flex items-center gap-2">
+                    <BookOpen className="w-4 h-4 text-[#C2410C]" />
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#1C1917]">
+                      Trade Notepad &amp; Psychological Ledger
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    {selectedAutopsyTrade.emotion && (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#DCFCE7] text-[#15803D] border border-[#BBF7D0]">
+                        {selectedAutopsyTrade.emotion}
+                      </span>
+                    )}
+                    {selectedAutopsyTrade.mistakeTag && (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#FFF7ED] text-[#C2410C] border border-[#FED7AA]">
+                        {selectedAutopsyTrade.mistakeTag}
+                      </span>
+                    )}
+                  </div>
+                </div>
 
-            {/* Discipline Verification Check */}
-            <div className="p-3 rounded-xl bg-[#F0FDFA] border border-[#CCFBF1] flex items-center justify-between text-xs">
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-[#0F766E]" />
-                <span className="text-[#0F766E] font-semibold">Rules Strictly Followed • In Good Standing</span>
-              </div>
-              <span className="text-[10px] text-[#78716C] font-mono">{selectedAutopsyTrade.date}</span>
-            </div>
+                {/* Ruled Paper Container */}
+                <div className="flex-1 bg-[#FFFDF9] rounded-2xl border border-[#E7E5E4] p-4 sm:p-5 shadow-xs relative overflow-hidden flex flex-col space-y-4">
+                  {/* Ruled red margin line */}
+                  <div className="absolute top-0 bottom-0 left-6 w-[1.5px] bg-[#FECACA]/60 pointer-events-none" />
 
-            <div className="pt-2 flex justify-end">
-              <button
-                onClick={() => setSelectedAutopsyTrade(null)}
-                className="px-5 py-2 bg-[#1C1917] hover:bg-[#292524] text-white rounded-xl text-xs font-semibold"
-              >
-                Close Autopsy
-              </button>
+                  <div className="pl-4 space-y-3">
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-[11px] font-bold text-[#C2410C] uppercase tracking-wide">
+                          Pre-Trade Confluences &amp; Thesis:
+                        </span>
+                      </div>
+                      <p className="p-3 rounded-xl bg-white/70 border border-[#E7E5E4] text-xs font-mono text-[#292524] leading-relaxed whitespace-pre-wrap">
+                        {selectedAutopsyTrade.preTradeThesis || 'Standard setup execution logged.'}
+                      </p>
+                    </div>
+
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-[11px] font-bold text-[#15803D] uppercase tracking-wide">
+                          Post-Trade Retrospective &amp; Lessons:
+                        </span>
+                      </div>
+                      <p className="p-3 rounded-xl bg-white/70 border border-[#E7E5E4] text-xs font-mono text-[#292524] leading-relaxed whitespace-pre-wrap">
+                        {selectedAutopsyTrade.postTradeReview || 'Trade executed according to risk parameters.'}
+                      </p>
+                    </div>
+
+                    {selectedAutopsyTrade.notes && selectedAutopsyTrade.notes !== selectedAutopsyTrade.preTradeThesis && (
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-[11px] font-bold text-[#78716C] uppercase tracking-wide">
+                            Additional Field Notes:
+                          </span>
+                        </div>
+                        <p className="p-3 rounded-xl bg-white/70 border border-[#E7E5E4] text-xs font-mono text-[#44403C] leading-relaxed whitespace-pre-wrap">
+                          {selectedAutopsyTrade.notes}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="pt-2 flex items-center justify-between">
+                  <span className="text-[10px] text-[#A8A29E] font-mono flex items-center gap-1">
+                    <BadgeCheck className="w-3.5 h-3.5 text-[#0F766E]" />
+                    Verified Desk Log
+                  </span>
+                  <button
+                    onClick={() => setSelectedAutopsyTrade(null)}
+                    className="px-5 py-2 bg-[#1C1917] hover:bg-[#292524] text-white rounded-xl text-xs font-bold transition-all"
+                  >
+                    Close Autopsy
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* QUICK LOG TRADE MODAL */}
+      {/* PROFESSIONAL HIGH-LEVEL TRADE LOGGING CONSOLE & NOTEPAD */}
       {isLogModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-          <div className="bg-white rounded-3xl border border-[#E7E5E4] max-w-lg w-full p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between pb-3 border-b border-[#E7E5E4]">
-              <div className="flex items-center gap-2">
-                <Plus className="w-5 h-5 text-[#C2410C]" />
-                <h3 className="text-base font-bold text-[#1C1917]">Log Verified Trade</h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/65 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="bg-white rounded-3xl border border-[#E7E5E4] max-w-5xl w-full shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
+            {/* Modal Header */}
+            <div className="px-6 py-4 bg-gradient-to-r from-[#1C1917] via-[#292524] to-[#1C1917] text-white flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-[#C2410C] flex items-center justify-center text-white shadow-md">
+                  <PenLine className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-base font-bold text-white tracking-tight">Institutional Trade Logger</h3>
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#C2410C]/30 text-[#FED7AA] border border-[#C2410C]/40">
+                      Tier 1 Desk Audit
+                    </span>
+                  </div>
+                  <p className="text-xs text-[#A8A29E]">
+                    Dual-telemetry ledger: execution metrics &amp; psychological notepad
+                  </p>
+                </div>
               </div>
-              <button
-                onClick={() => setIsLogModalOpen(false)}
-                className="text-[#78716C] hover:text-[#1C1917]"
-              >
-                <X className="w-5 h-5" />
-              </button>
+
+              <div className="flex items-center gap-3">
+                {liveRR && (
+                  <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-xl bg-white/10 border border-white/15 text-xs font-mono">
+                    <span className="text-[#A8A29E]">Live Target R:R:</span>
+                    <span className={`font-bold ${parseFloat(liveRR) >= 2 ? 'text-[#4ADE80]' : parseFloat(liveRR) >= 1 ? 'text-[#FBBF24]' : 'text-[#F87171]'}`}>
+                      1 : {liveRR}
+                    </span>
+                  </div>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setIsLogModalOpen(false)}
+                  className="w-8 h-8 rounded-xl bg-white/10 hover:bg-white/20 text-[#D6D3D1] hover:text-white flex items-center justify-center transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
             </div>
 
-            <form onSubmit={handleAddTrade} className="space-y-4 text-xs">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-[#44403C] font-semibold block mb-1">Pair / Instrument</label>
-                  <input
-                    type="text"
-                    required
-                    value={formPair}
-                    onChange={(e) => setFormPair(e.target.value)}
-                    placeholder="e.g. EUR/USD or XAU/USD"
-                    className="w-full px-3 py-2 bg-white border border-[#E7E5E4] rounded-xl text-[#1C1917] placeholder-[#A8A29E] focus:border-[#C2410C]"
-                  />
-                </div>
-                <div>
-                  <label className="text-[#44403C] font-semibold block mb-1">Direction</label>
-                  <div className="grid grid-cols-2 gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setFormDirection('LONG')}
-                      className={`py-2 rounded-xl font-bold transition-all ${
-                        formDirection === 'LONG'
-                          ? 'bg-[#15803D] text-white shadow-xs'
-                          : 'bg-[#FAFAF9] text-[#78716C] border border-[#E7E5E4]'
-                      }`}
-                    >
-                      BUY / LONG
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setFormDirection('SHORT')}
-                      className={`py-2 rounded-xl font-bold transition-all ${
-                        formDirection === 'SHORT'
-                          ? 'bg-[#B91C1C] text-white shadow-xs'
-                          : 'bg-[#FAFAF9] text-[#78716C] border border-[#E7E5E4]'
-                      }`}
-                    >
-                      SELL / SHORT
-                    </button>
+            {/* Mobile Tab Switcher (Visible on < lg, hidden on desktop lg+) */}
+            <div className="lg:hidden flex items-center p-2.5 bg-[#F5F5F4] border-b border-[#E7E5E4] shrink-0">
+              <div className="grid grid-cols-2 gap-1.5 w-full bg-[#E7E5E4]/70 p-1 rounded-xl text-xs font-bold">
+                <button
+                  type="button"
+                  onClick={() => setLogModalMobileTab('params')}
+                  className={`py-2 rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+                    logModalMobileTab === 'params'
+                      ? 'bg-white text-[#C2410C] shadow-xs'
+                      : 'text-[#78716C]'
+                  }`}
+                >
+                  <Activity className="w-3.5 h-3.5" />
+                  <span>1. Parameters</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setLogModalMobileTab('notes')}
+                  className={`py-2 rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+                    logModalMobileTab === 'notes'
+                      ? 'bg-white text-[#C2410C] shadow-xs'
+                      : 'text-[#78716C]'
+                  }`}
+                >
+                  <BookOpen className="w-3.5 h-3.5" />
+                  <span>2. Notepad</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Two-Column Body */}
+            <form onSubmit={handleAddTrade} className="flex flex-col flex-1 min-h-0">
+              <div className="grid grid-cols-1 lg:grid-cols-12 flex-1 min-h-0 overflow-y-auto">
+                {/* Left Panel: Execution Telemetry (6 cols) */}
+                <div className={`lg:col-span-6 p-4 sm:p-6 space-y-4 border-b lg:border-b-0 lg:border-r border-[#E7E5E4] bg-white ${logModalMobileTab === 'params' ? 'block' : 'hidden lg:block'}`}>
+                  <div className="flex items-center justify-between pb-2 border-b border-[#F5F5F4]">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#78716C] flex items-center gap-1.5">
+                      <Activity className="w-3.5 h-3.5 text-[#C2410C]" />
+                      Execution Parameters
+                    </span>
+                    <span className="text-[10px] font-mono text-[#A8A29E]">Step 1 / 2</span>
+                  </div>
+
+                  {/* Pair & Quick Picker */}
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-bold text-[#1C1917]">Instrument / Symbol</label>
+                      <div className="flex items-center gap-1">
+                        {['EUR/USD', 'GBP/USD', 'XAU/USD', 'US100', 'BTC/USD'].map((pair) => (
+                          <button
+                            key={pair}
+                            type="button"
+                            onClick={() => setFormPair(pair)}
+                            className={`px-1.5 py-0.5 rounded text-[10px] font-mono transition-colors ${
+                              formPair === pair
+                                ? 'bg-[#FFF7ED] text-[#C2410C] font-bold border border-[#FED7AA]'
+                                : 'bg-[#F5F5F4] text-[#78716C] hover:bg-[#E7E5E4]'
+                            }`}
+                          >
+                            {pair}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <input
+                      type="text"
+                      required
+                      value={formPair}
+                      onChange={(e) => setFormPair(e.target.value)}
+                      placeholder="e.g. EUR/USD, XAU/USD, US100"
+                      className="w-full px-3.5 py-2.5 bg-[#FAFAF9] border border-[#E7E5E4] rounded-xl text-xs font-mono text-[#1C1917] placeholder-[#A8A29E] focus:outline-none focus:border-[#C2410C] focus:bg-white transition-all font-semibold"
+                    />
+                  </div>
+
+                  {/* Direction & Outcome */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-xs font-bold text-[#1C1917] block mb-1.5">Order Direction</label>
+                      <div className="grid grid-cols-2 gap-1.5 p-1 bg-[#FAFAF9] rounded-xl border border-[#E7E5E4]">
+                        <button
+                          type="button"
+                          onClick={() => setFormDirection('LONG')}
+                          className={`py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1 ${
+                            formDirection === 'LONG'
+                              ? 'bg-[#15803D] text-white shadow-xs scale-100'
+                              : 'text-[#78716C] hover:text-[#1C1917]'
+                          }`}
+                        >
+                          <ArrowUpRight className="w-3.5 h-3.5" />
+                          <span>LONG</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setFormDirection('SHORT')}
+                          className={`py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1 ${
+                            formDirection === 'SHORT'
+                              ? 'bg-[#B91C1C] text-white shadow-xs scale-100'
+                              : 'text-[#78716C] hover:text-[#1C1917]'
+                          }`}
+                        >
+                          <ArrowDownRight className="w-3.5 h-3.5" />
+                          <span>SHORT</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="text-xs font-bold text-[#1C1917] block mb-1.5">Outcome Result</label>
+                      <div className="grid grid-cols-3 gap-1 p-1 bg-[#FAFAF9] rounded-xl border border-[#E7E5E4]">
+                        {(['WIN', 'LOSS', 'BE'] as const).map((out) => (
+                          <button
+                            key={out}
+                            type="button"
+                            onClick={() => setFormOutcome(out)}
+                            className={`py-2 rounded-lg text-xs font-bold transition-all ${
+                              formOutcome === out
+                                ? out === 'WIN'
+                                  ? 'bg-[#15803D] text-white shadow-xs'
+                                  : out === 'LOSS'
+                                  ? 'bg-[#B91C1C] text-white shadow-xs'
+                                  : 'bg-[#78716C] text-white shadow-xs'
+                                : 'text-[#78716C] hover:text-[#1C1917]'
+                            }`}
+                          >
+                            {out}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Setup Type, Timeframe & Market Session */}
+                  <div className="grid grid-cols-3 gap-2.5">
+                    <div>
+                      <label className="text-[11px] font-semibold text-[#44403C] block mb-1">Setup Type</label>
+                      <select
+                        value={formSetup}
+                        onChange={(e) => setFormSetup(e.target.value)}
+                        className="w-full px-2.5 py-2 bg-[#FAFAF9] border border-[#E7E5E4] rounded-xl text-xs text-[#1C1917] focus:border-[#C2410C] focus:bg-white"
+                      >
+                        <option value="Order Block (OB)">Order Block (OB)</option>
+                        <option value="Fair Value Gap (FVG)">Fair Value Gap (FVG)</option>
+                        <option value="Liquidity Sweep">Liquidity Sweep</option>
+                        <option value="Breaker Block">Breaker Block</option>
+                        <option value="SMC Divergence">SMC Divergence</option>
+                        <option value="London Breakout">London Breakout</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="text-[11px] font-semibold text-[#44403C] block mb-1">Timeframe</label>
+                      <select
+                        value={formTimeframe}
+                        onChange={(e) => setFormTimeframe(e.target.value)}
+                        className="w-full px-2.5 py-2 bg-[#FAFAF9] border border-[#E7E5E4] rounded-xl text-xs text-[#1C1917] focus:border-[#C2410C] focus:bg-white font-mono"
+                      >
+                        <option value="1m">1m</option>
+                        <option value="5m">5m</option>
+                        <option value="15m">15m</option>
+                        <option value="1H">1H</option>
+                        <option value="4H">4H</option>
+                        <option value="Daily">Daily</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="text-[11px] font-semibold text-[#44403C] block mb-1">Market Session</label>
+                      <select
+                        value={formSession}
+                        onChange={(e) => setFormSession(e.target.value)}
+                        className="w-full px-2.5 py-2 bg-[#FAFAF9] border border-[#E7E5E4] rounded-xl text-xs text-[#1C1917] focus:border-[#C2410C] focus:bg-white"
+                      >
+                        <option value="London">London</option>
+                        <option value="NY Killzone">NY Killzone</option>
+                        <option value="Asian Session">Asian Session</option>
+                        <option value="London/NY Overlap">London/NY Overlap</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Price Execution Ladder */}
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-[#1C1917] block">Price Execution Ladder</label>
+                    <div className="grid grid-cols-3 gap-2">
+                      <div>
+                        <span className="text-[10px] font-semibold text-[#78716C] block mb-1">Entry Price *</span>
+                        <input
+                          type="number"
+                          step="any"
+                          required
+                          value={formEntry}
+                          onChange={(e) => setFormEntry(e.target.value)}
+                          placeholder="1.08450"
+                          className="w-full px-2.5 py-2 bg-[#FAFAF9] border border-[#E7E5E4] rounded-xl text-xs font-mono font-bold text-[#1C1917] placeholder-[#A8A29E] focus:outline-none focus:border-[#C2410C] focus:bg-white"
+                        />
+                      </div>
+                      <div>
+                        <span className="text-[10px] font-semibold text-[#B91C1C] block mb-1">Stop Loss *</span>
+                        <input
+                          type="number"
+                          step="any"
+                          required
+                          value={formSL}
+                          onChange={(e) => setFormSL(e.target.value)}
+                          placeholder="1.08200"
+                          className="w-full px-2.5 py-2 bg-[#FAFAF9] border border-[#E7E5E4] rounded-xl text-xs font-mono font-bold text-[#B91C1C] placeholder-[#A8A29E] focus:outline-none focus:border-[#B91C1C] focus:bg-white"
+                        />
+                      </div>
+                      <div>
+                        <span className="text-[10px] font-semibold text-[#15803D] block mb-1">Take Profit *</span>
+                        <input
+                          type="number"
+                          step="any"
+                          required
+                          value={formTP}
+                          onChange={(e) => setFormTP(e.target.value)}
+                          placeholder="1.09200"
+                          className="w-full px-2.5 py-2 bg-[#FAFAF9] border border-[#E7E5E4] rounded-xl text-xs font-mono font-bold text-[#15803D] placeholder-[#A8A29E] focus:outline-none focus:border-[#15803D] focus:bg-white"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Lot Size & Exit */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-[11px] font-semibold text-[#44403C] block mb-1">Lot Size / Volume</label>
+                      <input
+                        type="number"
+                        step="any"
+                        value={formLotSize}
+                        onChange={(e) => setFormLotSize(e.target.value)}
+                        placeholder="2.00"
+                        className="w-full px-3 py-2 bg-[#FAFAF9] border border-[#E7E5E4] rounded-xl text-xs font-mono text-[#1C1917] focus:border-[#C2410C] focus:bg-white font-semibold"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[11px] font-semibold text-[#44403C] block mb-1">Exit Price (optional)</label>
+                      <input
+                        type="number"
+                        step="any"
+                        value={formExit}
+                        onChange={(e) => setFormExit(e.target.value)}
+                        placeholder="Defaults to TP or Entry"
+                        className="w-full px-3 py-2 bg-[#FAFAF9] border border-[#E7E5E4] rounded-xl text-xs font-mono text-[#1C1917] focus:border-[#C2410C] focus:bg-white"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Live R:R HUD Readout */}
+                  <div className="p-3 rounded-2xl bg-gradient-to-br from-[#FAFAF9] to-[#F5F5F4] border border-[#E7E5E4] flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-2">
+                      <div className="w-7 h-7 rounded-lg bg-[#C2410C]/10 text-[#C2410C] flex items-center justify-center">
+                        <Sparkles className="w-3.5 h-3.5" />
+                      </div>
+                      <div>
+                        <span className="text-[10px] text-[#78716C] block">Risk-to-Reward Ratio</span>
+                        <span className="font-mono font-bold text-sm text-[#1C1917]">
+                          {liveRR ? `1 : ${liveRR} R:R` : 'Enter Entry, SL & TP'}
+                        </span>
+                      </div>
+                    </div>
+                    {liveRR && (
+                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                        parseFloat(liveRR) >= 2.0
+                          ? 'bg-[#DCFCE7] text-[#15803D]'
+                          : parseFloat(liveRR) >= 1.0
+                          ? 'bg-[#FEF3C7] text-[#D97706]'
+                          : 'bg-[#FEE2E2] text-[#B91C1C]'
+                      }`}>
+                        {parseFloat(liveRR) >= 2.0 ? 'Optimal Setup (>= 2R)' : 'Sub-Optimal R:R'}
+                      </span>
+                    )}
                   </div>
                 </div>
-              </div>
 
-              <div className="grid grid-cols-3 gap-3">
-                <div>
-                  <label className="text-[#44403C] font-semibold block mb-1">Setup Type</label>
-                  <select
-                    value={formSetup}
-                    onChange={(e) => setFormSetup(e.target.value)}
-                    className="w-full px-3 py-2 bg-white border border-[#E7E5E4] rounded-xl text-[#1C1917] focus:border-[#C2410C]"
-                  >
-                    <option value="Order Block (OB)">Order Block (OB)</option>
-                    <option value="Fair Value Gap (FVG)">Fair Value Gap (FVG)</option>
-                    <option value="Liquidity Sweep">Liquidity Sweep</option>
-                    <option value="Breaker Block">Breaker Block</option>
-                    <option value="SMC Divergence">SMC Divergence</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="text-[#44403C] font-semibold block mb-1">Timeframe</label>
-                  <select
-                    value={formTimeframe}
-                    onChange={(e) => setFormTimeframe(e.target.value)}
-                    className="w-full px-3 py-2 bg-white border border-[#E7E5E4] rounded-xl text-[#1C1917] focus:border-[#C2410C]"
-                  >
-                    <option value="1m">1m</option>
-                    <option value="5m">5m</option>
-                    <option value="15m">15m</option>
-                    <option value="1H">1H</option>
-                    <option value="4H">4H</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="text-[#44403C] font-semibold block mb-1">Session</label>
-                  <select
-                    value={formSession}
-                    onChange={(e) => setFormSession(e.target.value)}
-                    className="w-full px-3 py-2 bg-white border border-[#E7E5E4] rounded-xl text-[#1C1917] focus:border-[#C2410C]"
-                  >
-                    <option value="London">London</option>
-                    <option value="NY Killzone">NY Killzone</option>
-                    <option value="Asian Session">Asian Session</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-3 gap-3">
-                <div>
-                  <label className="text-[#44403C] font-semibold block mb-1">Entry Price</label>
-                  <input
-                    type="number"
-                    step="any"
-                    required
-                    value={formEntry}
-                    onChange={(e) => setFormEntry(e.target.value)}
-                    placeholder="1.08420"
-                    className="w-full px-3 py-2 bg-white border border-[#E7E5E4] rounded-xl text-[#1C1917] font-mono placeholder-[#A8A29E] focus:border-[#C2410C]"
-                  />
-                </div>
-                <div>
-                  <label className="text-[#44403C] font-semibold block mb-1">Stop Loss</label>
-                  <input
-                    type="number"
-                    step="any"
-                    required
-                    value={formSL}
-                    onChange={(e) => setFormSL(e.target.value)}
-                    placeholder="1.08220"
-                    className="w-full px-3 py-2 bg-white border border-[#E7E5E4] rounded-xl text-[#1C1917] font-mono placeholder-[#A8A29E] focus:border-[#C2410C]"
-                  />
-                </div>
-                <div>
-                  <label className="text-[#44403C] font-semibold block mb-1">Take Profit</label>
-                  <input
-                    type="number"
-                    step="any"
-                    required
-                    value={formTP}
-                    onChange={(e) => setFormTP(e.target.value)}
-                    placeholder="1.08920"
-                    className="w-full px-3 py-2 bg-white border border-[#E7E5E4] rounded-xl text-[#1C1917] font-mono placeholder-[#A8A29E] focus:border-[#C2410C]"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-[#44403C] font-semibold block mb-1">Outcome</label>
-                  <div className="grid grid-cols-3 gap-1 bg-[#FAFAF9] p-1 rounded-xl border border-[#E7E5E4]">
-                    {(['WIN', 'LOSS', 'BE'] as const).map((out) => (
+                {/* Right Panel: Ruled High-Level Trading Notepad (6 cols) */}
+                <div className={`lg:col-span-6 p-4 sm:p-6 bg-[#FAF8F5] flex flex-col space-y-3 ${logModalMobileTab === 'notes' ? 'flex' : 'hidden lg:flex'}`}>
+                  <div className="flex items-center justify-between pb-2 border-b border-[#E7E5E4]">
+                    <div className="flex items-center gap-2">
+                      <BookOpen className="w-4 h-4 text-[#C2410C]" />
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-[#1C1917]">
+                        Trade Journal Notepad
+                      </span>
+                    </div>
+                    {/* Notepad Tabs */}
+                    <div className="flex items-center gap-1 bg-[#E7E5E4]/60 p-0.5 rounded-lg text-[10px] font-semibold">
                       <button
-                        key={out}
                         type="button"
-                        onClick={() => setFormOutcome(out)}
-                        className={`py-1.5 rounded-lg text-xs font-bold transition-all ${
-                          formOutcome === out
-                            ? out === 'WIN'
-                              ? 'bg-[#15803D] text-white shadow-xs'
-                              : out === 'LOSS'
-                              ? 'bg-[#B91C1C] text-white shadow-xs'
-                              : 'bg-[#78716C] text-white shadow-xs'
-                            : 'text-[#78716C]'
+                        onClick={() => setNotepadTab('thesis')}
+                        className={`px-2 py-1 rounded-md transition-all ${
+                          notepadTab === 'thesis'
+                            ? 'bg-white text-[#1C1917] shadow-xs font-bold'
+                            : 'text-[#78716C] hover:text-[#1C1917]'
                         }`}
                       >
-                        {out}
+                        Pre-Thesis
                       </button>
-                    ))}
+                      <button
+                        type="button"
+                        onClick={() => setNotepadTab('mindset')}
+                        className={`px-2 py-1 rounded-md transition-all ${
+                          notepadTab === 'mindset'
+                            ? 'bg-white text-[#1C1917] shadow-xs font-bold'
+                            : 'text-[#78716C] hover:text-[#1C1917]'
+                        }`}
+                      >
+                        Mindset &amp; Rules
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setNotepadTab('lessons')}
+                        className={`px-2 py-1 rounded-md transition-all ${
+                          notepadTab === 'lessons'
+                            ? 'bg-white text-[#1C1917] shadow-xs font-bold'
+                            : 'text-[#78716C] hover:text-[#1C1917]'
+                        }`}
+                      >
+                        Autopsy Review
+                      </button>
+                    </div>
                   </div>
-                </div>
 
-                <div>
-                  <label className="text-[#44403C] font-semibold block mb-1">Discipline Tag</label>
-                  <select
-                    value={formMistakeTag}
-                    onChange={(e) => setFormMistakeTag(e.target.value)}
-                    className="w-full px-3 py-2 bg-white border border-[#E7E5E4] rounded-xl text-[#1C1917] focus:border-[#C2410C]"
-                  >
-                    <option value="Followed Plan">Followed Plan (A+)</option>
-                    <option value="Patience / Waited">Patience / Waited for Shift</option>
-                    <option value="FOMO Entry">FOMO Entry</option>
-                    <option value="Moved SL Early">Moved SL Early</option>
-                    <option value="Revenge Trade">Revenge Trade</option>
-                  </select>
+                  {/* Quick Helper Insertion Chips */}
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="text-[10px] text-[#A8A29E] font-medium">Quick Insert:</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const timeStr = `[${new Date().toTimeString().slice(0, 5)} UTC] `;
+                        if (notepadTab === 'thesis') setFormPreThesis((prev) => prev ? `${prev}\n${timeStr}` : timeStr);
+                        else if (notepadTab === 'lessons') setFormPostReview((prev) => prev ? `${prev}\n${timeStr}` : timeStr);
+                        else setFormNotes((prev) => prev ? `${prev}\n${timeStr}` : timeStr);
+                      }}
+                      className="px-2 py-0.5 rounded-md bg-white hover:bg-[#FFF7ED] border border-[#E7E5E4] hover:border-[#FED7AA] text-[10px] text-[#78716C] hover:text-[#C2410C] font-mono transition-colors"
+                    >
+                      + Timestamp
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const snippet = `[HTF Bias: 4H Order Block tapped | 15m MSS confirmed]`;
+                        setFormPreThesis((prev) => prev ? `${prev}\n${snippet}` : snippet);
+                      }}
+                      className="px-2 py-0.5 rounded-md bg-white hover:bg-[#FFF7ED] border border-[#E7E5E4] hover:border-[#FED7AA] text-[10px] text-[#78716C] hover:text-[#C2410C] transition-colors"
+                    >
+                      + HTF Confluence
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const checklist = `[✓] London low swept\n[✓] FVG imbalance filled\n[✓] SL placed beyond swing high`;
+                        setFormPreThesis((prev) => prev ? `${prev}\n${checklist}` : checklist);
+                      }}
+                      className="px-2 py-0.5 rounded-md bg-white hover:bg-[#FFF7ED] border border-[#E7E5E4] hover:border-[#FED7AA] text-[10px] text-[#78716C] hover:text-[#C2410C] transition-colors"
+                    >
+                      + SMC Checklist
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const plan = `[Management: Move SL to Breakeven at +1.5R | Take 50% partial at 2R]`;
+                        setFormNotes((prev) => prev ? `${prev}\n${plan}` : plan);
+                      }}
+                      className="px-2 py-0.5 rounded-md bg-white hover:bg-[#FFF7ED] border border-[#E7E5E4] hover:border-[#FED7AA] text-[10px] text-[#78716C] hover:text-[#C2410C] transition-colors"
+                    >
+                      + Trailing Plan
+                    </button>
+                  </div>
+
+                  {/* Realistic Ruled Notepad Container */}
+                  <div className="flex-1 bg-[#FFFDF9] rounded-2xl border border-[#E7E5E4] p-4 sm:p-5 shadow-xs flex flex-col relative overflow-hidden min-h-[220px]">
+                    {/* Ruled Notebook Left Margin Line Accent */}
+                    <div className="absolute top-0 bottom-0 left-6 w-[1.5px] bg-[#FECACA]/60 pointer-events-none" />
+
+                    {notepadTab === 'thesis' && (
+                      <div className="flex-1 flex flex-col space-y-2 pl-4">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[11px] font-bold text-[#C2410C] uppercase tracking-wide">
+                            Pre-Trade Market Thesis &amp; Setup Context
+                          </span>
+                          <span className="text-[10px] text-[#A8A29E] font-mono">
+                            {formPreThesis.length} characters
+                          </span>
+                        </div>
+                        <textarea
+                          rows={7}
+                          value={formPreThesis}
+                          onChange={(e) => setFormPreThesis(e.target.value)}
+                          placeholder="Describe the trade context, higher timeframe bias, catalyst news, and reason for entry... (e.g. Swept Asian high, retested 15m mitigation block, clean 3R target to London low)."
+                          className="w-full flex-1 bg-transparent text-xs text-[#1C1917] leading-relaxed resize-none focus:outline-none placeholder-[#A8A29E] font-mono"
+                        />
+                      </div>
+                    )}
+
+                    {notepadTab === 'mindset' && (
+                      <div className="flex-1 flex flex-col space-y-3 pl-4">
+                        <div>
+                          <label className="text-[11px] font-bold text-[#1C1917] block mb-1.5">
+                            Execution Mindset / Emotional State
+                          </label>
+                          <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
+                            {[
+                              { label: 'Disciplined', color: 'bg-[#DCFCE7] text-[#15803D] border-[#BBF7D0]' },
+                              { label: 'Calm & Patient', color: 'bg-[#F0FDFA] text-[#0F766E] border-[#CCFBF1]' },
+                              { label: 'Hesitant / Late', color: 'bg-[#FEF3C7] text-[#D97706] border-[#FDE68A]' },
+                              { label: 'FOMO Entry', color: 'bg-[#FEE2E2] text-[#B91C1C] border-[#FECACA]' },
+                              { label: 'Revenge Trade', color: 'bg-[#FDF2F8] text-[#BE185D] border-[#FBCFE8]' },
+                              { label: 'Overconfident', color: 'bg-[#FFF7ED] text-[#C2410C] border-[#FED7AA]' },
+                            ].map((emo) => (
+                              <button
+                                key={emo.label}
+                                type="button"
+                                onClick={() => setFormEmotion(emo.label)}
+                                className={`px-2 py-1.5 rounded-xl text-[10px] font-bold border transition-all text-center truncate ${
+                                  formEmotion === emo.label
+                                    ? `${emo.color} ring-2 ring-offset-1 shadow-xs`
+                                    : 'bg-white text-[#78716C] border-[#E7E5E4] hover:bg-[#F5F5F4]'
+                                }`}
+                              >
+                                {emo.label}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="text-[11px] font-bold text-[#1C1917] block mb-1">
+                            Discipline Adherence Tag
+                          </label>
+                          <select
+                            value={formMistakeTag}
+                            onChange={(e) => setFormMistakeTag(e.target.value)}
+                            className="w-full px-2.5 py-1.5 bg-white border border-[#E7E5E4] rounded-xl text-xs text-[#1C1917] focus:border-[#C2410C]"
+                          >
+                            <option value="Followed Plan">Followed Plan (A+ Execution)</option>
+                            <option value="Patience / Waited">Patience / Waited for Shift</option>
+                            <option value="FOMO Entry">FOMO Entry</option>
+                            <option value="Moved SL Early">Moved SL Early</option>
+                            <option value="Overleveraged">Over-leveraged</option>
+                            <option value="Revenge Trade">Revenge Trade</option>
+                          </select>
+                        </div>
+
+                        <div className="flex-1">
+                          <label className="text-[10px] font-semibold text-[#78716C] block mb-1">
+                            Mental State Notes (Optional):
+                          </label>
+                          <textarea
+                            rows={3}
+                            value={formNotes}
+                            onChange={(e) => setFormNotes(e.target.value)}
+                            placeholder="How did you feel before clicking execution? Any heart rate spike or second guessing?"
+                            className="w-full bg-white/70 p-2.5 rounded-xl border border-[#E7E5E4] text-xs text-[#1C1917] focus:outline-none focus:border-[#C2410C] font-mono resize-none"
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {notepadTab === 'lessons' && (
+                      <div className="flex-1 flex flex-col space-y-2 pl-4">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[11px] font-bold text-[#15803D] uppercase tracking-wide">
+                            Post-Trade Retrospective &amp; Core Takeaway
+                          </span>
+                          <span className="text-[10px] text-[#A8A29E] font-mono">
+                            {formPostReview.length} characters
+                          </span>
+                        </div>
+                        <textarea
+                          rows={7}
+                          value={formPostReview}
+                          onChange={(e) => setFormPostReview(e.target.value)}
+                          placeholder="What did you do right? What could have been improved? Any management adjustments needed?"
+                          className="w-full flex-1 bg-transparent text-xs text-[#1C1917] leading-relaxed resize-none focus:outline-none placeholder-[#A8A29E] font-mono"
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Verification Checkbox */}
+                  <label className="flex items-center gap-2 p-2.5 rounded-xl bg-white border border-[#E7E5E4] cursor-pointer hover:border-[#FED7AA] transition-colors">
+                    <input
+                      type="checkbox"
+                      checked={formRulesFollowed}
+                      onChange={(e) => setFormRulesFollowed(e.target.checked)}
+                      className="rounded bg-white border-[#E7E5E4] text-[#C2410C] focus:ring-[#C2410C] w-4 h-4"
+                    />
+                    <div className="flex items-center gap-1.5 text-xs text-[#1C1917] font-semibold">
+                      <ShieldCheck className="w-3.5 h-3.5 text-[#0F766E]" />
+                      <span>Strict 1% Account Risk &amp; Verified Rules Followed</span>
+                    </div>
+                  </label>
                 </div>
               </div>
 
-              <div>
-                <label className="text-[#44403C] font-semibold block mb-1">Pre-Trade Entry Thesis</label>
-                <textarea
-                  rows={2}
-                  value={formPreThesis}
-                  onChange={(e) => setFormPreThesis(e.target.value)}
-                  placeholder="Confluences: Asian low swept, 15m order block tapped..."
-                  className="w-full px-3 py-2 bg-white border border-[#E7E5E4] rounded-xl text-[#1C1917] placeholder-[#A8A29E] focus:border-[#C2410C]"
-                />
-              </div>
-
-              <div className="pt-2 flex items-center justify-between">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={formRulesFollowed}
-                    onChange={(e) => setFormRulesFollowed(e.target.checked)}
-                    className="rounded bg-white border-[#E7E5E4] text-[#C2410C] focus:ring-[#C2410C]"
-                  />
-                  <span className="text-[#78716C] text-xs">Strict 1% Risk &amp; Rules Followed</span>
-                </label>
-
-                <div className="flex gap-2">
+              {/* Bottom Action Footer */}
+              <div className="p-4 sm:px-6 bg-[#FAFAF9] border-t border-[#E7E5E4] flex items-center justify-between shrink-0">
+                <span className="text-[11px] text-[#78716C] hidden sm:flex items-center gap-1">
+                  <BadgeCheck className="w-3.5 h-3.5 text-[#0F766E]" />
+                  Trade will be audited into your verified syndicate record
+                </span>
+                <div className="flex items-center gap-2.5 ml-auto w-full sm:w-auto justify-end">
                   <button
                     type="button"
                     onClick={() => setIsLogModalOpen(false)}
-                    className="px-4 py-2 bg-[#FAFAF9] text-[#78716C] hover:text-[#1C1917] rounded-xl text-xs font-semibold"
+                    className="flex-1 sm:flex-none px-4 py-2.5 bg-white hover:bg-[#F5F5F4] text-[#78716C] hover:text-[#1C1917] border border-[#E7E5E4] rounded-xl text-xs font-semibold transition-colors text-center"
                   >
-                    Cancel
+                    Discard
                   </button>
                   <button
                     type="submit"
-                    className="px-5 py-2 bg-[#C2410C] hover:bg-[#EA580C] text-white font-semibold rounded-xl text-xs shadow-xs"
+                    className="flex-1 sm:flex-none px-5 py-2.5 bg-[#C2410C] hover:bg-[#EA580C] text-white font-bold rounded-xl text-xs shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer text-center"
                   >
-                    Save &amp; Audit
+                    <Check className="w-4 h-4" />
+                    <span>Save &amp; Audit</span>
                   </button>
                 </div>
               </div>

@@ -1774,7 +1774,7 @@ export default function ForumPage() {
           {/* Connect Broker Button (Header Action) */}
           <button
             onClick={() => setShowConnectBrokerModal(true)}
-            className={`px-2.5 py-1 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 shadow-xs active:scale-95 border ${
+            className={`h-9 px-3 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 shadow-xs active:scale-95 border cursor-pointer ${
               user.account_verified
                 ? 'bg-[#F0FDFA] text-[#0F766E] border-[#CCFBF1] hover:bg-[#CCFBF1]'
                 : 'bg-[#FFF7ED] text-[#C2410C] border-[#FED7AA] hover:bg-[#FFEDD5]'
@@ -1790,17 +1790,16 @@ export default function ForumPage() {
           {/* Mobile Rules Icon */}
           <button
             onClick={() => setMobileInfoOpen(true)}
-            className="xl:hidden p-2 rounded-xl bg-[#FAFAF9] border border-[#E7E5E4] text-[#0F766E] hover:bg-[#F0FDFA] transition-all flex items-center gap-1 active:scale-95 shadow-xs"
+            className="xl:hidden h-9 w-9 rounded-xl bg-[#FAFAF9] border border-[#E7E5E4] text-[#0F766E] hover:bg-[#F0FDFA] transition-all flex items-center justify-center active:scale-95 shadow-xs cursor-pointer"
             title="Desk Verification Rules"
           >
             <ShieldCheck className="w-4 h-4" />
-            <span className="text-xs font-bold hidden sm:inline">Rules</span>
           </button>
 
           {/* Web Journal Direct Link (Desktop) */}
           <Link
             href="/journal"
-            className="hidden md:inline-flex text-xs font-semibold text-[#44403C] hover:text-[#C2410C] px-3 py-1.5 rounded-xl hover:bg-[#FFF7ED] border border-transparent hover:border-[#FED7AA] transition-all"
+            className="hidden md:inline-flex h-9 px-3 items-center text-xs font-semibold text-[#44403C] hover:text-[#C2410C] rounded-xl hover:bg-[#FFF7ED] border border-transparent hover:border-[#FED7AA] transition-all"
           >
             Web Journal
           </Link>
@@ -1811,7 +1810,7 @@ export default function ForumPage() {
           {/* User Account Chip -> Opens User Profile Modal */}
           <button
             onClick={() => openTraderProfile(user.display_name || user.name || user.username)}
-            className="px-2 sm:px-2.5 py-1 rounded-xl bg-[#FAFAF9] border border-[#E7E5E4] hover:border-[#FED7AA] hover:bg-[#FFF7ED] transition-all flex items-center gap-1.5 shadow-xs active:scale-95 text-left cursor-pointer"
+            className="h-9 px-2.5 rounded-xl bg-[#FAFAF9] border border-[#E7E5E4] hover:border-[#FED7AA] hover:bg-[#FFF7ED] transition-all flex items-center gap-2 shadow-xs active:scale-95 text-left cursor-pointer"
             title="Trader Identity Profile"
           >
             <TraderAvatar
@@ -1833,7 +1832,7 @@ export default function ForumPage() {
             href="https://t.me/PipBudBot"
             target="_blank"
             rel="noopener noreferrer"
-            className="h-8 px-2.5 sm:px-3 text-xs font-medium bg-[#C2410C] hover:bg-[#EA580C] text-white rounded-xl transition-all shadow-xs inline-flex items-center gap-1"
+            className="h-9 px-3 text-xs font-medium bg-[#C2410C] hover:bg-[#EA580C] text-white rounded-xl transition-all shadow-xs inline-flex items-center gap-1.5 active:scale-95 cursor-pointer"
           >
             <Send className="w-3 h-3" />
             <span className="hidden sm:inline">Bot</span>
@@ -1994,67 +1993,134 @@ export default function ForumPage() {
                 <p className="text-xs text-[#A8A29E]">No messages posted yet. Start the conversation!</p>
               </div>
             ) : (
-              currentMessages.map((msg) => (
+              currentMessages.map((msg) => {
+                if (msg.isDemotionNotice) {
+                  return (
+                    <div
+                      key={msg.id}
+                      className="my-3 rounded-2xl bg-gradient-to-r from-[#FEF2F2] via-[#FFF1F2] to-[#FFF5F5] border-2 border-[#FECACA] p-4 sm:p-5 shadow-xs relative overflow-hidden"
+                    >
+                      {/* Institutional Red Sentinel Accent Bar */}
+                      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#EF4444] via-[#DC2626] to-[#B91C1C]" />
+
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-3 border-b border-[#FEE2E2]">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-8 h-8 rounded-xl bg-[#DC2626] text-white flex items-center justify-center shrink-0 shadow-xs">
+                            <ShieldAlert className="w-4 h-4" />
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="font-mono font-bold text-xs uppercase tracking-wider text-[#991B1B]">
+                                {msg.author.name}
+                              </span>
+                              <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-[#DC2626] text-white tracking-wide">
+                                GOVERNANCE AUDIT
+                              </span>
+                            </div>
+                            <span className="text-[10px] text-[#B91C1C]/80 font-mono">
+                              Sentinel Merit Engine • Notice #{msg.id.toUpperCase()}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 text-[10px] text-[#991B1B] font-mono shrink-0">
+                          <Clock className="w-3 h-3" />
+                          <span>{msg.timestamp}</span>
+                        </div>
+                      </div>
+
+                      <div className="pt-3">
+                        <p className="text-xs sm:text-sm font-medium text-[#7F1D1D] leading-relaxed break-words font-mono bg-white/80 p-3 rounded-xl border border-[#FEE2E2]">
+                          {msg.content}
+                        </p>
+                      </div>
+
+                      {/* Audit Reactions & Transparency Footer */}
+                      <div className="flex items-center justify-between pt-3 text-[11px]">
+                        <div className="flex items-center gap-1.5">
+                          {Object.entries(msg.reactions).map(([emoji, count]) => {
+                            const hasReacted = userReactions[msg.id] === emoji;
+                            return (
+                              <button
+                                key={emoji}
+                                type="button"
+                                onClick={() => handleToggleReaction(msg.id, emoji)}
+                                className={`px-2.5 py-1 rounded-full text-[11px] flex items-center gap-1.5 transition-all duration-150 active:scale-110 cursor-pointer border ${
+                                  hasReacted
+                                    ? 'bg-[#FEE2E2] text-[#991B1B] border-[#FCA5A5] font-bold ring-1 ring-[#F87171]'
+                                    : 'bg-white hover:bg-[#FEF2F2] border-[#FECACA] text-[#7F1D1D]'
+                                }`}
+                                title={hasReacted ? `You reacted ${emoji}` : `Acknowledge audit with ${emoji}`}
+                              >
+                                <span>{emoji}</span>
+                                <span className="font-mono font-bold text-[10px]">{count}</span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                        <span className="text-[10px] text-[#991B1B] font-semibold flex items-center gap-1">
+                          <BadgeCheck className="w-3.5 h-3.5 text-[#DC2626]" />
+                          Immutable Desk Record
+                        </span>
+                      </div>
+                    </div>
+                  );
+                }
+
+                return (
                 <div
                   key={msg.id}
-                  className={`flex items-start gap-2.5 sm:gap-3.5 relative group p-2.5 -mx-2.5 rounded-2xl hover:bg-[#FAFAF9]/90 transition-all duration-150 ${
-                    msg.isDemotionNotice
-                      ? 'p-3 sm:p-4 rounded-2xl bg-[#FEF2F2] border border-[#FEE2E2]'
-                      : ''
-                  }`}
+                  className="flex items-start gap-2.5 sm:gap-3.5 relative group p-2.5 -mx-2.5 rounded-2xl hover:bg-[#FAFAF9]/90 transition-all duration-150"
                 >
                   {/* Floating Action Toolbar on Message Hover (Discord/Telegram Style) */}
-                  {!msg.isDemotionNotice && (
-                    <div className="absolute -top-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-150 bg-white/95 backdrop-blur-md border border-[#E7E5E4] rounded-xl shadow-md px-1.5 py-0.5 hidden sm:flex items-center gap-0.5 z-20 animate-in fade-in zoom-in-95 duration-100">
-                      {/* Quick Reaction Emojis */}
-                      {['🔥', '🎯', '🚀', '💡', '👏'].map((emoji) => (
-                        <button
-                          key={emoji}
-                          type="button"
-                          onClick={() => {
-                            handleToggleReaction(msg.id, emoji);
-                            triggerForumToast(`Reacted ${emoji} ✨`);
-                          }}
-                          className={`w-6 h-6 rounded-lg flex items-center justify-center text-xs transition-transform hover:scale-125 active:scale-150 cursor-pointer ${
-                            userReactions[msg.id] === emoji ? 'bg-[#FED7AA]' : 'hover:bg-[#FFF7ED]'
-                          }`}
-                          title={`React with ${emoji}`}
-                        >
-                          {emoji}
-                        </button>
-                      ))}
-
-                      <div className="w-[1px] h-3.5 bg-[#E7E5E4] mx-0.5" />
-
-                      {/* Reply Button */}
+                  <div className="absolute -top-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-150 bg-white/95 backdrop-blur-md border border-[#E7E5E4] rounded-xl shadow-md px-1.5 py-0.5 hidden sm:flex items-center gap-0.5 z-20 animate-in fade-in zoom-in-95 duration-100">
+                    {/* Quick Reaction Emojis */}
+                    {['🔥', '🎯', '🚀', '💡', '👏'].map((emoji) => (
                       <button
+                        key={emoji}
                         type="button"
                         onClick={() => {
-                          setReplyingTo(msg);
-                          setMessageInput(`@${msg.author.username} `);
+                          handleToggleReaction(msg.id, emoji);
+                          triggerForumToast(`Reacted ${emoji} ✨`);
                         }}
-                        className="p-1 rounded-lg text-[#78716C] hover:text-[#C2410C] hover:bg-[#FFF7ED] transition-colors cursor-pointer"
-                        title={`Reply to ${msg.author.name}`}
+                        className={`w-6 h-6 rounded-lg flex items-center justify-center text-xs transition-transform hover:scale-125 active:scale-150 cursor-pointer ${
+                          userReactions[msg.id] === emoji ? 'bg-[#FED7AA]' : 'hover:bg-[#FFF7ED]'
+                        }`}
+                        title={`React with ${emoji}`}
                       >
-                        <MessageSquare className="w-3.5 h-3.5" />
+                        {emoji}
                       </button>
+                    ))}
 
-                      {/* Copy Text Button */}
-                      <button
-                        type="button"
-                        onClick={async () => {
-                          if (navigator.clipboard) {
-                            await navigator.clipboard.writeText(msg.content);
-                            triggerForumToast('Message copied to clipboard 📋');
-                          }
-                        }}
-                        className="p-1 rounded-lg text-[#78716C] hover:text-[#1C1917] hover:bg-[#F5F5F4] transition-colors cursor-pointer"
-                        title="Copy message"
-                      >
-                        <Copy className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  )}
+                    <div className="w-[1px] h-3.5 bg-[#E7E5E4] mx-0.5" />
+
+                    {/* Reply Button */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setReplyingTo(msg);
+                        setMessageInput(`@${msg.author.username} `);
+                      }}
+                      className="p-1 rounded-lg text-[#78716C] hover:text-[#C2410C] hover:bg-[#FFF7ED] transition-colors cursor-pointer"
+                      title={`Reply to ${msg.author.name}`}
+                    >
+                      <MessageSquare className="w-3.5 h-3.5" />
+                    </button>
+
+                    {/* Copy Text Button */}
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        if (navigator.clipboard) {
+                          await navigator.clipboard.writeText(msg.content);
+                          triggerForumToast('Message copied to clipboard 📋');
+                        }
+                      }}
+                      className="p-1 rounded-lg text-[#78716C] hover:text-[#1C1917] hover:bg-[#F5F5F4] transition-colors cursor-pointer"
+                      title="Copy message"
+                    >
+                      <Copy className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
 
                   {/* Clickable Author Avatar */}
                   <TraderAvatar
@@ -2079,11 +2145,7 @@ export default function ForumPage() {
                       <button
                         type="button"
                         onClick={() => openTraderProfile(msg.author.name)}
-                        className={`px-1.5 sm:px-2 py-0.2 rounded text-[9px] sm:text-[10px] font-bold truncate cursor-pointer hover:opacity-90 ${
-                          msg.isDemotionNotice
-                            ? 'bg-[#B91C1C] text-white'
-                            : 'bg-[#FFF7ED] text-[#C2410C] border border-[#FED7AA]'
-                        }`}
+                        className="px-1.5 sm:px-2 py-0.2 rounded text-[9px] sm:text-[10px] font-bold truncate cursor-pointer hover:opacity-90 bg-[#FFF7ED] text-[#C2410C] border border-[#FED7AA]"
                         title={`View ${msg.author.name}'s Verified Profile`}
                       >
                         {msg.author.badge}
@@ -2114,11 +2176,7 @@ export default function ForumPage() {
                     )}
 
                     {/* Text content */}
-                    <p
-                      className={`text-xs sm:text-sm leading-relaxed break-words ${
-                        msg.isDemotionNotice ? 'text-[#991B1B] font-medium' : 'text-[#292524]'
-                      }`}
-                    >
+                    <p className="text-xs sm:text-sm leading-relaxed break-words text-[#292524]">
                       {msg.content}
                     </p>
 
@@ -2262,7 +2320,8 @@ export default function ForumPage() {
                     </div>
                   </div>
                 </div>
-              ))
+              );
+            })
             )}
 
             {/* Locked Channel Notice Banner inside Chat */}
@@ -3103,7 +3162,7 @@ export default function ForumPage() {
 
       {/* Floating Modern Toast Notification */}
       {forumToast && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 animate-slide-up-in pointer-events-none">
+        <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 animate-fade-in pointer-events-none">
           <div className="bg-[#1C1917]/95 text-white backdrop-blur-md px-4 py-2.5 rounded-2xl shadow-xl border border-white/10 text-xs font-semibold flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-[#10B981] animate-pulse" />
             <span>{forumToast}</span>

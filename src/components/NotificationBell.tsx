@@ -219,7 +219,7 @@ export default function NotificationBell() {
           setIsOpen(!isOpen);
           if (!isOpen) fetchNotifications();
         }}
-        className={`relative p-2 rounded-xl border transition-all cursor-pointer flex items-center justify-center ${
+        className={`relative h-9 w-9 rounded-xl border transition-all cursor-pointer flex items-center justify-center shrink-0 ${
           isOpen
             ? 'bg-[#FFF7ED] border-[#FED7AA] text-[#C2410C]'
             : 'bg-white border-[#E7E5E4] text-[#44403C] hover:text-[#1C1917] hover:border-[#D6D3D1] hover:bg-[#FAFAF9]'
@@ -237,7 +237,7 @@ export default function NotificationBell() {
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-80 sm:w-96 max-w-[calc(100vw-24px)] bg-white rounded-2xl shadow-xl border border-[#E7E5E4] z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+        <div className="fixed inset-x-3 sm:absolute sm:inset-x-auto sm:right-0 top-16 sm:top-full sm:mt-2 w-auto sm:w-96 max-w-[calc(100vw-24px)] bg-white rounded-2xl shadow-2xl border border-[#E7E5E4] z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
           {/* Header */}
           <div className="p-3.5 sm:p-4 bg-[#FAFAF9] border-b border-[#E7E5E4] flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -330,36 +330,38 @@ export default function NotificationBell() {
                 <div
                   key={n.id}
                   onClick={() => handleMarkRead(n.id, n.link)}
-                  className={`p-3.5 transition-all cursor-pointer hover:bg-[#FFF7ED]/50 flex items-start gap-3 relative group ${
+                  className={`p-3 sm:p-3.5 transition-all cursor-pointer hover:bg-[#FFF7ED]/50 flex items-start gap-3 relative group ${
                     !n.is_read ? 'bg-[#FFFDFB]' : 'bg-white opacity-85 hover:opacity-100'
                   }`}
                 >
-                  {/* Unread dot */}
-                  {!n.is_read && (
-                    <span className="w-2 h-2 rounded-full bg-[#EA580C] absolute left-1.5 top-5 shrink-0" />
-                  )}
-
-                  {/* Avatar / Icon */}
-                  <div className="relative shrink-0 ml-1">
-                    {n.actor ? (
-                      <TraderAvatar
-                        name={n.actor.name}
-                        username={n.actor.username}
-                        avatarUrl={n.actor.avatarUrl}
-                        avatarType={n.actor.avatarType}
-                        tierColor={n.actor.tierColor}
-                        size="sm"
-                      />
-                    ) : (
-                      <div className="w-7 h-7 rounded-xl bg-[#FAFAF9] border border-[#E7E5E4] flex items-center justify-center">
-                        {getTypeIcon(n.type)}
-                      </div>
-                    )}
-                    {n.actor && (
-                      <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-white border border-[#E7E5E4] flex items-center justify-center shadow-2xs">
-                        {getTypeIcon(n.type)}
-                      </span>
-                    )}
+                  {/* Left indicator column: unread dot + avatar */}
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span
+                      className={`w-2 h-2 rounded-full shrink-0 transition-opacity ${
+                        !n.is_read ? 'bg-[#EA580C]' : 'opacity-0'
+                      }`}
+                    />
+                    <div className="relative">
+                      {n.actor ? (
+                        <TraderAvatar
+                          name={n.actor.name}
+                          username={n.actor.username}
+                          avatarUrl={n.actor.avatarUrl}
+                          avatarType={n.actor.avatarType}
+                          tierColor={n.actor.tierColor}
+                          size="sm"
+                        />
+                      ) : (
+                        <div className="w-8 h-8 rounded-xl bg-[#FAFAF9] border border-[#E7E5E4] flex items-center justify-center">
+                          {getTypeIcon(n.type)}
+                        </div>
+                      )}
+                      {n.actor && (
+                        <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-white border border-[#E7E5E4] flex items-center justify-center shadow-2xs">
+                          {getTypeIcon(n.type)}
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   {/* Body Content */}
@@ -372,7 +374,7 @@ export default function NotificationBell() {
                       >
                         {n.title}
                       </span>
-                      <span className="text-[10px] text-[#A8A29E] shrink-0">{n.timestamp}</span>
+                      <span className="text-[10px] text-[#A8A29E] shrink-0 font-medium">{n.timestamp}</span>
                     </div>
                     <p className="text-xs text-[#57534E] leading-relaxed line-clamp-2">
                       {n.message}
