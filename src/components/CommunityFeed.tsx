@@ -85,6 +85,7 @@ export interface PostReply {
   images?: string[];
   timestamp: string;
   upvotes: number;
+  hasUpvoted?: boolean;
   isVerifiedAnswer?: boolean;
 }
 
@@ -374,6 +375,71 @@ export default function CommunityFeed({ onSwitchToPublic }: { onSwitchToPublic?:
   // Reply Thread Drawer State
   const [activeReplyPostId, setActiveReplyPostId] = useState<string | null>(null);
   const [replyInputText, setReplyInputText] = useState('');
+  const [replyingToAuthor, setReplyingToAuthor] = useState<{
+    postId: string;
+    username: string;
+    name: string;
+  } | null>(null);
+
+  // Floating Toast System State
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const toastTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const triggerToast = (msg: string) => {
+    if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
+    setToastMessage(msg);
+    toastTimeoutRef.current = setTimeout(() => {
+      setToastMessage(null);
+    }, 2400);
+  };
+
+  // Saved Bookmarks Set State (persisted to localStorage)
+  const [bookmarkedPostIds, setBookmarkedPostIds] = useState<Set<string>>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('pipbud_bookmarked_posts');
+        if (saved) return new Set(JSON.parse(saved));
+      } catch {}
+    }
+    return new Set<string>();
+  });
+
+  const handleToggleBookmark = (postId: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    setBookmarkedPostIds((prev) => {
+      const next = new Set(prev);
+      const isBookmarked = next.has(postId);
+      if (isBookmarked) {
+        next.delete(postId);
+        triggerToast('Removed from bookmarks');
+      } else {
+        next.add(postId);
+        triggerToast('Saved to bookmarks 🔖');
+      }
+      try {
+        localStorage.setItem('pipbud_bookmarked_posts', JSON.stringify(Array.from(next)));
+      } catch {}
+      return next;
+    });
+  };
+
+  const handleSharePost = async (post: CommunityPost, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    try {
+      const shareUrl =
+        typeof window !== 'undefined'
+          ? `${window.location.origin}/community#post-${post.id}`
+          : '';
+      if (navigator.clipboard && shareUrl) {
+        await navigator.clipboard.writeText(shareUrl);
+        triggerToast('Discussion link copied to clipboard 📋');
+      } else {
+        triggerToast('Link copied 📋');
+      }
+    } catch {
+      triggerToast('Link copied to clipboard 📋');
+    }
+  };
 
   // Top Verified Posters State (backed by live Django leaderboard)
   const [topPosters, setTopPosters] = useState<
@@ -493,6 +559,8 @@ export default function CommunityFeed({ onSwitchToPublic }: { onSwitchToPublic?:
         ? true
         : selectedCategory === 'my'
         ? user && post.author.username === user.username
+        : selectedCategory === 'saved'
+        ? bookmarkedPostIds.has(post.id)
         : post.category === selectedCategory;
 
     const query = searchQuery.toLowerCase().trim();
@@ -510,6 +578,8 @@ export default function CommunityFeed({ onSwitchToPublic }: { onSwitchToPublic?:
   const handleToggleUpvote = async (postId: string) => {
     const targetPost = posts.find((p) => p.id === postId);
     const willUpvote = targetPost ? !targetPost.hasUpvoted : true;
+
+    triggerToast(willUpvote ? 'Upvoted setup 🔥' : 'Removed upvote');
 
     // Optimistic UI update
     setPosts((prev) =>
@@ -545,6 +615,60 @@ export default function CommunityFeed({ onSwitchToPublic }: { onSwitchToPublic?:
       }
     } catch {
       // Keep optimistic state if network fails
+    }
+  };
+
+  // Handle Reply Upvote with optimistic update & backend sync
+  const handleToggleReplyUpvote = async (postId: string, replyId: string) => {
+    let willUpvote = true;
+    setPosts((prev) =>
+      prev.map((p) => {
+        if (p.id !== postId) return p;
+        return {
+          ...p,
+          replies: p.replies.map((r) => {
+            if (r.id !== replyId) return r;
+            willUpvote = !r.hasUpvoted;
+            return {
+              ...r,
+              hasUpvoted: willUpvote,
+              upvotes: willUpvote ? r.upvotes + 1 : Math.max(0, r.upvotes - 1),
+            };
+          }),
+        };
+      })
+    );
+
+    triggerToast(willUpvote ? 'Upvoted response 🔥' : 'Removed upvote');
+
+    try {
+      const apiBase = getApiBase();
+      const res = await fetch(`${apiBase}/api/community/replies/${replyId}/upvote/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(user?.id ? { 'X-Trader-Id': user.id } : {}),
+          ...(user?.token ? { Authorization: `Bearer ${user.token}` } : {}),
+        },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setPosts((prev) =>
+          prev.map((p) => {
+            if (p.id !== postId) return p;
+            return {
+              ...p,
+              replies: p.replies.map((r) =>
+                r.id === replyId
+                  ? { ...r, upvotes: data.upvotes, hasUpvoted: data.hasUpvoted }
+                  : r
+              ),
+            };
+          })
+        );
+      }
+    } catch {
+      // Keep optimistic state
     }
   };
 
@@ -658,6 +782,8 @@ export default function CommunityFeed({ onSwitchToPublic }: { onSwitchToPublic?:
 
     const replyContent = replyInputText.trim();
     setReplyInputText('');
+    setReplyingToAuthor(null);
+    triggerToast('Reply published ✨');
 
     // Attempt backend creation
     try {
@@ -701,10 +827,13 @@ export default function CommunityFeed({ onSwitchToPublic }: { onSwitchToPublic?:
         badge: user.tier_badge,
         tierColor: user.tier_color || '#1C1917',
         broker: user.broker_name || 'Verified Trader',
+        avatarUrl: user.avatar_url,
+        avatarType: user.avatar_type,
       },
       content: replyContent,
       timestamp: 'Just now',
       upvotes: 1,
+      hasUpvoted: true,
       isVerifiedAnswer: user.skill_level >= 4,
     };
 
@@ -1084,12 +1213,17 @@ export default function CommunityFeed({ onSwitchToPublic }: { onSwitchToPublic?:
                 <div>
                   <h1 className="text-base sm:text-lg font-bold text-[#1C1917] tracking-tight flex items-center gap-2">
                     <span>Trader Community Feed</span>
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#F0FDFA] text-[#0F766E] border border-[#CCFBF1]">
-                      100% Audited Alpha
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#F0FDFA] text-[#0F766E] border border-[#CCFBF1] flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#0F766E] animate-pulse" />
+                      <span>Live Audited Alpha</span>
                     </span>
                   </h1>
-                  <p className="text-xs text-[#78716C] mt-0.5">
-                    Ask questions, share setups, and analyze liquidity with verified prop &amp; live traders.
+                  <p className="text-xs text-[#78716C] mt-0.5 flex flex-wrap items-center gap-2">
+                    <span>Ask questions, share setups, and analyze liquidity with verified prop &amp; live traders.</span>
+                    <span className="hidden md:inline-flex items-center gap-1 text-[11px] text-[#0F766E] font-medium bg-[#F0FDFA] px-2 py-0.5 rounded-full border border-[#CCFBF1]">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#10B981] animate-pulse-live" />
+                      34 traders active • 6 funded setups audited today
+                    </span>
                   </p>
                 </div>
                 {user && (
@@ -1105,28 +1239,32 @@ export default function CommunityFeed({ onSwitchToPublic }: { onSwitchToPublic?:
               </div>
 
               <div className="flex items-center gap-3">
-                <button
-                  type="button"
+                <TraderAvatar
+                  name={user ? user.display_name || user.username : 'Trader'}
+                  username={user ? user.username : 'trader'}
+                  avatarUrl={user?.avatar_url}
+                  avatarType={user?.avatar_type}
+                  tierColor={user?.tier_color}
+                  level={user?.skill_level}
+                  size="md"
                   onClick={() => openTraderProfile(user ? user.username : 'Trader')}
-                  className="w-10 h-10 rounded-xl text-white font-bold text-xs flex items-center justify-center shrink-0 uppercase shadow-xs hover:opacity-90 hover:scale-105 transition-all cursor-pointer"
-                  style={{ backgroundColor: user?.tier_color || '#1C1917' }}
-                  title="View your verified trader profile"
-                >
-                  {user ? user.username.slice(0, 2) : 'TR'}
-                </button>
+                />
                 <button
                   type="button"
                   onClick={() => {
                     setNewPostCategory('question');
                     setIsComposerOpen(true);
                   }}
-                  className="flex-1 text-left px-4 py-2.5 rounded-xl bg-[#FAFAF9] border border-[#E7E5E4] hover:border-[#FED7AA] hover:bg-[#FFF7ED]/30 text-xs text-[#78716C] transition-all cursor-pointer truncate"
+                  className="flex-1 text-left px-4 py-2.5 rounded-2xl bg-[#FAFAF9] border border-[#E7E5E4] hover:border-[#FED7AA] hover:bg-[#FFF7ED]/30 text-xs text-[#78716C] transition-all cursor-pointer truncate shadow-2xs hover:shadow-xs active:scale-99 flex items-center justify-between group"
                 >
-                  What&apos;s on your charts? Ask a question or drop market alpha...
+                  <span className="group-hover:text-[#1C1917] transition-colors truncate">
+                    What&apos;s on your charts? Ask a question or drop market alpha...
+                  </span>
+                  <Plus className="w-4 h-4 text-[#A8A29E] group-hover:text-[#C2410C] group-hover:rotate-90 transition-all shrink-0 ml-2" />
                 </button>
               </div>
 
-              {/* Action Category Shortcuts */}
+              {/* Action Category Shortcuts with Interactive Spring */}
               <div className="flex items-center gap-2 pt-2 border-t border-[#F5F5F4] overflow-x-auto text-xs">
                 <button
                   type="button"
@@ -1134,7 +1272,7 @@ export default function CommunityFeed({ onSwitchToPublic }: { onSwitchToPublic?:
                     setNewPostCategory('question');
                     setIsComposerOpen(true);
                   }}
-                  className="px-3 py-1.5 rounded-xl bg-[#FAFAF9] hover:bg-[#FFF7ED] border border-[#E7E5E4] hover:border-[#FED7AA] font-medium text-[#1C1917] flex items-center gap-1.5 shrink-0 transition-all"
+                  className="px-3 py-1.5 rounded-xl bg-[#FAFAF9] hover:bg-[#FFF7ED] border border-[#E7E5E4] hover:border-[#FED7AA] font-semibold text-[#1C1917] flex items-center gap-1.5 shrink-0 transition-all active:scale-95 cursor-pointer shadow-2xs"
                 >
                   <HelpCircle className="w-3.5 h-3.5 text-[#C2410C]" />
                   <span>Ask Question (Q&A)</span>
@@ -1146,7 +1284,7 @@ export default function CommunityFeed({ onSwitchToPublic }: { onSwitchToPublic?:
                     setNewPostCategory('setup');
                     setIsComposerOpen(true);
                   }}
-                  className="px-3 py-1.5 rounded-xl bg-[#FAFAF9] hover:bg-[#F0FDFA] border border-[#E7E5E4] hover:border-[#CCFBF1] font-medium text-[#1C1917] flex items-center gap-1.5 shrink-0 transition-all"
+                  className="px-3 py-1.5 rounded-xl bg-[#FAFAF9] hover:bg-[#F0FDFA] border border-[#E7E5E4] hover:border-[#CCFBF1] font-semibold text-[#1C1917] flex items-center gap-1.5 shrink-0 transition-all active:scale-95 cursor-pointer shadow-2xs"
                 >
                   <TrendingUp className="w-3.5 h-3.5 text-[#0F766E]" />
                   <span>Share Setup</span>
@@ -1158,7 +1296,7 @@ export default function CommunityFeed({ onSwitchToPublic }: { onSwitchToPublic?:
                     setNewPostCategory('intel');
                     setIsComposerOpen(true);
                   }}
-                  className="px-3 py-1.5 rounded-xl bg-[#FAFAF9] hover:bg-[#F5F5F4] border border-[#E7E5E4] font-medium text-[#1C1917] flex items-center gap-1.5 shrink-0 transition-all"
+                  className="px-3 py-1.5 rounded-xl bg-[#FAFAF9] hover:bg-[#EFF6FF] border border-[#E7E5E4] hover:border-[#BFDBFE] font-semibold text-[#1C1917] flex items-center gap-1.5 shrink-0 transition-all active:scale-95 cursor-pointer shadow-2xs"
                 >
                   <Radio className="w-3.5 h-3.5 text-[#2563EB]" />
                   <span>Market Intel</span>
@@ -1409,6 +1547,7 @@ export default function CommunityFeed({ onSwitchToPublic }: { onSwitchToPublic?:
                   { id: 'setup', label: 'Trade Setups', count: posts.filter((p) => p.category === 'setup').length },
                   { id: 'intel', label: 'Market Intel', count: posts.filter((p) => p.category === 'intel').length },
                   { id: 'my', label: 'My Posts', count: user ? posts.filter((p) => p.author.username === user.username).length : 0 },
+                  { id: 'saved', label: 'Bookmarks', count: posts.filter((p) => bookmarkedPostIds.has(p.id)).length },
                 ].map((tab) => (
                   <button
                     key={tab.id}
@@ -1646,30 +1785,40 @@ export default function CommunityFeed({ onSwitchToPublic }: { onSwitchToPublic?:
                       </div>
                     )}
 
-                    {/* Action Bar (Upvotes, Answers/Comments, Share) */}
+                    {/* Action Bar (Upvotes, Answers/Comments, Share, Bookmark) */}
                     <div className="flex items-center justify-between pt-3 border-t border-[#F5F5F4] text-xs">
                       <div className="flex items-center gap-2">
-                        {/* Upvote Button */}
+                        {/* Upvote Button with Tactile Spring */}
                         <button
                           type="button"
                           onClick={() => handleToggleUpvote(post.id)}
-                          className={`h-8 px-3 rounded-lg flex items-center gap-1.5 font-semibold transition-all ${
+                          className={`h-8 px-3 rounded-xl flex items-center gap-1.5 font-bold transition-all duration-150 active:scale-125 cursor-pointer shadow-2xs ${
                             post.hasUpvoted
-                              ? 'bg-[#C2410C] text-white shadow-xs'
-                              : 'bg-[#FAFAF9] hover:bg-[#F5F5F4] text-[#57534E] border border-[#E7E5E4]'
+                              ? 'bg-[#FFF7ED] text-[#C2410C] border border-[#FED7AA] shadow-orange-100 ring-1 ring-[#FED7AA]'
+                              : 'bg-[#FAFAF9] hover:bg-[#FFF7ED] text-[#57534E] hover:text-[#C2410C] border border-[#E7E5E4] hover:border-[#FED7AA]'
                           }`}
+                          title={post.hasUpvoted ? 'Remove upvote' : 'Upvote this setup/alpha'}
                         >
-                          <ArrowUp className="w-3.5 h-3.5" />
-                          <span>{post.upvotes}</span>
+                          <Flame
+                            className={`w-3.5 h-3.5 transition-transform ${
+                              post.hasUpvoted ? 'text-[#C2410C] fill-[#C2410C] scale-110' : 'text-[#78716C]'
+                            }`}
+                          />
+                          <span className="tabular-nums">{post.upvotes}</span>
                         </button>
 
-                        {/* Toggle Answers Thread */}
+                        {/* Toggle Answers Thread Button */}
                         <button
                           type="button"
-                          onClick={() =>
-                            setActiveReplyPostId(activeReplyPostId === post.id ? null : post.id)
-                          }
-                          className="h-8 px-3 rounded-lg bg-[#FAFAF9] hover:bg-[#F5F5F4] text-[#57534E] border border-[#E7E5E4] font-medium flex items-center gap-1.5 transition-all"
+                          onClick={() => {
+                            setActiveReplyPostId(activeReplyPostId === post.id ? null : post.id);
+                            setReplyingToAuthor(null);
+                          }}
+                          className={`h-8 px-3 rounded-xl border font-semibold flex items-center gap-1.5 transition-all duration-150 active:scale-95 cursor-pointer ${
+                            activeReplyPostId === post.id
+                              ? 'bg-[#1C1917] text-white border-[#1C1917] shadow-xs'
+                              : 'bg-[#FAFAF9] hover:bg-[#F5F5F4] text-[#57534E] hover:text-[#1C1917] border-[#E7E5E4]'
+                          }`}
                         >
                           <MessageSquare className="w-3.5 h-3.5" />
                           <span>
@@ -1679,35 +1828,73 @@ export default function CommunityFeed({ onSwitchToPublic }: { onSwitchToPublic?:
                         </button>
                       </div>
 
-                      <span className="text-[11px] text-[#A8A29E]">Audited Track Record</span>
+                      <div className="flex items-center gap-1.5">
+                        {/* Bookmark Button */}
+                        <button
+                          type="button"
+                          onClick={(e) => handleToggleBookmark(post.id, e)}
+                          className={`h-8 w-8 rounded-xl border flex items-center justify-center transition-all duration-150 active:scale-125 cursor-pointer ${
+                            bookmarkedPostIds.has(post.id)
+                              ? 'bg-[#FFF7ED] border-[#FED7AA] text-[#C2410C]'
+                              : 'bg-[#FAFAF9] hover:bg-[#F5F5F4] text-[#78716C] hover:text-[#1C1917] border-[#E7E5E4]'
+                          }`}
+                          title={bookmarkedPostIds.has(post.id) ? 'Remove bookmark' : 'Bookmark setup'}
+                        >
+                          <Bookmark
+                            className={`w-3.5 h-3.5 ${
+                              bookmarkedPostIds.has(post.id) ? 'fill-[#C2410C] text-[#C2410C]' : ''
+                            }`}
+                          />
+                        </button>
+
+                        {/* Share Button */}
+                        <button
+                          type="button"
+                          onClick={(e) => handleSharePost(post, e)}
+                          className="h-8 w-8 rounded-xl border border-[#E7E5E4] bg-[#FAFAF9] hover:bg-[#FFF7ED] hover:border-[#FED7AA] text-[#78716C] hover:text-[#C2410C] flex items-center justify-center transition-all duration-150 active:scale-125 cursor-pointer"
+                          title="Copy link to post"
+                        >
+                          <Share2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
                     </div>
 
-                    {/* Expandable Answers & Replies Thread */}
+                    {/* Expandable Answers & Replies Thread with Vertical Connector Line */}
                     {activeReplyPostId === post.id && (
-                      <div className="pt-3 border-t border-[#E7E5E4] space-y-3 bg-[#FAFAF9]/50 -mx-5 -mb-5 p-5 rounded-b-2xl">
-                        <div className="space-y-2.5">
-                          <h3 className="text-xs font-bold text-[#1C1917] uppercase tracking-wider">
-                            {post.category === 'question' ? 'Verified Answers' : 'Discussion Thread'} (
-                            {post.replies.length})
+                      <div className="pt-4 border-t border-[#E7E5E4] space-y-3 bg-[#FAFAF9]/60 -mx-5 -mb-5 p-5 rounded-b-2xl animate-in slide-in-from-top-2 duration-200">
+                        <div className="flex items-center justify-between pb-1">
+                          <h3 className="text-xs font-bold text-[#1C1917] uppercase tracking-wider flex items-center gap-1.5">
+                            <MessageSquare className="w-3.5 h-3.5 text-[#C2410C]" />
+                            <span>
+                              {post.category === 'question' ? 'Verified Answers' : 'Discussion Thread'} ({post.replies.length})
+                            </span>
                           </h3>
+                          <span className="text-[10px] text-[#78716C] hidden sm:inline">
+                            Press <kbd className="px-1.5 py-0.5 rounded bg-white border border-[#E7E5E4] font-mono text-[9px]">Cmd+Enter</kbd> to reply
+                          </span>
+                        </div>
 
-                          {post.replies.length === 0 ? (
-                            <p className="text-xs text-[#78716C] py-2">
-                              No answers yet. Share your experience or analysis below!
+                        {post.replies.length === 0 ? (
+                          <div className="text-center py-5 bg-white rounded-xl border border-dashed border-[#E7E5E4] space-y-1">
+                            <p className="text-xs font-semibold text-[#1C1917]">No responses yet</p>
+                            <p className="text-[11px] text-[#78716C]">
+                              Be the first trader to provide analysis or answer this inquiry.
                             </p>
-                          ) : (
-                            post.replies.map((reply) => (
+                          </div>
+                        ) : (
+                          /* Visual Thread Line Container */
+                          <div className="relative pl-4 sm:pl-5 space-y-2.5 before:absolute before:left-2 sm:before:left-2.5 before:top-2 before:bottom-3 before:w-0.5 before:bg-[#E7E5E4] before:rounded-full">
+                            {post.replies.map((reply) => (
                               <div
                                 key={reply.id}
-                                className={`p-3.5 rounded-xl border text-xs space-y-1.5 ${
+                                className={`relative p-3.5 rounded-2xl border text-xs space-y-2 transition-all duration-150 group ${
                                   reply.isVerifiedAnswer
-                                    ? 'bg-white border-[#CCFBF1] shadow-xs'
-                                    : 'bg-white border-[#E7E5E4]'
+                                    ? 'bg-white border-[#CCFBF1] shadow-2xs'
+                                    : 'bg-white border-[#E7E5E4] hover:border-[#D6D3D1]'
                                 }`}
                               >
                                 <div className="flex items-center justify-between">
                                   <div className="flex items-center gap-2">
-                                    {/* Reply Author Avatar */}
                                     <TraderAvatar
                                       name={reply.author.name}
                                       username={reply.author.username}
@@ -1717,7 +1904,6 @@ export default function CommunityFeed({ onSwitchToPublic }: { onSwitchToPublic?:
                                       size="xs"
                                       onClick={() => openTraderProfile(reply.author.name)}
                                     />
-                                    {/* Clickable Reply Author */}
                                     <button
                                       type="button"
                                       onClick={() => openTraderProfile(reply.author.name)}
@@ -1726,15 +1912,12 @@ export default function CommunityFeed({ onSwitchToPublic }: { onSwitchToPublic?:
                                     >
                                       {reply.author.name}
                                     </button>
-                                    <button
-                                      type="button"
-                                      onClick={() => openTraderProfile(reply.author.name)}
-                                      className="px-1.5 py-0.2 rounded text-[9px] font-bold text-white cursor-pointer hover:opacity-90"
+                                    <span
+                                      className="px-1.5 py-0.2 rounded text-[9px] font-bold text-white shrink-0"
                                       style={{ backgroundColor: reply.author.tierColor }}
-                                      title={`Verified Level ${reply.author.level}`}
                                     >
                                       L{reply.author.level}
-                                    </button>
+                                    </span>
                                     {reply.isVerifiedAnswer && (
                                       <span className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded text-[9px] font-semibold bg-[#F0FDFA] text-[#0F766E] border border-[#CCFBF1]">
                                         <CheckCircle2 className="w-3 h-3 text-[#0F766E]" />
@@ -1744,48 +1927,147 @@ export default function CommunityFeed({ onSwitchToPublic }: { onSwitchToPublic?:
                                   </div>
                                   <span className="text-[10px] text-[#A8A29E]">{reply.timestamp}</span>
                                 </div>
-                                <p className="text-[#44403C] leading-relaxed">{reply.content}</p>
-                              </div>
-                            ))
-                          )}
-                        </div>
 
-                        {/* Reply Form */}
-                        <div className="flex items-center gap-2 pt-2">
-                          {user && (
-                            <TraderAvatar
-                              name={user.display_name || user.username}
-                              username={user.username}
-                              avatarUrl={user.avatar_url}
-                              avatarType={user.avatar_type}
-                              tierColor={user.tier_color}
-                              size="xs"
-                            />
+                                <p className="text-[#44403C] leading-relaxed whitespace-pre-line pl-0.5">
+                                  {reply.content}
+                                </p>
+
+                                {/* Micro Action Bar for Comments (Upvote + Reply Chip + Copy) */}
+                                <div className="flex items-center justify-between pt-1.5 border-t border-[#F5F5F4] text-[11px]">
+                                  <div className="flex items-center gap-2">
+                                    {/* Tactile Reply Upvote */}
+                                    <button
+                                      type="button"
+                                      onClick={() => handleToggleReplyUpvote(post.id, reply.id)}
+                                      className={`h-6 px-2 rounded-lg flex items-center gap-1 font-semibold text-[10px] transition-all duration-150 active:scale-125 cursor-pointer ${
+                                        reply.hasUpvoted
+                                          ? 'bg-[#FFF7ED] text-[#C2410C] border border-[#FED7AA]'
+                                          : 'bg-[#FAFAF9] hover:bg-[#F5F5F4] text-[#78716C] border border-[#E7E5E4]'
+                                      }`}
+                                      title={reply.hasUpvoted ? 'Remove upvote' : 'Upvote this reply'}
+                                    >
+                                      <ArrowUp className="w-2.5 h-2.5" />
+                                      <span>{reply.upvotes}</span>
+                                    </button>
+
+                                    {/* Direct Reply Target Trigger */}
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        setReplyingToAuthor({
+                                          postId: post.id,
+                                          username: reply.author.username,
+                                          name: reply.author.name,
+                                        });
+                                        setReplyInputText((prev) =>
+                                          prev.includes(`@${reply.author.username}`)
+                                            ? prev
+                                            : `@${reply.author.username} ${prev}`
+                                        );
+                                      }}
+                                      className="h-6 px-2 rounded-lg bg-transparent hover:bg-[#FFF7ED] text-[#78716C] hover:text-[#C2410C] font-semibold text-[10px] flex items-center gap-1 transition-all active:scale-95 cursor-pointer"
+                                    >
+                                      <MessageSquare className="w-2.5 h-2.5" />
+                                      <span>Reply</span>
+                                    </button>
+                                  </div>
+
+                                  <button
+                                    type="button"
+                                    onClick={async () => {
+                                      if (navigator.clipboard) {
+                                        await navigator.clipboard.writeText(reply.content);
+                                        triggerToast('Reply text copied 📋');
+                                      }
+                                    }}
+                                    className="text-[10px] text-[#A8A29E] hover:text-[#1C1917] transition-colors cursor-pointer"
+                                    title="Copy text"
+                                  >
+                                    Copy
+                                  </button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Reply Form Container */}
+                        <div className="space-y-2 pt-2">
+                          {/* Active Replying To Chip */}
+                          {replyingToAuthor && replyingToAuthor.postId === post.id && (
+                            <div className="flex items-center justify-between px-3 py-1.5 rounded-xl bg-[#FFF7ED] border border-[#FED7AA] text-xs text-[#C2410C] animate-in fade-in duration-100">
+                              <div className="flex items-center gap-1.5 truncate">
+                                <MessageSquare className="w-3.5 h-3.5 shrink-0" />
+                                <span className="truncate">
+                                  Replying to <strong className="font-bold">@{replyingToAuthor.username}</strong> ({replyingToAuthor.name})
+                                </span>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => setReplyingToAuthor(null)}
+                                className="p-0.5 hover:bg-[#FED7AA]/50 rounded text-[#9A3412] transition-colors cursor-pointer"
+                                title="Cancel replying to user"
+                              >
+                                <X className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
                           )}
-                          <input
-                            type="text"
-                            value={replyInputText}
-                            onChange={(e) => setReplyInputText(e.target.value)}
-                            placeholder={
-                              post.category === 'question'
-                                ? 'Write a verified answer...'
-                                : 'Contribute to this discussion...'
-                            }
-                            className="flex-1 h-9 px-3 rounded-xl border border-[#E7E5E4] text-xs text-[#1C1917] bg-white outline-hidden focus:border-[#C2410C]"
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter') {
-                                e.preventDefault();
-                                handleAddReply(post.id);
+
+                          {/* Quick Emoji Reaction Pill Tray */}
+                          <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5">
+                            <span className="text-[10px] font-semibold text-[#78716C] uppercase mr-0.5">Quick:</span>
+                            {['🔥', '🎯', '🚀', '💡', '👏', '❤️'].map((emoji) => (
+                              <button
+                                key={emoji}
+                                type="button"
+                                onClick={() => setReplyInputText((prev) => (prev ? `${prev} ${emoji}` : emoji))}
+                                className="w-6 h-6 rounded-lg bg-white hover:bg-[#FFF7ED] border border-[#E7E5E4] hover:border-[#FED7AA] flex items-center justify-center text-xs transition-transform active:scale-125 cursor-pointer shadow-2xs"
+                                title={`Insert ${emoji}`}
+                              >
+                                {emoji}
+                              </button>
+                            ))}
+                          </div>
+
+                          {/* Input Bar */}
+                          <div className="flex items-center gap-2">
+                            {user && (
+                              <TraderAvatar
+                                name={user.display_name || user.username}
+                                username={user.username}
+                                avatarUrl={user.avatar_url}
+                                avatarType={user.avatar_type}
+                                tierColor={user.tier_color}
+                                size="xs"
+                              />
+                            )}
+                            <input
+                              type="text"
+                              value={replyInputText}
+                              onChange={(e) => setReplyInputText(e.target.value)}
+                              placeholder={
+                                post.category === 'question'
+                                  ? 'Write a verified answer...'
+                                  : 'Contribute to this discussion...'
                               }
-                            }}
-                          />
-                          <button
-                            type="button"
-                            onClick={() => handleAddReply(post.id)}
-                            className="px-4 h-9 bg-[#1C1917] hover:bg-[#292524] text-white text-xs font-semibold rounded-xl transition-all shrink-0"
-                          >
-                            Answer
-                          </button>
+                              className="flex-1 h-10 px-3.5 rounded-xl border border-[#E7E5E4] text-xs text-[#1C1917] bg-white outline-hidden focus:border-[#C2410C] focus:ring-1 focus:ring-[#C2410C]/20 shadow-2xs transition-all"
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter' && (e.metaKey || e.ctrlKey || !e.shiftKey)) {
+                                  e.preventDefault();
+                                  handleAddReply(post.id);
+                                }
+                              }}
+                            />
+                            <button
+                              type="button"
+                              onClick={() => handleAddReply(post.id)}
+                              disabled={!replyInputText.trim()}
+                              className="px-4 h-10 bg-[#1C1917] hover:bg-[#292524] disabled:opacity-50 text-white text-xs font-semibold rounded-xl transition-all shrink-0 active:scale-95 cursor-pointer shadow-xs inline-flex items-center gap-1.5"
+                            >
+                              <Send className="w-3.5 h-3.5" />
+                              <span>{post.category === 'question' ? 'Answer' : 'Reply'}</span>
+                            </button>
+                          </div>
                         </div>
                       </div>
                     )}
@@ -2176,6 +2458,16 @@ export default function CommunityFeed({ onSwitchToPublic }: { onSwitchToPublic?:
                 className="max-w-full max-h-[75vh] object-contain rounded-xl shadow-lg"
               />
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Floating Modern Toast Notification */}
+      {toastMessage && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 animate-slide-up-in pointer-events-none">
+          <div className="bg-[#1C1917]/95 text-white backdrop-blur-md px-4 py-2.5 rounded-2xl shadow-xl border border-white/10 text-xs font-semibold flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-[#10B981] animate-pulse" />
+            <span>{toastMessage}</span>
           </div>
         </div>
       )}

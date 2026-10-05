@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import PipbudLogo from '@/components/PipbudLogo';
@@ -661,6 +661,16 @@ export default function ForumPage() {
   const [showAttachModal, setShowAttachModal] = useState(false);
   const [selectedTradeToAttach, setSelectedTradeToAttach] = useState<AuditedTrade>(AVAILABLE_JOURNAL_TRADES[0]);
   const [customAttachNote, setCustomAttachNote] = useState('');
+  const [forumToast, setForumToast] = useState<string | null>(null);
+  const forumToastTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const triggerForumToast = (msg: string) => {
+    if (forumToastTimeoutRef.current) clearTimeout(forumToastTimeoutRef.current);
+    setForumToast(msg);
+    forumToastTimeoutRef.current = setTimeout(() => {
+      setForumToast(null);
+    }, 2400);
+  };
 
   // Live / Funded Broker Account Verification Modal
   const [showConnectBrokerModal, setShowConnectBrokerModal] = useState(false);
@@ -1987,12 +1997,65 @@ export default function ForumPage() {
               currentMessages.map((msg) => (
                 <div
                   key={msg.id}
-                  className={`flex items-start gap-2.5 sm:gap-3.5 ${
+                  className={`flex items-start gap-2.5 sm:gap-3.5 relative group p-2.5 -mx-2.5 rounded-2xl hover:bg-[#FAFAF9]/90 transition-all duration-150 ${
                     msg.isDemotionNotice
                       ? 'p-3 sm:p-4 rounded-2xl bg-[#FEF2F2] border border-[#FEE2E2]'
                       : ''
                   }`}
                 >
+                  {/* Floating Action Toolbar on Message Hover (Discord/Telegram Style) */}
+                  {!msg.isDemotionNotice && (
+                    <div className="absolute -top-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-150 bg-white/95 backdrop-blur-md border border-[#E7E5E4] rounded-xl shadow-md px-1.5 py-0.5 hidden sm:flex items-center gap-0.5 z-20 animate-in fade-in zoom-in-95 duration-100">
+                      {/* Quick Reaction Emojis */}
+                      {['🔥', '🎯', '🚀', '💡', '👏'].map((emoji) => (
+                        <button
+                          key={emoji}
+                          type="button"
+                          onClick={() => {
+                            handleToggleReaction(msg.id, emoji);
+                            triggerForumToast(`Reacted ${emoji} ✨`);
+                          }}
+                          className={`w-6 h-6 rounded-lg flex items-center justify-center text-xs transition-transform hover:scale-125 active:scale-150 cursor-pointer ${
+                            userReactions[msg.id] === emoji ? 'bg-[#FED7AA]' : 'hover:bg-[#FFF7ED]'
+                          }`}
+                          title={`React with ${emoji}`}
+                        >
+                          {emoji}
+                        </button>
+                      ))}
+
+                      <div className="w-[1px] h-3.5 bg-[#E7E5E4] mx-0.5" />
+
+                      {/* Reply Button */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setReplyingTo(msg);
+                          setMessageInput(`@${msg.author.username} `);
+                        }}
+                        className="p-1 rounded-lg text-[#78716C] hover:text-[#C2410C] hover:bg-[#FFF7ED] transition-colors cursor-pointer"
+                        title={`Reply to ${msg.author.name}`}
+                      >
+                        <MessageSquare className="w-3.5 h-3.5" />
+                      </button>
+
+                      {/* Copy Text Button */}
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          if (navigator.clipboard) {
+                            await navigator.clipboard.writeText(msg.content);
+                            triggerForumToast('Message copied to clipboard 📋');
+                          }
+                        }}
+                        className="p-1 rounded-lg text-[#78716C] hover:text-[#1C1917] hover:bg-[#F5F5F4] transition-colors cursor-pointer"
+                        title="Copy message"
+                      >
+                        <Copy className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  )}
+
                   {/* Clickable Author Avatar */}
                   <TraderAvatar
                     name={msg.author.name}
@@ -2143,7 +2206,7 @@ export default function ForumPage() {
                           <button
                             key={emoji}
                             onClick={() => handleToggleReaction(msg.id, emoji)}
-                            className={`px-2 py-0.5 rounded-full text-[11px] flex items-center gap-1 transition-all active:scale-95 border ${
+                            className={`px-2 py-0.5 rounded-full text-[11px] flex items-center gap-1 transition-all duration-150 active:scale-125 cursor-pointer border ${
                               hasReacted
                                 ? 'bg-[#FFF7ED] text-[#C2410C] border-[#FED7AA] font-bold shadow-xs ring-1 ring-[#FED7AA]'
                                 : 'bg-white hover:bg-[#FFF7ED] border-[#E7E5E4] text-[#44403C]'
@@ -2151,7 +2214,7 @@ export default function ForumPage() {
                             title={hasReacted ? `You reacted ${emoji}. Click to remove` : `React with ${emoji} (replaces your current reaction)`}
                           >
                             <span>{emoji}</span>
-                            <span className="font-medium text-[10px]">{count}</span>
+                            <span className="font-medium text-[10px] tabular-nums">{count}</span>
                           </button>
                         );
                       })}
@@ -2160,7 +2223,7 @@ export default function ForumPage() {
                       <div className="relative">
                         <button
                           onClick={() => setActiveEmojiPickerMsgId(activeEmojiPickerMsgId === msg.id ? null : msg.id)}
-                          className="px-2 py-0.5 rounded-full bg-white hover:bg-[#FFF7ED] border border-[#E7E5E4] hover:border-[#FED7AA] text-[11px] text-[#78716C] active:scale-95 transition-all"
+                          className="px-2 py-0.5 rounded-full bg-white hover:bg-[#FFF7ED] border border-[#E7E5E4] hover:border-[#FED7AA] text-[11px] text-[#78716C] active:scale-125 cursor-pointer transition-all"
                           title="Add single reaction"
                         >
                           +
@@ -2172,7 +2235,7 @@ export default function ForumPage() {
                               <button
                                 key={emoji}
                                 onClick={() => handleToggleReaction(msg.id, emoji)}
-                                className={`w-7 h-7 rounded-lg flex items-center justify-center text-sm transition-transform active:scale-125 ${
+                                className={`w-7 h-7 rounded-lg flex items-center justify-center text-sm transition-transform active:scale-125 cursor-pointer ${
                                   userReactions[msg.id] === emoji ? 'bg-[#FED7AA]' : 'hover:bg-[#FFF7ED]'
                                 }`}
                               >
@@ -2190,7 +2253,7 @@ export default function ForumPage() {
                           setReplyingTo(msg);
                           setMessageInput(`@${msg.author.username} `);
                         }}
-                        className="px-2 py-0.5 rounded-full bg-white hover:bg-[#FFF7ED] border border-[#E7E5E4] hover:border-[#FED7AA] text-[11px] text-[#78716C] hover:text-[#C2410C] font-medium transition-all active:scale-95 inline-flex items-center gap-1"
+                        className="px-2 py-0.5 rounded-full bg-white hover:bg-[#FFF7ED] border border-[#E7E5E4] hover:border-[#FED7AA] text-[11px] text-[#78716C] hover:text-[#C2410C] font-medium transition-all active:scale-95 cursor-pointer inline-flex items-center gap-1"
                         title={`Reply to ${msg.author.name}`}
                       >
                         <MessageSquare className="w-3 h-3" />
@@ -3034,6 +3097,16 @@ export default function ForumPage() {
                 Attach & Post
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Floating Modern Toast Notification */}
+      {forumToast && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 animate-slide-up-in pointer-events-none">
+          <div className="bg-[#1C1917]/95 text-white backdrop-blur-md px-4 py-2.5 rounded-2xl shadow-xl border border-white/10 text-xs font-semibold flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-[#10B981] animate-pulse" />
+            <span>{forumToast}</span>
           </div>
         </div>
       )}
