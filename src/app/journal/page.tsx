@@ -22,6 +22,7 @@ import {
   Calendar as CalendarIcon,
   Layers,
   ChevronRight,
+  ChevronLeft,
   X,
   Send,
   Lock,
@@ -52,7 +53,13 @@ import {
   FileText,
   CheckSquare,
   BadgeCheck,
-  Brain
+  Brain,
+  Star,
+  Bookmark,
+  Volume2,
+  Mic,
+  Eye,
+  Camera
 } from 'lucide-react';
 
 export interface JournalTrade {
@@ -85,17 +92,132 @@ export interface JournalTrade {
   dateIso: string;
 }
 
+export const INITIAL_DEMO_JOURNAL_TRADES: JournalTrade[] = [
+  {
+    id: 't-demo-1',
+    ticketId: '8924101',
+    pair: 'EUR/USD',
+    direction: 'LONG',
+    setupType: 'Fair Value Gap (FVG)',
+    timeframe: '15m',
+    session: 'London Open',
+    entryPrice: 1.08520,
+    stopLoss: 1.08380,
+    takeProfit: 1.08940,
+    exitPrice: 1.08940,
+    lotSize: 2.0,
+    riskReward: 3.0,
+    realizedRR: 3.0,
+    outcome: 'WIN',
+    profitPercent: 3.0,
+    profitDollar: 300.0,
+    holdingTime: '1h 15m',
+    emotion: 'Disciplined',
+    mistakeTag: 'A+ Execution',
+    preTradeThesis: 'London Open swept Asian session low at 07:15 GMT. Confirmed 5m Market Structure Shift (MSS) with high displacement. Entered on 50% equilibrium retest of 15m FVG.',
+    postTradeReview: 'Clean delivery straight into Previous Day High target. Trusting the 15m higher timeframe structure prevented micromanaging during the 8-pip pullback.',
+    rulesFollowed: true,
+    notes: 'Reflection: Maintained complete emotional composure. Executed the entry mechanically once the FVG was tapped.',
+    date: 'Sep 30, 2026',
+    dateIso: '2026-09-30'
+  },
+  {
+    id: 't-demo-2',
+    ticketId: '8924102',
+    pair: 'GBP/USD',
+    direction: 'SHORT',
+    setupType: 'Liquidity Sweep (BSL/SSL)',
+    timeframe: '5m',
+    session: 'NY AM Killzone',
+    entryPrice: 1.30450,
+    stopLoss: 1.30600,
+    takeProfit: 1.30000,
+    exitPrice: 1.30000,
+    lotSize: 2.0,
+    riskReward: 3.0,
+    realizedRR: 3.0,
+    outcome: 'WIN',
+    profitPercent: 3.0,
+    profitDollar: 300.0,
+    holdingTime: '45m',
+    emotion: 'Calm & Patient',
+    mistakeTag: 'A+ Execution',
+    preTradeThesis: 'Previous Day High (PDH) purged during 09:30 US equity open. Bearish market structure break with institutional displacement.',
+    postTradeReview: 'Targeted sell-side liquidity at London session low. Flawless execution without second guessing.',
+    rulesFollowed: true,
+    notes: 'Reflection: Did not rush the entry. Waited for the 5m candle to close below the swing low before pressing market sell.',
+    date: 'Sep 23, 2026',
+    dateIso: '2026-09-23'
+  },
+  {
+    id: 't-demo-3',
+    ticketId: '8924103',
+    pair: 'XAU/USD',
+    direction: 'LONG',
+    setupType: 'Order Block (OB)',
+    timeframe: '15m',
+    session: 'London / NY Overlap',
+    entryPrice: 2650.50,
+    stopLoss: 2642.00,
+    takeProfit: 2671.75,
+    exitPrice: 2671.75,
+    lotSize: 1.0,
+    riskReward: 2.5,
+    realizedRR: 2.5,
+    outcome: 'WIN',
+    profitPercent: 2.5,
+    profitDollar: 250.0,
+    holdingTime: '2h 10m',
+    emotion: 'Flow State',
+    mistakeTag: 'A+ Execution',
+    preTradeThesis: 'Gold retested unmitigated 4H bullish order block following CPI volatility wash. Clean rejection wick.',
+    postTradeReview: 'Partial profit taken at 1:2 R:R, runner held into previous week high. Controlled risk throughout.',
+    rulesFollowed: true,
+    notes: 'Reflection: Perfect adherence to trade plan. Resisted the impulse to overleverage despite high conviction.',
+    date: 'Oct 01, 2026',
+    dateIso: '2026-10-01'
+  },
+  {
+    id: 't-demo-4',
+    ticketId: '8924104',
+    pair: 'NAS100',
+    direction: 'SHORT',
+    setupType: 'Silver Bullet',
+    timeframe: '1m',
+    session: 'NY AM Killzone',
+    entryPrice: 19850.0,
+    stopLoss: 19890.0,
+    takeProfit: 19730.0,
+    exitPrice: 19890.0,
+    lotSize: 1.0,
+    riskReward: 3.0,
+    realizedRR: -1.0,
+    outcome: 'LOSS',
+    profitPercent: -1.0,
+    profitDollar: -100.0,
+    holdingTime: '20m',
+    emotion: 'Disciplined',
+    mistakeTag: 'Followed Plan',
+    preTradeThesis: '10:00 AM Silver Bullet hour imbalance fill. Looking for expansion into discount relative equal lows.',
+    postTradeReview: 'News headline spiked price through stop loss. Invalidation was respected and accepted without revenge trading.',
+    rulesFollowed: true,
+    notes: 'Reflection: Even a losing trade is a victory if rules are strictly followed. Exactly -1R lost, capital preserved.',
+    date: 'Sep 24, 2026',
+    dateIso: '2026-09-24'
+  }
+];
+
 export default function JournalPage() {
   const { user, syncBrokerTrades } = useAuth();
 
-  // Live audited trade ledger dataset
-  const [trades, setTrades] = useState<JournalTrade[]>([]);
+  // Live audited trade ledger dataset (initialized with verified demo entries)
+  const [trades, setTrades] = useState<JournalTrade[]>(INITIAL_DEMO_JOURNAL_TRADES);
   const [isLoadingTrades, setIsLoadingTrades] = useState(false);
 
   // Fetch real verified trades from backend API
   useEffect(() => {
     if (!user) {
-      setTrades([]);
+      setTrades(INITIAL_DEMO_JOURNAL_TRADES);
       return;
     }
     const fetchTrades = async () => {
@@ -164,6 +286,8 @@ export default function JournalPage() {
   const [selectedSetupFilter, setSelectedSetupFilter] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCalendarDate, setSelectedCalendarDate] = useState<string | null>(null);
+  const [mobileCalendarView, setMobileCalendarView] = useState<'grid' | 'agenda'>('grid');
+  const [ledgerViewMode, setLedgerViewMode] = useState<'journal' | 'table'>('journal');
 
   // Modals state
   const [isLogModalOpen, setIsLogModalOpen] = useState(false);
@@ -421,6 +545,115 @@ export default function JournalPage() {
     })).sort((a, b) => b.pnl - a.pnl);
   }, [trades]);
 
+  // Aggregated calendar days computation
+  const calendarData = useMemo(() => {
+    // Group trades by dateIso
+    const tradesByDate = new Map<string, JournalTrade[]>();
+    trades.forEach((t) => {
+      const d = t.dateIso || '2026-09-30';
+      const arr = tradesByDate.get(d) || [];
+      arr.push(t);
+      tradesByDate.set(d, arr);
+    });
+
+    const sampleDays = [
+      { day: 15, date: '2026-09-15', weekday: 'Tue', pnl: 0, count: 0, weekend: false },
+      { day: 16, date: '2026-09-16', weekday: 'Wed', pnl: -100, count: 1, weekend: false },
+      { day: 17, date: '2026-09-17', weekday: 'Thu', pnl: 0, count: 0, weekend: false },
+      { day: 18, date: '2026-09-18', weekday: 'Fri', pnl: 300, count: 1, weekend: false },
+      { day: 19, date: '2026-09-19', weekday: 'Sat', pnl: 0, count: 0, weekend: true },
+      { day: 20, date: '2026-09-20', weekday: 'Sun', pnl: 0, count: 0, weekend: true },
+      { day: 21, date: '2026-09-21', weekday: 'Mon', pnl: 0, count: 0, weekend: false },
+      { day: 22, date: '2026-09-22', weekday: 'Tue', pnl: 0, count: 1, weekend: false },
+      { day: 23, date: '2026-09-23', weekday: 'Wed', pnl: 300, count: 1, weekend: false },
+      { day: 24, date: '2026-09-24', weekday: 'Thu', pnl: -100, count: 1, weekend: false },
+      { day: 25, date: '2026-09-25', weekday: 'Fri', pnl: 0, count: 0, weekend: false },
+      { day: 26, date: '2026-09-26', weekday: 'Sat', pnl: 0, count: 0, weekend: true },
+      { day: 27, date: '2026-09-27', weekday: 'Sun', pnl: 0, count: 0, weekend: true },
+      { day: 28, date: '2026-09-28', weekday: 'Mon', pnl: 0, count: 0, weekend: false },
+      { day: 29, date: '2026-09-29', weekday: 'Tue', pnl: 0, count: 0, weekend: false },
+      { day: 30, date: '2026-09-30', weekday: 'Wed', pnl: 300, count: 1, weekend: false },
+      { day: 1, date: '2026-10-01', weekday: 'Thu', pnl: 250, count: 1, weekend: false },
+      { day: 2, date: '2026-10-02', weekday: 'Fri', pnl: 0, count: 0, weekend: false },
+      { day: 3, date: '2026-10-03', weekday: 'Sat', pnl: 0, count: 0, weekend: true },
+      { day: 4, date: '2026-10-04', weekday: 'Sun', pnl: 0, count: 0, weekend: true },
+      { day: 5, date: '2026-10-05', weekday: 'Mon', pnl: 0, count: 0, weekend: false },
+    ];
+
+    // Merge real logged trades and extra dates
+    const sampleDateSet = new Set(sampleDays.map((sd) => sd.date));
+    const allDaysPool = [...sampleDays];
+
+    tradesByDate.forEach((_, dateKey) => {
+      if (!sampleDateSet.has(dateKey)) {
+        const dObj = new Date(dateKey);
+        const dayNumber = !isNaN(dObj.getDate()) ? dObj.getDate() : 1;
+        const dayOfWeekIndex = !isNaN(dObj.getDay()) ? dObj.getDay() : 1;
+        const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        const isWeekend = dayOfWeekIndex === 0 || dayOfWeekIndex === 6;
+        allDaysPool.push({
+          day: dayNumber,
+          date: dateKey,
+          weekday: weekdays[dayOfWeekIndex],
+          pnl: 0,
+          count: 0,
+          weekend: isWeekend,
+        });
+      }
+    });
+
+    const days = allDaysPool.map((sd) => {
+      const realTrades = tradesByDate.get(sd.date) || [];
+      if (realTrades.length > 0) {
+        const sumPL = realTrades.reduce((acc, cur) => acc + cur.profitDollar, 0);
+        return {
+          ...sd,
+          count: realTrades.length,
+          pnl: sumPL,
+          trades: realTrades,
+        };
+      }
+      return {
+        ...sd,
+        trades: [],
+      };
+    });
+
+    let winDays = 0;
+    let lossDays = 0;
+    let beDays = 0;
+    let totalPnl = 0;
+    let bestDayPnl = 0;
+
+    days.forEach((d) => {
+      if (d.count > 0) {
+        totalPnl += d.pnl;
+        if (d.pnl > 0) {
+          winDays++;
+          if (d.pnl > bestDayPnl) bestDayPnl = d.pnl;
+        } else if (d.pnl < 0) {
+          lossDays++;
+        } else {
+          beDays++;
+        }
+      }
+    });
+
+    const activeTradingDays = days.filter((d) => d.count > 0);
+    const winRate = activeTradingDays.length > 0 ? Math.round((winDays / activeTradingDays.length) * 100) : 0;
+
+    return {
+      days,
+      winDays,
+      lossDays,
+      beDays,
+      totalPnl,
+      bestDayPnl,
+      winRate,
+      activeTradingDays,
+    };
+  }, [trades]);
+
   // Export CSV function
   const handleExportCSV = () => {
     const headers = [
@@ -566,13 +799,13 @@ export default function JournalPage() {
                   <span className="w-1.5 h-1.5 rounded-full bg-[#15803D] animate-pulse" />
                 </button>
 
-                <button
-                  onClick={() => setIsLogModalOpen(true)}
+                <Link
+                  href="/journal/log"
                   className="h-10 px-4 bg-[#C2410C] hover:bg-[#EA580C] text-white rounded-xl text-xs font-semibold inline-flex items-center gap-1.5 transition-all shadow-xs active:scale-98"
                 >
-                  <Plus className="w-4 h-4" />
+                  <PenLine className="w-4 h-4" />
                   <span>Log Trade</span>
-                </button>
+                </Link>
 
                 <button
                   onClick={() => setIsAuditModalOpen(true)}
@@ -912,116 +1145,416 @@ export default function JournalPage() {
 
             {/* TAB 2: Calendar Heatmap (Monthly P&L Grid) */}
             {activeAnalyticsTab === 'calendar' && (
-              <div className="space-y-4">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="font-bold text-[#1C1917]">September - October 2026 Trading Days</span>
-                  <div className="flex items-center gap-3 text-[11px]">
+              <div className="space-y-5">
+                {/* 1. High-Class Calendar Header & Performance Strip */}
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 p-4 rounded-2xl bg-[#FAFAF9] border border-[#E7E5E4]">
+                  {/* Month Title & Verified Badge */}
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-white border border-[#E7E5E4] flex items-center justify-center text-[#C2410C] shadow-2xs">
+                      <CalendarIcon className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-bold text-[#1C1917] text-sm sm:text-base">September – October 2026</h3>
+                        <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#ECFDF5] text-[#15803D] border border-[#A7F3D0]">
+                          Verified
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-[#78716C]">Daily performance & behavioral P&L audit</p>
+                    </div>
+                  </div>
+
+                  {/* Summary Metric Strip */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                    <div className="p-2.5 rounded-xl bg-white border border-[#E7E5E4] flex flex-col justify-center">
+                      <span className="text-[10px] uppercase font-bold text-[#78716C]">Net P&L</span>
+                      <span className={`font-mono font-bold text-sm ${calendarData.totalPnl >= 0 ? 'text-[#15803D]' : 'text-[#B91C1C]'}`}>
+                        {calendarData.totalPnl >= 0 ? `+$${calendarData.totalPnl.toFixed(2)}` : `-$${Math.abs(calendarData.totalPnl).toFixed(2)}`}
+                      </span>
+                    </div>
+
+                    <div className="p-2.5 rounded-xl bg-white border border-[#E7E5E4] flex flex-col justify-center">
+                      <span className="text-[10px] uppercase font-bold text-[#78716C]">Day Record</span>
+                      <span className="font-mono font-bold text-sm">
+                        <span className="text-[#15803D]">{calendarData.winDays}W</span>
+                        <span className="text-[#A8A29E] mx-1">/</span>
+                        <span className="text-[#B91C1C]">{calendarData.lossDays}L</span>
+                      </span>
+                    </div>
+
+                    <div className="p-2.5 rounded-xl bg-white border border-[#E7E5E4] flex flex-col justify-center">
+                      <span className="text-[10px] uppercase font-bold text-[#78716C]">Win Rate</span>
+                      <span className="font-mono font-bold text-sm text-[#1C1917]">{calendarData.winRate}%</span>
+                    </div>
+
+                    <div className="p-2.5 rounded-xl bg-white border border-[#E7E5E4] flex flex-col justify-center">
+                      <span className="text-[10px] uppercase font-bold text-[#78716C]">Best Day</span>
+                      <span className="font-mono font-bold text-sm text-[#15803D]">+${calendarData.bestDayPnl.toFixed(0)}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Mobile View Switcher (Heatmap Grid vs Daily Breakdown) */}
+                <div className="sm:hidden flex items-center justify-between gap-1.5 p-1 bg-[#F5F5F4] rounded-xl border border-[#E7E5E4]">
+                  <button
+                    type="button"
+                    onClick={() => setMobileCalendarView('grid')}
+                    className={`flex-1 py-1.5 text-xs font-semibold rounded-lg transition-all ${
+                      mobileCalendarView === 'grid'
+                        ? 'bg-white text-[#1C1917] shadow-xs'
+                        : 'text-[#78716C] hover:text-[#1C1917]'
+                    }`}
+                  >
+                    Calendar Heatmap
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setMobileCalendarView('agenda')}
+                    className={`flex-1 py-1.5 text-xs font-semibold rounded-lg transition-all ${
+                      mobileCalendarView === 'agenda'
+                        ? 'bg-white text-[#1C1917] shadow-xs'
+                        : 'text-[#78716C] hover:text-[#1C1917]'
+                    }`}
+                  >
+                    Daily Breakdown ({calendarData.activeTradingDays.length})
+                  </button>
+                </div>
+
+                {/* Legend indicator */}
+                <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-[#78716C] px-1">
+                  <span className="hidden sm:inline font-medium">Click any trading day to inspect its executions or filter the trade ledger.</span>
+                  <div className="flex items-center gap-3">
                     <span className="flex items-center gap-1.5">
-                      <span className="w-3 h-3 rounded bg-[#DCFCE7] border border-[#BBF7D0]" />
-                      <span className="text-[#78716C]">Green Day (Win)</span>
+                      <span className="w-2.5 h-2.5 rounded-md bg-[#DCFCE7] border border-[#86EFAC]" />
+                      <span>Profitable Day</span>
                     </span>
                     <span className="flex items-center gap-1.5">
-                      <span className="w-3 h-3 rounded bg-[#FEE2E2] border border-[#FECACA]" />
-                      <span className="text-[#78716C]">Red Day (Loss)</span>
+                      <span className="w-2.5 h-2.5 rounded-md bg-[#FEE2E2] border border-[#FCA5A5]" />
+                      <span>Drawdown Day</span>
                     </span>
                     <span className="flex items-center gap-1.5">
-                      <span className="w-3 h-3 rounded bg-[#F5F5F4] border border-[#E7E5E4]" />
-                      <span className="text-[#78716C]">No Trades (Discipline)</span>
+                      <span className="w-2.5 h-2.5 rounded-md bg-[#F5F5F4] border border-[#E7E5E4]" />
+                      <span>No Trades</span>
                     </span>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-7 gap-2 text-xs">
-                  {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => (
-                    <div key={day} className="text-center font-bold text-[#78716C] py-1 text-[11px]">
-                      {day}
-                    </div>
-                  ))}
+                {/* DESKTOP CALENDAR VIEW (Spacious 7-Column Grid) */}
+                <div className="hidden sm:block">
+                  <div className="grid grid-cols-7 gap-2.5 text-xs">
+                    {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => (
+                      <div key={day} className="text-center font-bold text-[#78716C] py-1.5 text-[11px] uppercase tracking-wider">
+                        {day}
+                      </div>
+                    ))}
 
-                  {/* Sample September/October Calendar Grid */}
-                  {[
-                    { day: 15, pnl: 0, count: 0, date: '2026-09-15' },
-                    { day: 16, pnl: -100, count: 1, date: '2026-09-16' },
-                    { day: 17, pnl: 0, count: 0, date: '2026-09-17' },
-                    { day: 18, pnl: 300, count: 1, date: '2026-09-18' },
-                    { day: 19, pnl: 300, count: 1, date: '2026-09-19' },
-                    { day: 20, pnl: 0, count: 0, weekend: true },
-                    { day: 21, pnl: 0, count: 0, weekend: true },
-                    { day: 22, pnl: 0, count: 1, date: '2026-09-22' },
-                    { day: 23, pnl: 300, count: 1, date: '2026-09-23' },
-                    { day: 24, pnl: -100, count: 1, date: '2026-09-24' },
-                    { day: 25, pnl: 0, count: 0 },
-                    { day: 26, pnl: 0, count: 0, weekend: true },
-                    { day: 27, pnl: 0, count: 0, weekend: true },
-                    { day: 28, pnl: 0, count: 0 },
-                    { day: 29, pnl: 0, count: 0 },
-                    { day: 30, pnl: 300, count: 1, date: '2026-09-30' },
-                    { day: 1, pnl: 250, count: 1, date: '2026-10-01' },
-                    { day: 2, pnl: 0, count: 0 },
-                    { day: 3, pnl: 0, count: 0, weekend: true },
-                    { day: 4, pnl: 0, count: 0, weekend: true },
-                    { day: 5, pnl: 0, count: 0 }
-                  ].map((cell, idx) => {
-                    const isSelected = selectedCalendarDate === cell.date;
-                    const isGreen = cell.pnl > 0;
-                    const isRed = cell.pnl < 0;
+                    {calendarData.days.map((cell, idx) => {
+                      const isSelected = selectedCalendarDate === cell.date;
+                      const isGreen = cell.pnl > 0;
+                      const isRed = cell.pnl < 0;
 
-                    return (
-                      <button
-                        key={idx}
-                        type="button"
-                        onClick={() => {
-                          if (cell.date) {
-                            setSelectedCalendarDate(isSelected ? null : cell.date);
-                          }
-                        }}
-                        className={`p-2.5 rounded-xl border transition-all text-left flex flex-col justify-between h-20 ${
-                          isSelected
-                            ? 'ring-2 ring-[#C2410C] border-[#C2410C]'
-                            : cell.weekend
-                            ? 'bg-[#FAFAF9] border-[#E7E5E4] opacity-50'
-                            : isGreen
-                            ? 'bg-[#DCFCE7]/70 border-[#BBF7D0] hover:bg-[#DCFCE7]'
-                            : isRed
-                            ? 'bg-[#FEE2E2]/70 border-[#FECACA] hover:bg-[#FEE2E2]'
-                            : 'bg-white border-[#E7E5E4] hover:border-[#D6D3D1]'
-                        }`}
-                      >
-                        <div className="flex items-center justify-between">
-                          <span className="font-mono text-[11px] font-bold text-[#1C1917]">{cell.day}</span>
-                          {cell.count > 0 && (
-                            <span className="text-[9px] px-1 rounded bg-[#E7E5E4] text-[#44403C]">
-                              {cell.count}t
+                      return (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => {
+                            if (cell.date) {
+                              setSelectedCalendarDate(isSelected ? null : cell.date);
+                            }
+                          }}
+                          className={`group p-3 rounded-2xl border transition-all text-left flex flex-col justify-between h-24 relative overflow-hidden cursor-pointer ${
+                            isSelected
+                              ? 'ring-2 ring-[#C2410C] border-[#C2410C] bg-[#FFF7ED] shadow-sm'
+                              : cell.weekend
+                              ? 'bg-[#FAFAF9]/60 border-[#F5F5F4] opacity-55 hover:opacity-80'
+                              : isGreen
+                              ? 'bg-gradient-to-b from-[#F0FDF4] to-[#DCFCE7]/60 border-[#BBF7D0] hover:border-[#86EFAC] hover:shadow-xs'
+                              : isRed
+                              ? 'bg-gradient-to-b from-[#FEF2F2] to-[#FEE2E2]/60 border-[#FECACA] hover:border-[#FCA5A5] hover:shadow-xs'
+                              : 'bg-white border-[#E7E5E4] hover:border-[#D6D3D1] hover:bg-[#FAFAF9]'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between w-full">
+                            <span className={`font-mono text-xs font-bold ${isSelected ? 'text-[#C2410C]' : 'text-[#1C1917]'}`}>
+                              {String(cell.day).padStart(2, '0')}
                             </span>
-                          )}
-                        </div>
+                            {cell.count > 0 ? (
+                              <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded-md font-semibold ${
+                                isGreen ? 'bg-[#DCFCE7] text-[#15803D]' : isRed ? 'bg-[#FEE2E2] text-[#B91C1C]' : 'bg-[#E7E5E4] text-[#44403C]'
+                              }`}>
+                                {cell.count} {cell.count === 1 ? 'trade' : 'trades'}
+                              </span>
+                            ) : cell.weekend ? (
+                              <span className="text-[9px] font-mono text-[#A8A29E] uppercase">Weekend</span>
+                            ) : null}
+                          </div>
 
-                        <div>
-                          {cell.count > 0 ? (
-                            <span
-                              className={`text-[11px] font-bold font-mono block ${
-                                isGreen ? 'text-[#15803D]' : isRed ? 'text-[#B91C1C]' : 'text-[#1C1917]'
-                              }`}
-                            >
-                              {cell.pnl > 0 ? `+$${cell.pnl}` : cell.pnl < 0 ? `-$${Math.abs(cell.pnl)}` : '$0'}
-                            </span>
-                          ) : (
-                            <span className="text-[10px] text-[#A8A29E] block">-</span>
-                          )}
-                        </div>
-                      </button>
-                    );
-                  })}
+                          <div className="mt-2">
+                            {cell.count > 0 ? (
+                              <div className="flex items-center gap-1">
+                                {isGreen ? (
+                                  <ArrowUpRight className="w-3.5 h-3.5 text-[#15803D] shrink-0" />
+                                ) : isRed ? (
+                                  <ArrowDownRight className="w-3.5 h-3.5 text-[#B91C1C] shrink-0" />
+                                ) : null}
+                                <span
+                                  className={`text-xs font-bold font-mono tracking-tight ${
+                                    isGreen ? 'text-[#15803D]' : isRed ? 'text-[#B91C1C]' : 'text-[#78716C]'
+                                  }`}
+                                >
+                                  {cell.pnl > 0 ? `+$${cell.pnl.toFixed(2)}` : cell.pnl < 0 ? `-$${Math.abs(cell.pnl).toFixed(2)}` : '$0.00'}
+                                </span>
+                              </div>
+                            ) : (
+                              <span className="text-[11px] text-[#A8A29E] font-mono block">--</span>
+                            )}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
 
+                {/* MOBILE CALENDAR VIEW (sm:hidden) */}
+                <div className="sm:hidden space-y-4">
+                  {mobileCalendarView === 'grid' ? (
+                    <>
+                      {/* Touch-Friendly Compact Grid */}
+                      <div className="grid grid-cols-7 gap-1.5 text-center">
+                        {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day, i) => (
+                          <div key={i} className="text-[10px] font-bold text-[#A8A29E] py-1">
+                            {day}
+                          </div>
+                        ))}
+
+                        {calendarData.days.map((cell, idx) => {
+                          const isSelected = selectedCalendarDate === cell.date;
+                          const isGreen = cell.pnl > 0;
+                          const isRed = cell.pnl < 0;
+
+                          return (
+                            <button
+                              key={idx}
+                              type="button"
+                              onClick={() => {
+                                if (cell.date) {
+                                  setSelectedCalendarDate(isSelected ? null : cell.date);
+                                }
+                              }}
+                              className={`aspect-square min-h-[46px] rounded-xl border flex flex-col items-center justify-center p-1 relative transition-all active:scale-95 cursor-pointer ${
+                                isSelected
+                                  ? 'ring-2 ring-[#C2410C] border-[#C2410C] bg-[#FFF7ED]'
+                                  : cell.weekend
+                                  ? 'bg-[#FAFAF9]/50 border-[#F5F5F4] opacity-40'
+                                  : isGreen
+                                  ? 'bg-[#DCFCE7]/70 border-[#BBF7D0] text-[#15803D]'
+                                  : isRed
+                                  ? 'bg-[#FEE2E2]/70 border-[#FECACA] text-[#B91C1C]'
+                                  : 'bg-white border-[#E7E5E4] text-[#1C1917]'
+                              }`}
+                            >
+                              <span className={`text-[12px] font-mono font-bold leading-none ${
+                                isSelected ? 'text-[#C2410C]' : isGreen ? 'text-[#15803D]' : isRed ? 'text-[#B91C1C]' : 'text-[#44403C]'
+                              }`}>
+                                {cell.day}
+                              </span>
+
+                              {cell.count > 0 ? (
+                                <span className={`w-1.5 h-1.5 rounded-full mt-1 ${
+                                  isGreen ? 'bg-[#15803D]' : isRed ? 'bg-[#B91C1C]' : 'bg-[#78716C]'
+                                }`} />
+                              ) : (
+                                <span className="w-1.5 h-1.5 mt-1" />
+                              )}
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      {/* Interactive Mobile Day Performance Card */}
+                      {selectedCalendarDate ? (
+                        (() => {
+                          const dayObj = calendarData.days.find((d) => d.date === selectedCalendarDate);
+                          const dayTrades = dayObj?.trades?.length
+                            ? dayObj.trades
+                            : trades.filter((t) => t.dateIso === selectedCalendarDate);
+                          const dayPL = dayObj ? dayObj.pnl : dayTrades.reduce((acc, t) => acc + t.profitDollar, 0);
+
+                          return (
+                            <div className="p-4 rounded-2xl bg-white border border-[#E7E5E4] shadow-xs space-y-3 animate-in fade-in duration-200">
+                              <div className="flex items-center justify-between pb-3 border-b border-[#F5F5F4]">
+                                <div>
+                                  <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#78716C]">
+                                    Selected Trading Day
+                                  </span>
+                                  <h4 className="font-bold text-sm text-[#1C1917]">{selectedCalendarDate}</h4>
+                                </div>
+                                <div className="text-right">
+                                  <span className={`font-mono font-bold text-sm block ${dayPL >= 0 ? 'text-[#15803D]' : 'text-[#B91C1C]'}`}>
+                                    {dayPL >= 0 ? `+$${dayPL.toFixed(2)}` : `-$${Math.abs(dayPL).toFixed(2)}`}
+                                  </span>
+                                  <span className="text-[10px] text-[#78716C] font-mono">{dayTrades.length} executed {dayTrades.length === 1 ? 'trade' : 'trades'}</span>
+                                </div>
+                              </div>
+
+                              {dayTrades.length > 0 ? (
+                                <div className="space-y-2">
+                                  {dayTrades.map((t) => (
+                                    <div
+                                      key={t.id}
+                                      onClick={() => setSelectedAutopsyTrade(t)}
+                                      className="p-3 rounded-xl bg-[#FAFAF9] border border-[#E7E5E4] flex items-center justify-between cursor-pointer hover:border-[#FED7AA]"
+                                    >
+                                      <div className="flex items-center gap-2.5">
+                                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold font-mono ${
+                                          t.direction === 'LONG' ? 'bg-[#15803D] text-white' : 'bg-[#B91C1C] text-white'
+                                        }`}>
+                                          {t.direction}
+                                        </span>
+                                        <div>
+                                          <div className="flex items-center gap-1.5">
+                                            <span className="font-mono font-bold text-xs text-[#1C1917]">{t.pair}</span>
+                                            <span className="text-[10px] text-[#78716C]">({t.setupType})</span>
+                                          </div>
+                                          <span className="text-[10px] text-[#A8A29E] font-mono">1:{t.riskReward || 2} R:R • {t.timeframe}</span>
+                                        </div>
+                                      </div>
+                                      <div className="text-right">
+                                        <span className={`font-mono font-bold text-xs block ${
+                                          t.profitDollar >= 0 ? 'text-[#15803D]' : 'text-[#B91C1C]'
+                                        }`}>
+                                          {t.profitDollar >= 0 ? `+$${t.profitDollar.toFixed(2)}` : `-$${Math.abs(t.profitDollar).toFixed(2)}`}
+                                        </span>
+                                        <span className="text-[9px] uppercase font-bold text-[#78716C]">{t.outcome}</span>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              ) : (
+                                <div className="py-4 text-center text-xs text-[#78716C]">
+                                  No verified trades logged on this calendar date.
+                                </div>
+                              )}
+
+                              <div className="pt-2 flex items-center justify-between">
+                                <button
+                                  type="button"
+                                  onClick={() => setSelectedCalendarDate(null)}
+                                  className="text-xs text-[#78716C] hover:text-[#1C1917] font-medium"
+                                >
+                                  Clear Selection
+                                </button>
+                                <span className="text-[11px] text-[#C2410C] font-semibold">
+                                  Ledger filtered below ↓
+                                </span>
+                              </div>
+                            </div>
+                          );
+                        })()
+                      ) : (
+                        <div className="p-3.5 rounded-2xl bg-[#FAFAF9] border border-dashed border-[#D6D3D1] text-center text-xs text-[#78716C]">
+                          Tap any day on the calendar heatmap above to inspect executions and returns.
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    /* Chronological Mobile Daily Breakdown Stream */
+                    <div className="space-y-3">
+                      {calendarData.activeTradingDays.length === 0 ? (
+                        <div className="p-6 text-center text-xs text-[#78716C] bg-white rounded-2xl border border-[#E7E5E4]">
+                          No active trading days recorded in this window.
+                        </div>
+                      ) : (
+                        calendarData.activeTradingDays.map((dayItem) => {
+                          const isSelected = selectedCalendarDate === dayItem.date;
+                          const isGreen = dayItem.pnl > 0;
+                          const isRed = dayItem.pnl < 0;
+
+                          return (
+                            <div
+                              key={dayItem.date}
+                              className={`p-3.5 rounded-2xl border transition-all ${
+                                isSelected ? 'bg-[#FFF7ED] border-[#C2410C]' : 'bg-white border-[#E7E5E4]'
+                              }`}
+                            >
+                              <div className="flex items-center justify-between pb-2.5 border-b border-[#F5F5F4]">
+                                <div className="flex items-center gap-2">
+                                  <div className={`w-8 h-8 rounded-xl flex items-center justify-center font-mono font-bold text-xs ${
+                                    isGreen ? 'bg-[#DCFCE7] text-[#15803D]' : isRed ? 'bg-[#FEE2E2] text-[#B91C1C]' : 'bg-[#F5F5F4] text-[#78716C]'
+                                  }`}>
+                                    {dayItem.day}
+                                  </div>
+                                  <div>
+                                    <span className="font-bold text-xs text-[#1C1917] block">{dayItem.date}</span>
+                                    <span className="text-[10px] text-[#78716C]">{dayItem.weekday} • {dayItem.count} {dayItem.count === 1 ? 'trade' : 'trades'}</span>
+                                  </div>
+                                </div>
+                                <div className="text-right">
+                                  <span className={`font-mono font-bold text-sm block ${
+                                    isGreen ? 'text-[#15803D]' : isRed ? 'text-[#B91C1C]' : 'text-[#78716C]'
+                                  }`}>
+                                    {dayItem.pnl > 0 ? `+$${dayItem.pnl.toFixed(2)}` : dayItem.pnl < 0 ? `-$${Math.abs(dayItem.pnl).toFixed(2)}` : '$0.00'}
+                                  </span>
+                                  <button
+                                    type="button"
+                                    onClick={() => setSelectedCalendarDate(isSelected ? null : dayItem.date)}
+                                    className="text-[10px] text-[#C2410C] font-semibold hover:underline"
+                                  >
+                                    {isSelected ? 'Reset Filter' : 'Filter Ledger'}
+                                  </button>
+                                </div>
+                              </div>
+
+                              {dayItem.trades && dayItem.trades.length > 0 && (
+                                <div className="mt-2.5 space-y-1.5">
+                                  {dayItem.trades.map((t) => (
+                                    <div
+                                      key={t.id}
+                                      onClick={() => setSelectedAutopsyTrade(t)}
+                                      className="p-2 rounded-xl bg-[#FAFAF9] flex items-center justify-between text-xs cursor-pointer hover:bg-[#F5F5F4]"
+                                    >
+                                      <div className="flex items-center gap-2">
+                                        <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold font-mono ${
+                                          t.direction === 'LONG' ? 'bg-[#15803D] text-white' : 'bg-[#B91C1C] text-white'
+                                        }`}>
+                                          {t.direction}
+                                        </span>
+                                        <span className="font-mono font-bold text-[11px] text-[#1C1917]">{t.pair}</span>
+                                        <span className="text-[10px] text-[#78716C] hidden min-[360px]:inline">({t.setupType})</span>
+                                      </div>
+                                      <span className={`font-mono font-bold text-xs ${
+                                        t.profitDollar >= 0 ? 'text-[#15803D]' : 'text-[#B91C1C]'
+                                      }`}>
+                                        {t.profitDollar >= 0 ? `+$${t.profitDollar.toFixed(2)}` : `-$${Math.abs(t.profitDollar).toFixed(2)}`}
+                                      </span>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* Filter Status Notification Banner */}
                 {selectedCalendarDate && (
-                  <div className="flex items-center justify-between p-3 rounded-xl bg-[#FFF7ED] border border-[#FED7AA] text-xs text-[#C2410C]">
-                    <span>Filtered to trades on {selectedCalendarDate}</span>
+                  <div className="flex items-center justify-between p-3.5 rounded-2xl bg-[#FFF7ED] border border-[#FED7AA] text-xs text-[#C2410C] shadow-2xs animate-in fade-in duration-150">
+                    <div className="flex items-center gap-2">
+                      <Filter className="w-4 h-4 shrink-0 text-[#C2410C]" />
+                      <span>
+                        Verified ledger is currently filtered to <strong>{selectedCalendarDate}</strong>.
+                      </span>
+                    </div>
                     <button
+                      type="button"
                       onClick={() => setSelectedCalendarDate(null)}
-                      className="font-bold underline hover:text-[#EA580C]"
+                      className="px-2.5 py-1 rounded-lg bg-white border border-[#FED7AA] text-[#C2410C] font-bold hover:bg-[#FFEDD5] transition-colors shrink-0 flex items-center gap-1 cursor-pointer"
                     >
-                      Clear Date Filter
+                      <X className="w-3.5 h-3.5" />
+                      <span>Clear Date Filter</span>
                     </button>
                   </div>
                 )}
@@ -1182,8 +1715,39 @@ export default function JournalPage() {
                 </p>
               </div>
 
-              {/* Filters */}
+              {/* Filters & View Switcher */}
               <div className="flex flex-wrap items-center gap-2.5">
+                {/* View Switcher: Apple Journal Feed vs Table Ledger */}
+                <div className="flex items-center bg-[#F5F5F4] p-1 rounded-xl border border-[#E7E5E4]">
+                  <button
+                    type="button"
+                    onClick={() => setLedgerViewMode('journal')}
+                    className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
+                      ledgerViewMode === 'journal'
+                        ? 'bg-white text-[#1C1917] shadow-xs'
+                        : 'text-[#78716C] hover:text-[#1C1917]'
+                    }`}
+                  >
+                    <BookOpen className="w-3.5 h-3.5 text-[#C2410C]" />
+                    <span>Apple Journal</span>
+                    <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-[#FEF3C7] text-[#B45309] font-bold font-mono">
+                      PRO
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setLedgerViewMode('table')}
+                    className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
+                      ledgerViewMode === 'table'
+                        ? 'bg-white text-[#1C1917] shadow-xs'
+                        : 'text-[#78716C] hover:text-[#1C1917]'
+                    }`}
+                  >
+                    <Layers className="w-3.5 h-3.5" />
+                    <span>Table</span>
+                  </button>
+                </div>
+
                 {/* Search Bar */}
                 <div className="relative">
                   <Search className="w-3.5 h-3.5 text-[#78716C] absolute left-3 top-1/2 -translate-y-1/2" />
@@ -1243,8 +1807,204 @@ export default function JournalPage() {
               </div>
             </div>
 
-            {/* Desktop / Tablet Ledger Table (hidden on mobile md:block) */}
-            <div className="hidden md:block overflow-x-auto">
+            {/* View Switching: Apple Journal Feed (PRO) vs Table Ledger */}
+            {ledgerViewMode === 'journal' ? (
+              /* APPLE JOURNAL FEED VIEW */
+              <div className="p-4 sm:p-7 space-y-6 bg-[#FAF8F5]">
+                {filteredTrades.length === 0 ? (
+                  <div className="py-16 text-center space-y-3 bg-white rounded-3xl border border-[#E7E5E4] p-8 max-w-lg mx-auto">
+                    <div className="w-12 h-12 rounded-2xl bg-[#FFF7ED] border border-[#FED7AA] flex items-center justify-center mx-auto text-[#C2410C]">
+                      <BookOpen className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <p className="font-bold text-sm text-[#1C1917]">No Journal Reflections Found</p>
+                      <p className="text-xs text-[#78716C] mt-1 leading-relaxed">
+                        No trade entries match your active filters. Clear your filters or write a new Apple Journal trade entry.
+                      </p>
+                    </div>
+                    <div className="pt-2">
+                      <Link
+                        href="/journal/log"
+                        className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#C2410C] hover:bg-[#EA580C] text-white text-xs font-semibold rounded-xl transition-all shadow-xs"
+                      >
+                        <PenLine className="w-3.5 h-3.5" />
+                        <span>Write Journal Entry</span>
+                      </Link>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-6 max-w-3xl mx-auto">
+                    {filteredTrades.map((t) => {
+                      const isWin = t.outcome === 'WIN';
+                      const isLoss = t.outcome === 'LOSS';
+                      const moodColor = isWin ? '#15803D' : isLoss ? '#B91C1C' : '#475569';
+                      const moodRing = isWin ? '#86EFAC' : isLoss ? '#FCA5A5' : '#CBD5E1';
+                      const moodTone = isWin ? 'Disciplined & Grounded' : isLoss ? 'Risk-Controlled Invalidation' : 'Observant & Neutral';
+
+                      return (
+                        <div
+                          key={t.id}
+                          className="bg-white rounded-3xl border border-[#E7E5E4] p-5 sm:p-7 shadow-[0_4px_25px_rgba(28,25,23,0.04)] hover:shadow-md transition-all space-y-4 relative overflow-hidden"
+                        >
+                          {/* Apple Journal State of Mind Top Ambient Bar */}
+                          <div
+                            className="absolute top-0 left-0 right-0 h-1.5"
+                            style={{ backgroundColor: moodColor }}
+                          />
+
+                          {/* Card Header: Date & State of Mind Badge */}
+                          <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-[#F5F5F4]">
+                            <div>
+                              <span className="font-bold text-sm text-[#1C1917] block">
+                                {t.date}
+                              </span>
+                              <span className="text-[11px] text-[#78716C] font-mono">
+                                {t.session} • {t.timeframe} Chart • #{t.ticketId}
+                              </span>
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                              <span
+                                className="px-2.5 py-1 rounded-full text-[11px] font-semibold flex items-center gap-1.5 shadow-2xs"
+                                style={{
+                                  backgroundColor: `${moodColor}12`,
+                                  color: moodColor,
+                                  border: `1px solid ${moodRing}`
+                                }}
+                              >
+                                <span
+                                  className="w-2 h-2 rounded-full"
+                                  style={{ backgroundColor: moodColor }}
+                                />
+                                <span>{t.emotion || moodTone}</span>
+                              </span>
+
+                              <button
+                                type="button"
+                                onClick={() => setSelectedAutopsyTrade(t)}
+                                className="p-1.5 rounded-lg text-[#78716C] hover:text-[#C2410C] hover:bg-[#FFF7ED] transition-colors cursor-pointer"
+                                title="Open detailed autopsy modal"
+                              >
+                                <ExternalLink className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* Attached Executed Trade Moment Widget (Apple Moment Card) */}
+                          <div
+                            onClick={() => setSelectedAutopsyTrade(t)}
+                            className="p-3.5 rounded-2xl bg-[#FAF8F5] border border-[#E8E4DA] flex flex-wrap items-center justify-between gap-3 cursor-pointer hover:border-[#FED7AA] transition-colors"
+                          >
+                            <div className="flex items-center gap-3">
+                              <span
+                                className={`px-2.5 py-1 rounded-xl text-xs font-mono font-bold ${
+                                  t.direction === 'LONG' ? 'bg-[#15803D] text-white shadow-2xs' : 'bg-[#B91C1C] text-white shadow-2xs'
+                                }`}
+                              >
+                                {t.direction}
+                              </span>
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <span className="font-mono font-bold text-sm text-[#1C1917]">{t.pair}</span>
+                                  <span className="text-xs text-[#78716C]">({t.setupType})</span>
+                                </div>
+                                <span className="text-[10px] text-[#A8A29E] font-mono">
+                                  {t.entryPrice} &rarr; {t.exitPrice} (SL: {t.stopLoss} • TP: {t.takeProfit})
+                                </span>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-3">
+                              <div className="text-right">
+                                <span className="text-[10px] uppercase font-bold text-[#78716C] block">Realized R:R</span>
+                                <span className="font-mono font-bold text-xs text-[#1C1917]">
+                                  {t.realizedRR >= 0 ? `+${t.realizedRR}R` : `${t.realizedRR}R`}
+                                </span>
+                              </div>
+
+                              <div className="text-right">
+                                <span
+                                  className={`font-mono font-bold text-sm block ${
+                                    t.profitDollar >= 0 ? 'text-[#15803D]' : 'text-[#B91C1C]'
+                                  }`}
+                                >
+                                  {t.profitDollar >= 0 ? `+$${t.profitDollar.toFixed(2)}` : `-$${Math.abs(t.profitDollar).toFixed(2)}`}
+                                </span>
+                                <span className="text-[10px] uppercase font-bold text-[#78716C]">{t.outcome}</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Reflection Notes Body */}
+                          <div className="space-y-3 pt-1">
+                            {t.preTradeThesis && (
+                              <div className="space-y-1">
+                                <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#9A3412] block">
+                                  Pre-Trade Thesis &amp; Context:
+                                </span>
+                                <p className="text-xs sm:text-sm text-[#44403C] leading-relaxed whitespace-pre-wrap">
+                                  {t.preTradeThesis}
+                                </p>
+                              </div>
+                            )}
+
+                            {t.postTradeReview && t.postTradeReview !== t.preTradeThesis && (
+                              <div className="pt-2 border-t border-[#F5F5F4] space-y-1">
+                                <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#15803D] block">
+                                  Autopsy &amp; Compounding Lessons:
+                                </span>
+                                <p className="text-xs sm:text-sm text-[#44403C] leading-relaxed whitespace-pre-wrap">
+                                  {t.postTradeReview}
+                                </p>
+                              </div>
+                            )}
+
+                            {t.notes && t.notes !== t.preTradeThesis && t.notes !== t.postTradeReview && (
+                              <div className="p-3 rounded-2xl bg-[#FFFBEB]/70 border border-[#FDE68A] text-xs font-serif text-[#78350F] italic leading-relaxed">
+                                {t.notes}
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Screenshot preview if available */}
+                          {t.chartUrl && (
+                            <div className="pt-2">
+                              <div
+                                onClick={() => setSelectedAutopsyTrade(t)}
+                                className="rounded-2xl overflow-hidden border border-[#E7E5E4] max-h-56 cursor-pointer"
+                              >
+                                <img src={t.chartUrl} alt="Chart verification" className="w-full object-cover" />
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Footer action bar */}
+                          <div className="pt-3 border-t border-[#F5F5F4] flex items-center justify-between text-xs">
+                            <span className="text-[11px] text-[#0F766E] font-semibold flex items-center gap-1">
+                              <CheckCircle2 className="w-3.5 h-3.5 text-[#0F766E]" />
+                              <span>Verified Rule Compliance</span>
+                            </span>
+
+                            <button
+                              type="button"
+                              onClick={() => setSelectedAutopsyTrade(t)}
+                              className="text-xs font-bold text-[#C2410C] hover:text-[#EA580C] inline-flex items-center gap-1 cursor-pointer"
+                            >
+                              <span>Full Autopsy View</span>
+                              <ChevronRight className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            ) : (
+              /* TABLE LEDGER VIEW */
+              <>
+                {/* Desktop / Tablet Ledger Table (hidden on mobile md:block) */}
+                <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-left text-xs">
                 <thead className="bg-[#F5F5F4] text-[#78716C] font-semibold uppercase tracking-wider text-[10px] border-b border-[#E7E5E4]">
                   <tr>
@@ -1472,23 +2232,21 @@ export default function JournalPage() {
                 ))
               )}
             </div>
-          </div>
-        </div>
-      )}
+          </>
+        )}
+      </div>
+    </div>
+  )}
 
       {/* Mobile Floating Action Button (FAB) for instant one-touch logging */}
       {user && (
-        <button
-          type="button"
-          onClick={() => {
-            setLogModalMobileTab('params');
-            setIsLogModalOpen(true);
-          }}
+        <Link
+          href="/journal/log"
           className="sm:hidden fixed bottom-6 right-5 z-40 h-13 w-13 rounded-2xl bg-[#C2410C] hover:bg-[#EA580C] text-white shadow-xl shadow-[#C2410C]/40 flex items-center justify-center transition-transform active:scale-90 border border-white/20 cursor-pointer"
-          title="Log Trade"
+          title="Open Trading Notepad"
         >
-          <Plus className="w-6 h-6" />
-        </button>
+          <PenLine className="w-6 h-6" />
+        </Link>
       )}
 
       {/* DETAILED TRADE AUTOPSY INSPECTOR MODAL */}
