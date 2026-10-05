@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { Menu, X, Send, User, ShieldCheck, MessageSquare } from 'lucide-react';
 import PipbudLogo from './PipbudLogo';
 import { useAuth } from '@/context/AuthContext';
+import NotificationBell from './NotificationBell';
+import TraderAvatar from './TraderAvatar';
 
 interface NavbarProps {
   onReturnToFeed?: () => void;
@@ -106,20 +108,27 @@ export default function Navbar({ onReturnToFeed }: NavbarProps = {}) {
           {/* Action CTA & User Auth */}
           <div className="hidden sm:flex items-center gap-3">
             {user ? (
-              <Link
-                href="/settings"
-                className="h-9 px-3 text-xs font-semibold bg-white border border-[#E7E5E4] hover:border-[#FED7AA] text-[#1C1917] rounded-xl transition-all inline-flex items-center gap-2 shadow-xs hover:bg-[#FFF7ED]"
-                title="Trader Settings & Privacy"
-              >
-                <span
-                  className="w-2 h-2 rounded-full"
-                  style={{ backgroundColor: user.tier_color || '#0F766E' }}
-                />
-                <span className="font-bold text-[#C2410C]">L{user.skill_level}</span>
-                <span className="text-[#44403C] max-w-[110px] truncate">
-                  {user.display_name || `@${user.username}`}
-                </span>
-              </Link>
+              <>
+                <NotificationBell />
+                <Link
+                  href="/settings"
+                  className="h-9 px-2.5 sm:px-3 text-xs font-semibold bg-white border border-[#E7E5E4] hover:border-[#FED7AA] text-[#1C1917] rounded-xl transition-all inline-flex items-center gap-2 shadow-xs hover:bg-[#FFF7ED]"
+                  title="Trader Settings & Privacy"
+                >
+                  <TraderAvatar
+                    name={user.display_name || user.username}
+                    username={user.username}
+                    avatarUrl={user.avatar_url}
+                    avatarType={user.avatar_type}
+                    tierColor={user.tier_color}
+                    size="xs"
+                  />
+                  <span className="font-bold text-[#C2410C]">L{user.skill_level}</span>
+                  <span className="text-[#44403C] max-w-[110px] truncate">
+                    {user.display_name || `@${user.username}`}
+                  </span>
+                </Link>
+              </>
             ) : (
               <Link
                 href="/login"
@@ -140,14 +149,17 @@ export default function Navbar({ onReturnToFeed }: NavbarProps = {}) {
             </a>
           </div>
 
-          {/* Mobile menu toggle */}
-          <button
-            onClick={() => setMobileOpen(!mobileOpen)}
-            className="md:hidden p-2 rounded-lg text-[#44403C] hover:text-[#1C1917] hover:bg-[#E7E5E4]/50 transition-colors"
-            aria-label="Toggle menu"
-          >
-            {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
+          {/* Mobile Notification & menu toggle */}
+          <div className="flex md:hidden items-center gap-1.5">
+            {user && <NotificationBell />}
+            <button
+              onClick={() => setMobileOpen(!mobileOpen)}
+              className="p-2 rounded-lg text-[#44403C] hover:text-[#1C1917] hover:bg-[#E7E5E4]/50 transition-colors"
+              aria-label="Toggle menu"
+            >
+              {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -157,9 +169,19 @@ export default function Navbar({ onReturnToFeed }: NavbarProps = {}) {
           {user && (
             <div className="space-y-2">
               <div className="p-3 bg-[#FAFAF9] rounded-xl border border-[#E7E5E4] flex items-center justify-between">
-                <div>
-                  <span className="text-[10px] text-[#78716C] block">Logged In Trader</span>
-                  <span className="text-xs font-bold text-[#1C1917]">@{user.username}</span>
+                <div className="flex items-center gap-2.5">
+                  <TraderAvatar
+                    name={user.display_name || user.username}
+                    username={user.username}
+                    avatarUrl={user.avatar_url}
+                    avatarType={user.avatar_type}
+                    tierColor={user.tier_color}
+                    size="sm"
+                  />
+                  <div>
+                    <span className="text-[10px] text-[#78716C] block">Logged In Trader</span>
+                    <span className="text-xs font-bold text-[#1C1917]">@{user.username}</span>
+                  </div>
                 </div>
                 <span
                   className="px-2 py-0.5 rounded-full text-[10px] font-bold text-white shadow-xs"

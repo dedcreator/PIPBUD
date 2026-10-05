@@ -6,6 +6,8 @@ import Image from 'next/image';
 import PipbudLogo from '@/components/PipbudLogo';
 import { useAuth, BrokerConnectPayload, getApiBase } from '@/context/AuthContext';
 import { MessageItemSkeleton } from '@/components/SkeletonLoader';
+import TraderAvatar from '@/components/TraderAvatar';
+import NotificationBell from '@/components/NotificationBell';
 import {
   MessageSquare,
   ShieldCheck,
@@ -1281,31 +1283,14 @@ export default function ForumPage() {
           className="flex items-center gap-2.5 p-1 -m-1 rounded-xl hover:bg-white cursor-pointer transition-all group"
           title="Click to view your verified meritocracy profile"
         >
-          {user.avatar_type?.startsWith('mascot') || !user.avatar_type ? (
-            <div className="w-10 h-10 rounded-xl bg-white border border-[#FED7AA] p-1 flex items-center justify-center shrink-0 shadow-xs group-hover:scale-105 transition-transform">
-              <Image
-                src="/icon-192.png"
-                alt="Avatar"
-                width={30}
-                height={30}
-                className="object-contain"
-              />
-            </div>
-          ) : user.avatar_type === 'custom' && user.avatar_url ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={user.avatar_url}
-              alt="Avatar"
-              className="w-10 h-10 rounded-xl object-cover shrink-0 shadow-xs border border-[#E7E5E4] group-hover:scale-105 transition-transform"
-            />
-          ) : (
-            <div
-              className="w-10 h-10 rounded-xl text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-xs uppercase group-hover:scale-105 transition-transform"
-              style={{ backgroundColor: user.tier_color || '#1C1917' }}
-            >
-              {(user.display_name || user.username).slice(0, 2)}
-            </div>
-          )}
+          <TraderAvatar
+            name={user.display_name || user.username}
+            username={user.username}
+            avatarUrl={user.avatar_url}
+            avatarType={user.avatar_type}
+            tierColor={user.tier_color}
+            size="md"
+          />
           <div className="overflow-hidden min-w-0 flex-1">
             <div className="flex items-center justify-between gap-1">
               <span className="font-bold text-xs text-[#1C1917] truncate group-hover:text-[#C2410C] transition-colors">
@@ -1646,12 +1631,14 @@ export default function ForumPage() {
             className="flex items-center gap-2 p-2 rounded-xl bg-[#FFF7ED] border border-[#FED7AA] cursor-pointer hover:bg-[#FFEDD5] transition-all"
             title="Click to view your profile"
           >
-            <div
-              className="w-7 h-7 rounded-lg text-white text-[10px] font-bold flex items-center justify-center shrink-0"
-              style={{ backgroundColor: user.tier_color || '#1C1917' }}
-            >
-              {user.username.slice(0, 2).toUpperCase()}
-            </div>
+            <TraderAvatar
+              name={user.display_name || user.username}
+              username={user.username}
+              avatarUrl={user.avatar_url}
+              avatarType={user.avatar_type}
+              tierColor={user.tier_color}
+              size="sm"
+            />
             <div className="truncate flex-1">
               <span className="font-bold text-[#1C1917] block text-[11px] truncate">
                 {user.display_name || `@${user.username}`} <span className="text-[#C2410C] font-normal">(You)</span>
@@ -1672,9 +1659,13 @@ export default function ForumPage() {
             className="flex items-center gap-2 p-2 rounded-xl hover:bg-[#FAFAF9] cursor-pointer transition-colors"
             title="Click to view Solomon Kane's audited profile"
           >
-            <div className="w-7 h-7 rounded-lg bg-[#C2410C] text-white text-[10px] font-bold flex items-center justify-center shrink-0">
-              SK
-            </div>
+            <TraderAvatar
+              name="Solomon Kane"
+              username="solomon_kane"
+              avatarType="mascot_orange"
+              tierColor="#C2410C"
+              size="sm"
+            />
             <div className="truncate flex-1">
               <span className="font-semibold text-[#1C1917] block text-[11px] truncate hover:text-[#C2410C]">Solomon Kane</span>
               <span className="text-[9px] text-[#C2410C]">Level 7: Titan</span>
@@ -1688,9 +1679,13 @@ export default function ForumPage() {
             className="flex items-center gap-2 p-2 rounded-xl hover:bg-[#FAFAF9] cursor-pointer transition-colors"
             title="Click to view Aisha Bello's audited profile"
           >
-            <div className="w-7 h-7 rounded-lg bg-[#EA580C] text-white text-[10px] font-bold flex items-center justify-center shrink-0">
-              AB
-            </div>
+            <TraderAvatar
+              name="Aisha Bello"
+              username="aisha_bello"
+              avatarType="mascot_green"
+              tierColor="#EA580C"
+              size="sm"
+            />
             <div className="truncate flex-1">
               <span className="font-semibold text-[#1C1917] block text-[11px] truncate hover:text-[#C2410C]">Aisha Bello</span>
               <span className="text-[9px] text-[#EA580C]">Level 6: Mentor</span>
@@ -1704,9 +1699,13 @@ export default function ForumPage() {
             className="flex items-center gap-2 p-2 rounded-xl hover:bg-[#FAFAF9] cursor-pointer transition-colors"
             title="Click to view Chidi Okonkwo's audited profile"
           >
-            <div className="w-7 h-7 rounded-lg bg-[#F59E0B] text-white text-[10px] font-bold flex items-center justify-center shrink-0">
-              CO
-            </div>
+            <TraderAvatar
+              name="Chidi Okonkwo"
+              username="chidi_o"
+              avatarType="mascot_gold"
+              tierColor="#F59E0B"
+              size="sm"
+            />
             <div className="truncate flex-1">
               <span className="font-semibold text-[#1C1917] block text-[11px] truncate hover:text-[#C2410C]">Chidi Okonkwo</span>
               <span className="text-[9px] text-[#F59E0B]">Level 5: Alpha</span>
@@ -1796,15 +1795,22 @@ export default function ForumPage() {
             Web Journal
           </Link>
 
+          {/* Notifications */}
+          <NotificationBell />
+
           {/* User Account Chip -> Opens User Profile Modal */}
           <button
             onClick={() => openTraderProfile(user.display_name || user.name || user.username)}
-            className="px-2.5 py-1 rounded-xl bg-[#FAFAF9] border border-[#E7E5E4] hover:border-[#FED7AA] hover:bg-[#FFF7ED] transition-all flex items-center gap-1.5 shadow-xs active:scale-95 text-left"
+            className="px-2 sm:px-2.5 py-1 rounded-xl bg-[#FAFAF9] border border-[#E7E5E4] hover:border-[#FED7AA] hover:bg-[#FFF7ED] transition-all flex items-center gap-1.5 shadow-xs active:scale-95 text-left cursor-pointer"
             title="Trader Identity Profile"
           >
-            <span
-              className="w-2.5 h-2.5 rounded-full shrink-0"
-              style={{ backgroundColor: user.tier_color || '#C2410C' }}
+            <TraderAvatar
+              name={user.display_name || user.username}
+              username={user.username}
+              avatarUrl={user.avatar_url}
+              avatarType={user.avatar_type}
+              tierColor={user.tier_color}
+              size="xs"
             />
             <span className="font-bold text-xs text-[#C2410C]">L{user.skill_level}</span>
             <span className="text-xs font-medium text-[#44403C] hidden sm:inline max-w-[110px] truncate">
@@ -1988,18 +1994,16 @@ export default function ForumPage() {
                   }`}
                 >
                   {/* Clickable Author Avatar */}
-                  <button
+                  <TraderAvatar
+                    name={msg.author.name}
+                    username={msg.author.username}
+                    avatarUrl={msg.author.avatarUrl}
+                    avatarType={msg.author.avatarType}
+                    tierColor={msg.author.avatarBg}
+                    level={msg.author.level}
+                    size="sm"
                     onClick={() => openTraderProfile(msg.author.name)}
-                    className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl font-bold text-xs text-white flex items-center justify-center shrink-0 shadow-xs hover:opacity-90 transition-opacity active:scale-95"
-                    style={{ backgroundColor: msg.author.avatarBg }}
-                    title={`View ${msg.author.name}'s Verified Profile`}
-                  >
-                    {msg.author.name
-                      .split(' ')
-                      .map((n) => n[0])
-                      .slice(0, 2)
-                      .join('')}
-                  </button>
+                  />
 
                   <div className="flex-1 space-y-1.5 min-w-0">
                     <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
@@ -2661,31 +2665,14 @@ export default function ForumPage() {
 
             {/* Profile Hero Card */}
             <div className="flex items-center gap-3.5 p-4 rounded-2xl bg-[#FAFAF9] border border-[#E7E5E4]">
-              {selectedProfileTrader.avatarType?.startsWith('mascot') || selectedProfileTrader.isCurrentUser ? (
-                <div className="w-14 h-14 rounded-2xl bg-white border border-[#FED7AA] p-1.5 flex items-center justify-center shrink-0 shadow-xs">
-                  <Image
-                    src="/icon-192.png"
-                    alt="Mascot Avatar"
-                    width={44}
-                    height={44}
-                    className="object-contain"
-                  />
-                </div>
-              ) : selectedProfileTrader.avatarUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={selectedProfileTrader.avatarUrl}
-                  alt={selectedProfileTrader.name}
-                  className="w-14 h-14 rounded-2xl object-cover shrink-0 shadow-xs border border-[#E7E5E4]"
-                />
-              ) : (
-                <div
-                  className="w-14 h-14 rounded-2xl text-white font-bold text-lg flex items-center justify-center shrink-0 shadow-xs uppercase"
-                  style={{ backgroundColor: selectedProfileTrader.tierColor }}
-                >
-                  {selectedProfileTrader.name.slice(0, 2)}
-                </div>
-              )}
+              <TraderAvatar
+                name={selectedProfileTrader.name}
+                username={selectedProfileTrader.username}
+                avatarUrl={selectedProfileTrader.avatarUrl}
+                avatarType={selectedProfileTrader.avatarType}
+                tierColor={selectedProfileTrader.tierColor || selectedProfileTrader.avatarBg}
+                size="xl"
+              />
 
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">

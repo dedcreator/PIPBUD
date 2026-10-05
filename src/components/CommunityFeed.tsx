@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
@@ -29,11 +29,15 @@ import {
   Check,
   Activity,
   Radio,
-  UserCheck
+  UserCheck,
+  UploadCloud,
+  Image as ImageIcon,
+  Maximize2,
 } from 'lucide-react';
 import PipbudLogo from './PipbudLogo';
 import { useAuth, getApiBase } from '@/context/AuthContext';
 import { PostCardSkeleton } from './SkeletonLoader';
+import TraderAvatar from './TraderAvatar';
 
 export type PostCategory = 'question' | 'setup' | 'intel' | 'discussion';
 
@@ -74,8 +78,11 @@ export interface PostReply {
     badge: string;
     tierColor: string;
     broker?: string;
+    avatarUrl?: string;
+    avatarType?: string;
   };
   content: string;
+  images?: string[];
   timestamp: string;
   upvotes: number;
   isVerifiedAnswer?: boolean;
@@ -86,6 +93,7 @@ export interface CommunityPost {
   category: PostCategory;
   title: string;
   content: string;
+  images?: string[];
   author: {
     name: string;
     username: string;
@@ -94,6 +102,8 @@ export interface CommunityPost {
     tierColor: string;
     broker: string;
     winRate: string | number;
+    avatarUrl?: string;
+    avatarType?: string;
   };
   tags: string[];
   setupData?: {
@@ -299,6 +309,67 @@ export default function CommunityFeed({ onSwitchToPublic }: { onSwitchToPublic?:
   const [newPostEntry, setNewPostEntry] = useState('');
   const [newPostSL, setNewPostSL] = useState('');
   const [newPostTP, setNewPostTP] = useState('');
+
+  // Attached Images & Lightbox Modal State
+  const [newPostImages, setNewPostImages] = useState<string[]>([]);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [activeLightboxImage, setActiveLightboxImage] = useState<string | null>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    if (newPostImages.length >= 3) {
+      alert('You can attach a maximum of 3 screenshots or charts per post.');
+      return;
+    }
+
+    const file = files[0];
+    setIsUploadingImage(true);
+
+    try {
+      const apiBase = getApiBase();
+      const formData = new FormData();
+      formData.append('image', file);
+
+      const res = await fetch(`${apiBase}/api/community/upload-image/`, {
+        method: 'POST',
+        headers: {
+          ...(user?.id ? { 'X-Trader-Id': user.id } : {}),
+          ...(user?.token ? { Authorization: `Bearer ${user.token}` } : {}),
+        },
+        body: formData,
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.url) {
+          setNewPostImages((prev) => [...prev, data.url].slice(0, 3));
+          setIsUploadingImage(false);
+          if (imageInputRef.current) imageInputRef.current.value = '';
+          return;
+        }
+      }
+    } catch {
+      // Fallback
+    }
+
+    // Fallback: Read as base64 Data URL for instant preview
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === 'string') {
+        setNewPostImages((prev) => [...prev, reader.result as string].slice(0, 3));
+      }
+      setIsUploadingImage(false);
+    };
+    reader.readAsDataURL(file);
+    if (imageInputRef.current) imageInputRef.current.value = '';
+  };
+
+  const removePostImage = (idxToRemove: number) => {
+    setNewPostImages((prev) => prev.filter((_, idx) => idx !== idxToRemove));
+  };
 
   // Reply Thread Drawer State
   const [activeReplyPostId, setActiveReplyPostId] = useState<string | null>(null);
@@ -520,6 +591,7 @@ export default function CommunityFeed({ onSwitchToPublic }: { onSwitchToPublic?:
           title: newPostTitle.trim(),
           content: newPostContent.trim(),
           tags: parsedTags.length > 0 ? parsedTags : [newPostCategory === 'question' ? 'Q&A' : 'General'],
+          images: newPostImages,
           setupData: setupPayload,
         }),
       });
@@ -534,6 +606,7 @@ export default function CommunityFeed({ onSwitchToPublic }: { onSwitchToPublic?:
           setNewPostEntry('');
           setNewPostSL('');
           setNewPostTP('');
+          setNewPostImages([]);
           setIsComposerOpen(false);
           return;
         }
@@ -548,6 +621,7 @@ export default function CommunityFeed({ onSwitchToPublic }: { onSwitchToPublic?:
       category: newPostCategory,
       title: newPostTitle.trim(),
       content: newPostContent.trim(),
+      images: newPostImages,
       author: {
         name: user?.display_name || user?.name || `@${user?.username || 'Trader'}`,
         username: user?.username || 'trader',
@@ -556,6 +630,8 @@ export default function CommunityFeed({ onSwitchToPublic }: { onSwitchToPublic?:
         tierColor: user?.tier_color || '#78716C',
         broker: user?.broker_name || 'Verified Trader',
         winRate: user?.win_rate || 0,
+        avatarUrl: user?.avatar_url,
+        avatarType: user?.avatar_type,
       },
       tags: parsedTags.length > 0 ? parsedTags : [newPostCategory === 'question' ? 'Q&A' : 'General'],
       setupData: setupPayload,
@@ -572,6 +648,7 @@ export default function CommunityFeed({ onSwitchToPublic }: { onSwitchToPublic?:
     setNewPostEntry('');
     setNewPostSL('');
     setNewPostTP('');
+    setNewPostImages([]);
     setIsComposerOpen(false);
   };
 
@@ -1093,11 +1170,23 @@ export default function CommunityFeed({ onSwitchToPublic }: { onSwitchToPublic?:
             {isComposerOpen && (
               <div className="bg-white rounded-2xl border-2 border-[#FED7AA] p-5 shadow-lg space-y-4 animate-in fade-in duration-150">
                 <div className="flex items-center justify-between pb-3 border-b border-[#E7E5E4]">
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold text-sm text-[#1C1917]">Create Community Discussion</span>
-                    <span className="text-[11px] px-2 py-0.5 rounded-full bg-[#FFF7ED] text-[#C2410C] font-semibold border border-[#FED7AA]">
-                      Signed as @{user?.username || 'trader'}
-                    </span>
+                  <div className="flex items-center gap-2.5">
+                    {user && (
+                      <TraderAvatar
+                        name={user.display_name || user.username}
+                        username={user.username}
+                        avatarUrl={user.avatar_url}
+                        avatarType={user.avatar_type}
+                        tierColor={user.tier_color}
+                        size="sm"
+                      />
+                    )}
+                    <div>
+                      <span className="font-bold text-sm text-[#1C1917] block">Create Community Discussion</span>
+                      <span className="text-[10px] text-[#78716C]">
+                        Posting as @{user?.username || 'trader'} • Level {user?.skill_level || 1}
+                      </span>
+                    </div>
                   </div>
                   <button
                     onClick={() => setIsComposerOpen(false)}
@@ -1234,6 +1323,58 @@ export default function CommunityFeed({ onSwitchToPublic }: { onSwitchToPublic?:
                     />
                   </div>
 
+                  {/* Image Attachments */}
+                  <div className="p-3 bg-[#FAFAF9] rounded-xl border border-[#E7E5E4] space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-semibold text-[#1C1917] flex items-center gap-1.5">
+                        <ImageIcon className="w-3.5 h-3.5 text-[#C2410C]" />
+                        <span>Chart Screenshots ({newPostImages.length}/3)</span>
+                      </span>
+                      <input
+                        type="file"
+                        ref={imageInputRef}
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        className="hidden"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => imageInputRef.current?.click()}
+                        disabled={newPostImages.length >= 3 || isUploadingImage}
+                        className="h-7 px-2.5 rounded-lg border border-[#E7E5E4] hover:border-[#FED7AA] bg-white hover:bg-[#FFF7ED] text-[11px] font-semibold text-[#44403C] hover:text-[#C2410C] flex items-center gap-1 transition-all disabled:opacity-50 cursor-pointer shadow-2xs"
+                      >
+                        <UploadCloud className="w-3 h-3" />
+                        <span>{isUploadingImage ? 'Uploading...' : 'Attach Chart'}</span>
+                      </button>
+                    </div>
+
+                    {newPostImages.length > 0 && (
+                      <div className="flex flex-wrap gap-2 pt-1">
+                        {newPostImages.map((imgUrl, idx) => (
+                          <div
+                            key={idx}
+                            className="relative w-20 h-20 rounded-xl border border-[#E7E5E4] overflow-hidden group shadow-2xs bg-white"
+                          >
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={imgUrl}
+                              alt={`Attachment ${idx + 1}`}
+                              className="w-full h-full object-cover"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => removePostImage(idx)}
+                              className="absolute top-1 right-1 p-1 rounded-full bg-black/70 text-white hover:bg-black transition-colors"
+                              title="Remove image"
+                            >
+                              <X className="w-3 h-3" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
                   {/* Action Bar */}
                   <div className="flex items-center justify-between pt-2">
                     <span className="text-[11px] text-[#78716C]">
@@ -1346,15 +1487,16 @@ export default function CommunityFeed({ onSwitchToPublic }: { onSwitchToPublic?:
                     <div className="flex items-center justify-between gap-3">
                       <div className="flex items-center gap-3 min-w-0">
                         {/* Clickable Author Avatar */}
-                        <button
-                          type="button"
+                        <TraderAvatar
+                          name={post.author.name}
+                          username={post.author.username}
+                          avatarUrl={post.author.avatarUrl}
+                          avatarType={post.author.avatarType}
+                          tierColor={post.author.tierColor}
+                          level={post.author.level}
+                          size="md"
                           onClick={() => openTraderProfile(post.author.name)}
-                          className="w-10 h-10 rounded-xl text-white font-bold text-xs flex items-center justify-center shrink-0 uppercase shadow-xs hover:opacity-90 hover:scale-105 transition-all cursor-pointer"
-                          style={{ backgroundColor: post.author.tierColor }}
-                          title={`Inspect ${post.author.name}'s Verified Profile`}
-                        >
-                          {post.author.username.slice(0, 2)}
-                        </button>
+                        />
                         <div className="min-w-0 flex-1">
                           <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
                             {/* Clickable Author Name */}
@@ -1458,6 +1600,38 @@ export default function CommunityFeed({ onSwitchToPublic }: { onSwitchToPublic?:
                       </div>
                     )}
 
+                    {/* Attached Chart Screenshots (Responsive Grid) */}
+                    {post.images && post.images.length > 0 && (
+                      <div
+                        className={`grid gap-2 rounded-xl overflow-hidden pt-1 ${
+                          post.images.length === 1
+                            ? 'grid-cols-1'
+                            : post.images.length === 2
+                            ? 'grid-cols-2'
+                            : 'grid-cols-3'
+                        }`}
+                      >
+                        {post.images.slice(0, 3).map((imgUrl, i) => (
+                          <div
+                            key={i}
+                            onClick={() => setActiveLightboxImage(imgUrl)}
+                            className="relative group cursor-pointer overflow-hidden rounded-xl border border-[#E7E5E4] bg-[#1C1917]/5 max-h-72"
+                          >
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={imgUrl}
+                              alt={`Chart analysis screenshot ${i + 1}`}
+                              className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-200"
+                              loading="lazy"
+                            />
+                            <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white">
+                              <Maximize2 className="w-5 h-5 drop-shadow-md" />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
                     {/* Tags */}
                     {post.tags.length > 0 && (
                       <div className="flex flex-wrap gap-1.5 pt-1">
@@ -1533,6 +1707,16 @@ export default function CommunityFeed({ onSwitchToPublic }: { onSwitchToPublic?:
                               >
                                 <div className="flex items-center justify-between">
                                   <div className="flex items-center gap-2">
+                                    {/* Reply Author Avatar */}
+                                    <TraderAvatar
+                                      name={reply.author.name}
+                                      username={reply.author.username}
+                                      avatarUrl={reply.author.avatarUrl}
+                                      avatarType={reply.author.avatarType}
+                                      tierColor={reply.author.tierColor}
+                                      size="xs"
+                                      onClick={() => openTraderProfile(reply.author.name)}
+                                    />
                                     {/* Clickable Reply Author */}
                                     <button
                                       type="button"
@@ -1567,7 +1751,17 @@ export default function CommunityFeed({ onSwitchToPublic }: { onSwitchToPublic?:
                         </div>
 
                         {/* Reply Form */}
-                        <div className="flex gap-2 pt-2">
+                        <div className="flex items-center gap-2 pt-2">
+                          {user && (
+                            <TraderAvatar
+                              name={user.display_name || user.username}
+                              username={user.username}
+                              avatarUrl={user.avatar_url}
+                              avatarType={user.avatar_type}
+                              tierColor={user.tier_color}
+                              size="xs"
+                            />
+                          )}
                           <input
                             type="text"
                             value={replyInputText}
@@ -1611,12 +1805,14 @@ export default function CommunityFeed({ onSwitchToPublic }: { onSwitchToPublic?:
                   className="flex items-center gap-3 cursor-pointer group"
                   title="Click to view your verified public profile"
                 >
-                  <div
-                    className="w-12 h-12 rounded-xl text-white font-bold text-sm flex items-center justify-center shrink-0 uppercase shadow-xs group-hover:scale-105 transition-transform"
-                    style={{ backgroundColor: user.tier_color || '#1C1917' }}
-                  >
-                    {user.username.slice(0, 2)}
-                  </div>
+                  <TraderAvatar
+                    name={user.display_name || user.username}
+                    username={user.username}
+                    avatarUrl={user.avatar_url}
+                    avatarType={user.avatar_type}
+                    tierColor={user.tier_color}
+                    size="lg"
+                  />
                   <div className="min-w-0 flex-1">
                     <span className="font-bold text-sm text-[#1C1917] block truncate group-hover:text-[#C2410C] transition-colors">
                       {user.display_name || user.name || `@${user.username}`}
@@ -1690,12 +1886,12 @@ export default function CommunityFeed({ onSwitchToPublic }: { onSwitchToPublic?:
                     title={`Inspect ${trader.name}'s Verified Profile`}
                   >
                     <div className="flex items-center gap-2.5 min-w-0">
-                      <div
-                        className="w-8 h-8 rounded-lg text-white font-bold text-xs flex items-center justify-center shrink-0 uppercase shadow-2xs group-hover:scale-105 transition-transform"
-                        style={{ backgroundColor: trader.tierColor }}
-                      >
-                        {trader.name.slice(0, 2)}
-                      </div>
+                      <TraderAvatar
+                        name={trader.name}
+                        username={trader.name}
+                        tierColor={trader.tierColor}
+                        size="sm"
+                      />
                       <div className="min-w-0">
                         <span className="font-bold text-xs text-[#1C1917] block truncate group-hover:text-[#C2410C] transition-colors">
                           {trader.name}
@@ -1803,31 +1999,14 @@ export default function CommunityFeed({ onSwitchToPublic }: { onSwitchToPublic?:
 
             {/* Profile Hero Card */}
             <div className="flex items-center gap-3.5 p-4 rounded-2xl bg-[#FAFAF9] border border-[#E7E5E4]">
-              {selectedProfileTrader.avatarType?.startsWith('mascot') || selectedProfileTrader.isCurrentUser ? (
-                <div className="w-14 h-14 rounded-2xl bg-white border border-[#FED7AA] p-1.5 flex items-center justify-center shrink-0 shadow-xs">
-                  <Image
-                    src="/icon-192.png"
-                    alt="Mascot Avatar"
-                    width={44}
-                    height={44}
-                    className="object-contain"
-                  />
-                </div>
-              ) : selectedProfileTrader.avatarUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={selectedProfileTrader.avatarUrl}
-                  alt={selectedProfileTrader.name}
-                  className="w-14 h-14 rounded-2xl object-cover shrink-0 shadow-xs border border-[#E7E5E4]"
-                />
-              ) : (
-                <div
-                  className="w-14 h-14 rounded-2xl text-white font-bold text-lg flex items-center justify-center shrink-0 shadow-xs uppercase"
-                  style={{ backgroundColor: selectedProfileTrader.tierColor }}
-                >
-                  {selectedProfileTrader.name.slice(0, 2)}
-                </div>
-              )}
+              <TraderAvatar
+                name={selectedProfileTrader.name}
+                username={selectedProfileTrader.username}
+                avatarUrl={selectedProfileTrader.avatarUrl}
+                avatarType={selectedProfileTrader.avatarType}
+                tierColor={selectedProfileTrader.tierColor || selectedProfileTrader.avatarBg}
+                size="xl"
+              />
 
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
@@ -1959,6 +2138,43 @@ export default function CommunityFeed({ onSwitchToPublic }: { onSwitchToPublic?:
               >
                 Close Profile
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ============================================================ */}
+      {/* LIGHTBOX MODAL: FULL RESOLUTION CHART / SCREENSHOT ZOOM      */}
+      {/* ============================================================ */}
+      {activeLightboxImage && (
+        <div
+          onClick={() => setActiveLightboxImage(null)}
+          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-md animate-in fade-in duration-150 cursor-zoom-out"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="relative max-w-4xl w-full bg-[#1C1917] rounded-3xl overflow-hidden shadow-2xl border border-white/10 animate-in zoom-in-95 duration-200"
+          >
+            <div className="p-3 bg-black/40 flex items-center justify-between text-white border-b border-white/10">
+              <span className="text-xs font-semibold text-[#A8A29E] flex items-center gap-1.5">
+                <ImageIcon className="w-3.5 h-3.5 text-[#C2410C]" />
+                <span>Audited Chart Analysis</span>
+              </span>
+              <button
+                type="button"
+                onClick={() => setActiveLightboxImage(null)}
+                className="p-1 rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-2 sm:p-4 max-h-[80vh] overflow-auto flex items-center justify-center bg-black/20">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={activeLightboxImage}
+                alt="Full resolution chart preview"
+                className="max-w-full max-h-[75vh] object-contain rounded-xl shadow-lg"
+              />
             </div>
           </div>
         </div>
