@@ -43,6 +43,12 @@ export default function Footer() {
             </h4>
             <ul className="space-y-2 text-xs">
               <li>
+                <Link href="/feed" className="hover:text-[#C2410C] transition-colors flex items-center gap-1.5 font-semibold text-[#1C1917]">
+                  <MessageSquare className="w-3.5 h-3.5 text-[#C2410C]" />
+                  <span>Web App Terminal</span>
+                </Link>
+              </li>
+              <li>
                 <a
                   href="https://t.me/PipBudBot"
                   target="_blank"
@@ -66,9 +72,15 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/#legitimacy" className="hover:text-[#C2410C] transition-colors">
-                  Anti-Shortfall Protocol
-                </Link>
+                <a
+                  href="/PipBud_Design_System.pdf"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-[#C2410C] transition-colors flex items-center gap-1.5 text-[#0F766E] font-medium"
+                >
+                  <ShieldCheck className="w-3.5 h-3.5 text-[#0F766E]" />
+                  <span>Design System Specification (PDF)</span>
+                </a>
               </li>
             </ul>
           </div>

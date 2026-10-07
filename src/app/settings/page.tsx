@@ -278,6 +278,14 @@ export default function SettingsPage() {
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <Link
+                href="/profile"
+                className="text-xs font-bold text-[#C2410C] hover:underline inline-flex items-center gap-1 transition-colors"
+              >
+                <User className="w-3.5 h-3.5" />
+                <span>My Profile</span>
+              </Link>
+              <span className="text-[#A8A29E]">•</span>
+              <Link
                 href="/journal"
                 className="text-xs font-semibold text-[#78716C] hover:text-[#C2410C] inline-flex items-center gap-1 transition-colors"
               >
@@ -297,22 +305,32 @@ export default function SettingsPage() {
               Trader Identity & Privacy Settings
             </h1>
             <p className="text-xs sm:text-sm text-[#78716C]">
-              Protect your personal Telegram account from unsolicited messages, choose your forum pseudonym, and customize your avatar.
+              Manage your verified profile, privacy shield, and desk preferences.
             </p>
           </div>
 
-          <button
-            onClick={() => handleSave()}
-            disabled={isSaving}
-            className="h-11 px-6 rounded-xl bg-[#C2410C] hover:bg-[#EA580C] text-white font-semibold text-xs sm:text-sm inline-flex items-center justify-center gap-2 shadow-xs transition-all active:scale-95 disabled:opacity-50 shrink-0"
-          >
-            {isSaving ? (
-              <RefreshCw className="w-4 h-4 animate-spin" />
-            ) : (
-              <Save className="w-4 h-4" />
-            )}
-            <span>Save Preferences</span>
-          </button>
+          <div className="flex items-center gap-2">
+            <Link
+              href="/profile"
+              className="h-11 px-4 rounded-xl border border-[#E7E5E4] bg-white hover:bg-[#FAFAF9] text-[#1C1917] font-semibold text-xs sm:text-sm inline-flex items-center justify-center gap-1.5 transition-all"
+            >
+              <User className="w-4 h-4 text-[#C2410C]" />
+              <span>View Profile</span>
+            </Link>
+
+            <button
+              onClick={() => handleSave()}
+              disabled={isSaving}
+              className="h-11 px-6 rounded-xl bg-[#C2410C] hover:bg-[#EA580C] text-white font-semibold text-xs sm:text-sm inline-flex items-center justify-center gap-2 shadow-xs transition-all active:scale-95 disabled:opacity-50 shrink-0"
+            >
+              {isSaving ? (
+                <RefreshCw className="w-4 h-4 animate-spin" />
+              ) : (
+                <Save className="w-4 h-4" />
+              )}
+              <span>Save Preferences</span>
+            </button>
+          </div>
         </div>
 
         {/* Success / Error Notification Banners */}

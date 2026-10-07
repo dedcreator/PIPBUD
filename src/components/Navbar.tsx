@@ -49,20 +49,13 @@ export default function Navbar({ onReturnToFeed }: NavbarProps = {}) {
 
             {user ? (
               <>
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (onReturnToFeed) {
-                      onReturnToFeed();
-                    } else {
-                      window.location.href = '/';
-                    }
-                  }}
+                <Link
+                  href="/feed"
                   className="text-xs sm:text-sm font-bold text-[#C2410C] hover:text-[#EA580C] transition-all flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#FFF7ED] border border-[#FED7AA] shadow-2xs active:scale-95 cursor-pointer"
                 >
                   <MessageSquare className="w-3.5 h-3.5" />
-                  <span>Community Feed</span>
-                </button>
+                  <span>Launch App</span>
+                </Link>
                 <Link
                   href="/journal"
                   className="text-xs sm:text-sm font-semibold text-[#1C1917] hover:text-[#C2410C] transition-colors flex items-center gap-1.5"
@@ -191,21 +184,14 @@ export default function Navbar({ onReturnToFeed }: NavbarProps = {}) {
                 </span>
               </div>
 
-              <button
-                type="button"
-                onClick={() => {
-                  setMobileOpen(false);
-                  if (onReturnToFeed) {
-                    onReturnToFeed();
-                  } else {
-                    window.location.href = '/';
-                  }
-                }}
+              <Link
+                href="/feed"
+                onClick={() => setMobileOpen(false)}
                 className="w-full h-11 px-4 rounded-xl bg-[#C2410C] hover:bg-[#EA580C] text-white font-bold text-xs inline-flex items-center justify-center gap-2 shadow-xs transition-all active:scale-95 cursor-pointer"
               >
                 <MessageSquare className="w-4 h-4" />
-                <span>Return to Community Feed</span>
-              </button>
+                <span>Launch App Terminal</span>
+              </Link>
             </div>
           )}
 

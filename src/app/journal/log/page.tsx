@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, useMemo, useRef, useEffect } from 'react';
+import React, { useState, useMemo, useRef, useEffect, Suspense } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import { useAuth, getApiBase } from '@/context/AuthContext';
 import {
@@ -186,8 +186,10 @@ const STATE_OF_MIND_OPTIONS: StateOfMindOption[] = [
   }
 ];
 
-export default function LogTradeNotepadPage() {
+function LogTradeNotepadContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const existingTradeId = searchParams?.get('tradeId');
   const { user } = useAuth();
 
   // Primary Blotter State
@@ -197,6 +199,7 @@ export default function LogTradeNotepadPage() {
   const [setupType, setSetupType] = useState('Order Block (OB)');
   const [timeframe, setTimeframe] = useState('15m');
   const [session, setSession] = useState('London Open');
+  const [tradePlatform, setTradePlatform] = useState<string>('Manual');
 
   // Price & Risk Engine
   const [entryPrice, setEntryPrice] = useState('');
@@ -244,6 +247,56 @@ export default function LogTradeNotepadPage() {
   // Submission Status
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isLoadingExisting, setIsLoadingExisting] = useState(false);
+
+  // Pre-fill existing trade if tradeId is present in query parameters (e.g. from Telegram bot or ledger)
+  useEffect(() => {
+    if (!existingTradeId) return;
+    async function loadTrade() {
+      setIsLoadingExisting(true);
+      try {
+        const apiBase = getApiBase();
+        const res = await fetch(`${apiBase}/api/journal/trades/${existingTradeId}/`);
+        if (res.ok) {
+          const data = await res.json();
+          const t = data.trade;
+          if (t) {
+            if (t.pair) setPair(t.pair);
+            if (t.direction) setDirection(t.direction);
+            if (t.setup_type) setSetupType(t.setup_type);
+            if (t.entry_price) setEntryPrice(String(t.entry_price));
+            if (t.stop_loss) setStopLoss(String(t.stop_loss));
+            if (t.take_profit) setTakeProfit(String(t.take_profit));
+            if (t.outcome) setOutcome(t.outcome);
+            if (t.timeframe) setTimeframe(t.timeframe);
+            if (t.session) setSession(t.session);
+            if (t.platform) setTradePlatform(t.platform);
+            if (t.notes) {
+              setPreTradeThesis(t.notes);
+            }
+            if (t.outcome_notes) {
+              setPostTradeAutopsy(t.outcome_notes);
+            }
+            if (t.screenshot_url) {
+              setAttachments([
+                {
+                  id: 'initial',
+                  url: t.screenshot_url,
+                  caption: `${t.pair} Execution Chart`,
+                  type: 'general',
+                },
+              ]);
+            }
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load trade:', err);
+      } finally {
+        setIsLoadingExisting(false);
+      }
+    }
+    loadTrade();
+  }, [existingTradeId]);
 
   // Active Textarea Reference for formatting injection
   const thesisRef = useRef<HTMLTextAreaElement>(null);
@@ -488,13 +541,15 @@ export default function LogTradeNotepadPage() {
 
     try {
       const apiBase = getApiBase();
-      const token = typeof window !== 'undefined' ? localStorage.getItem('pipbud_token') : null;
+      const endpoint = existingTradeId
+        ? `${apiBase}/api/journal/trades/${existingTradeId}/`
+        : `${apiBase}/api/journal/trades/`;
 
-      const res = await fetch(`${apiBase}/api/journal/trades/`, {
-        method: 'POST',
+      const res = await fetch(endpoint, {
+        method: existingTradeId ? 'PATCH' : 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          ...(user?.token ? { Authorization: `Bearer ${user.token}` } : {}),
           ...(user?.id ? { 'X-Trader-Id': user.id } : {})
         },
         body: JSON.stringify(payload)
@@ -1620,5 +1675,19 @@ export default function LogTradeNotepadPage() {
         </div>
       )}
     </main>
+  );
+}
+
+export default function LogTradeNotepadPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-[#FBF9F5] flex items-center justify-center">
+          <div className="w-8 h-8 rounded-full border-2 border-[#C2410C] border-t-transparent animate-spin" />
+        </div>
+      }
+    >
+      <LogTradeNotepadContent />
+    </Suspense>
   );
 }

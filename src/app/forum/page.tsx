@@ -1978,19 +1978,19 @@ export default function ForumPage() {
           )}
 
           {/* Messages Stream */}
-          <div className="flex-1 overflow-y-auto p-3 sm:p-5 space-y-3 sm:space-y-4">
+          <div className="flex-1 overflow-y-auto p-2 sm:p-3.5 space-y-1.5 sm:space-y-2">
             {isMessagesLoading ? (
-              <div className="space-y-4 py-2">
+              <div className="space-y-2 py-2">
                 <MessageItemSkeleton />
                 <MessageItemSkeleton />
                 <MessageItemSkeleton />
                 <MessageItemSkeleton />
               </div>
             ) : currentMessages.length === 0 ? (
-              <div className="text-center py-16 text-[#A8A29E] space-y-2">
-                <Hash className="w-10 h-10 mx-auto text-[#D6D3D1]" />
-                <p className="text-sm font-semibold text-[#78716C]">Welcome to #{activeChannel}</p>
-                <p className="text-xs text-[#A8A29E]">No messages posted yet. Start the conversation!</p>
+              <div className="text-center py-12 text-[#A8A29E] space-y-2">
+                <Hash className="w-8 h-8 mx-auto text-[#D6D3D1]" />
+                <p className="text-sm font-semibold text-[#78716C]">#{activeChannel}</p>
+                <p className="text-xs text-[#A8A29E]">No messages yet.</p>
               </div>
             ) : (
               currentMessages.map((msg) => {
@@ -1998,44 +1998,41 @@ export default function ForumPage() {
                   return (
                     <div
                       key={msg.id}
-                      className="my-3 rounded-2xl bg-gradient-to-r from-[#FEF2F2] via-[#FFF1F2] to-[#FFF5F5] border-2 border-[#FECACA] p-4 sm:p-5 shadow-xs relative overflow-hidden"
+                      className="my-2 rounded-xl bg-gradient-to-r from-[#FEF2F2] via-[#FFF1F2] to-[#FFF5F5] border border-[#FECACA] p-3 sm:p-4 shadow-2xs relative overflow-hidden"
                     >
                       {/* Institutional Red Sentinel Accent Bar */}
                       <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#EF4444] via-[#DC2626] to-[#B91C1C]" />
 
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-3 border-b border-[#FEE2E2]">
-                        <div className="flex items-center gap-2.5">
-                          <div className="w-8 h-8 rounded-xl bg-[#DC2626] text-white flex items-center justify-center shrink-0 shadow-xs">
-                            <ShieldAlert className="w-4 h-4" />
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-[#FEE2E2]">
+                        <div className="flex items-center gap-2">
+                          <div className="w-7 h-7 rounded-lg bg-[#DC2626] text-white flex items-center justify-center shrink-0">
+                            <ShieldAlert className="w-3.5 h-3.5" />
                           </div>
                           <div>
                             <div className="flex items-center gap-2">
-                              <span className="font-mono font-bold text-xs uppercase tracking-wider text-[#991B1B]">
+                              <span className="font-mono font-bold text-xs uppercase text-[#991B1B]">
                                 {msg.author.name}
                               </span>
-                              <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-[#DC2626] text-white tracking-wide">
-                                GOVERNANCE AUDIT
+                              <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-[#DC2626] text-white">
+                                AUDIT
                               </span>
                             </div>
-                            <span className="text-[10px] text-[#B91C1C]/80 font-mono">
-                              Sentinel Merit Engine • Notice #{msg.id.toUpperCase()}
-                            </span>
                           </div>
                         </div>
-                        <div className="flex items-center gap-2 text-[10px] text-[#991B1B] font-mono shrink-0">
+                        <div className="flex items-center gap-1.5 text-[10px] text-[#991B1B] font-mono shrink-0">
                           <Clock className="w-3 h-3" />
                           <span>{msg.timestamp}</span>
                         </div>
                       </div>
 
-                      <div className="pt-3">
-                        <p className="text-xs sm:text-sm font-medium text-[#7F1D1D] leading-relaxed break-words font-mono bg-white/80 p-3 rounded-xl border border-[#FEE2E2]">
+                      <div className="pt-2">
+                        <p className="text-xs font-medium text-[#7F1D1D] leading-relaxed break-words font-mono bg-white/80 p-2.5 rounded-lg border border-[#FEE2E2]">
                           {msg.content}
                         </p>
                       </div>
 
                       {/* Audit Reactions & Transparency Footer */}
-                      <div className="flex items-center justify-between pt-3 text-[11px]">
+                      <div className="flex items-center justify-between pt-2 text-[11px]">
                         <div className="flex items-center gap-1.5">
                           {Object.entries(msg.reactions).map(([emoji, count]) => {
                             const hasReacted = userReactions[msg.id] === emoji;
@@ -2044,23 +2041,18 @@ export default function ForumPage() {
                                 key={emoji}
                                 type="button"
                                 onClick={() => handleToggleReaction(msg.id, emoji)}
-                                className={`px-2.5 py-1 rounded-full text-[11px] flex items-center gap-1.5 transition-all duration-150 active:scale-110 cursor-pointer border ${
+                                className={`px-2 py-0.5 rounded-full text-[10px] flex items-center gap-1 transition-all cursor-pointer border ${
                                   hasReacted
-                                    ? 'bg-[#FEE2E2] text-[#991B1B] border-[#FCA5A5] font-bold ring-1 ring-[#F87171]'
+                                    ? 'bg-[#FEE2E2] text-[#991B1B] border-[#FCA5A5] font-bold'
                                     : 'bg-white hover:bg-[#FEF2F2] border-[#FECACA] text-[#7F1D1D]'
                                 }`}
-                                title={hasReacted ? `You reacted ${emoji}` : `Acknowledge audit with ${emoji}`}
                               >
                                 <span>{emoji}</span>
-                                <span className="font-mono font-bold text-[10px]">{count}</span>
+                                <span className="font-mono font-bold">{count}</span>
                               </button>
                             );
                           })}
                         </div>
-                        <span className="text-[10px] text-[#991B1B] font-semibold flex items-center gap-1">
-                          <BadgeCheck className="w-3.5 h-3.5 text-[#DC2626]" />
-                          Immutable Desk Record
-                        </span>
                       </div>
                     </div>
                   );
@@ -2069,11 +2061,10 @@ export default function ForumPage() {
                 return (
                 <div
                   key={msg.id}
-                  className="flex items-start gap-2.5 sm:gap-3.5 relative group p-2.5 -mx-2.5 rounded-2xl hover:bg-[#FAFAF9]/90 transition-all duration-150"
+                  className="flex items-start gap-2.5 sm:gap-3 relative group py-1.5 px-2 rounded-xl hover:bg-[#FAFAF9] transition-all duration-100"
                 >
-                  {/* Floating Action Toolbar on Message Hover (Discord/Telegram Style) */}
-                  <div className="absolute -top-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-150 bg-white/95 backdrop-blur-md border border-[#E7E5E4] rounded-xl shadow-md px-1.5 py-0.5 hidden sm:flex items-center gap-0.5 z-20 animate-in fade-in zoom-in-95 duration-100">
-                    {/* Quick Reaction Emojis */}
+                  {/* Floating Action Toolbar on Message Hover */}
+                  <div className="absolute -top-2.5 right-2 opacity-0 group-hover:opacity-100 transition-all duration-100 bg-white/95 backdrop-blur-md border border-[#E7E5E4] rounded-lg shadow-sm px-1 py-0.5 hidden sm:flex items-center gap-0.5 z-20">
                     {['🔥', '🎯', '🚀', '💡', '👏'].map((emoji) => (
                       <button
                         key={emoji}
@@ -2082,7 +2073,7 @@ export default function ForumPage() {
                           handleToggleReaction(msg.id, emoji);
                           triggerForumToast(`Reacted ${emoji} ✨`);
                         }}
-                        className={`w-6 h-6 rounded-lg flex items-center justify-center text-xs transition-transform hover:scale-125 active:scale-150 cursor-pointer ${
+                        className={`w-5 h-5 rounded flex items-center justify-center text-xs transition-transform hover:scale-110 cursor-pointer ${
                           userReactions[msg.id] === emoji ? 'bg-[#FED7AA]' : 'hover:bg-[#FFF7ED]'
                         }`}
                         title={`React with ${emoji}`}
@@ -2091,34 +2082,32 @@ export default function ForumPage() {
                       </button>
                     ))}
 
-                    <div className="w-[1px] h-3.5 bg-[#E7E5E4] mx-0.5" />
+                    <div className="w-[1px] h-3 bg-[#E7E5E4] mx-0.5" />
 
-                    {/* Reply Button */}
                     <button
                       type="button"
                       onClick={() => {
                         setReplyingTo(msg);
                         setMessageInput(`@${msg.author.username} `);
                       }}
-                      className="p-1 rounded-lg text-[#78716C] hover:text-[#C2410C] hover:bg-[#FFF7ED] transition-colors cursor-pointer"
+                      className="p-1 rounded text-[#78716C] hover:text-[#C2410C] hover:bg-[#FFF7ED] transition-colors cursor-pointer"
                       title={`Reply to ${msg.author.name}`}
                     >
-                      <MessageSquare className="w-3.5 h-3.5" />
+                      <MessageSquare className="w-3 h-3" />
                     </button>
 
-                    {/* Copy Text Button */}
                     <button
                       type="button"
                       onClick={async () => {
                         if (navigator.clipboard) {
                           await navigator.clipboard.writeText(msg.content);
-                          triggerForumToast('Message copied to clipboard 📋');
+                          triggerForumToast('Message copied');
                         }
                       }}
-                      className="p-1 rounded-lg text-[#78716C] hover:text-[#1C1917] hover:bg-[#F5F5F4] transition-colors cursor-pointer"
+                      className="p-1 rounded text-[#78716C] hover:text-[#1C1917] hover:bg-[#F5F5F4] transition-colors cursor-pointer"
                       title="Copy message"
                     >
-                      <Copy className="w-3.5 h-3.5" />
+                      <Copy className="w-3 h-3" />
                     </button>
                   </div>
 
@@ -2134,8 +2123,8 @@ export default function ForumPage() {
                     onClick={() => openTraderProfile(msg.author.name)}
                   />
 
-                  <div className="flex-1 space-y-1.5 min-w-0">
-                    <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                  <div className="flex-1 space-y-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-1.5">
                       <button
                         onClick={() => openTraderProfile(msg.author.name)}
                         className="font-bold text-xs text-[#1C1917] truncate hover:text-[#C2410C] hover:underline transition-colors text-left"
@@ -2145,13 +2134,12 @@ export default function ForumPage() {
                       <button
                         type="button"
                         onClick={() => openTraderProfile(msg.author.name)}
-                        className="px-1.5 sm:px-2 py-0.2 rounded text-[9px] sm:text-[10px] font-bold truncate cursor-pointer hover:opacity-90 bg-[#FFF7ED] text-[#C2410C] border border-[#FED7AA]"
-                        title={`View ${msg.author.name}'s Verified Profile`}
+                        className="px-1.5 py-0.2 rounded text-[9px] font-bold truncate cursor-pointer hover:opacity-90 bg-[#FFF7ED] text-[#C2410C] border border-[#FED7AA]"
                       >
                         {msg.author.badge}
                       </button>
                       {msg.messageType === 'question' && (
-                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold bg-[#EFF6FF] text-[#1D4ED8] border border-[#BFDBFE]">
+                        <span className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded text-[9px] font-bold bg-[#EFF6FF] text-[#1D4ED8] border border-[#BFDBFE]">
                           <HelpCircle className="w-2.5 h-2.5" />
                           <span>Question</span>
                         </span>
@@ -2162,12 +2150,11 @@ export default function ForumPage() {
 
                     {/* Quoted Reply Preview */}
                     {msg.replyTo && (
-                      <div className="flex items-center gap-1.5 text-[11px] text-[#78716C] bg-[#F5F5F4] px-2.5 py-1 rounded-lg border-l-2 border-[#C2410C] mb-1">
+                      <div className="flex items-center gap-1.5 text-[11px] text-[#78716C] bg-[#F5F5F4] px-2 py-0.5 rounded border-l-2 border-[#C2410C] mb-1">
                         <button
                           type="button"
                           onClick={() => openTraderProfile(msg.replyTo!.authorName)}
                           className="font-semibold text-[#1C1917] shrink-0 hover:text-[#C2410C] hover:underline cursor-pointer"
-                          title={`View ${msg.replyTo.authorName}'s Verified Profile`}
                         >
                           Replying to {msg.replyTo.authorName}:
                         </button>
@@ -2175,10 +2162,22 @@ export default function ForumPage() {
                       </div>
                     )}
 
-                    {/* Text content */}
-                    <p className="text-xs sm:text-sm leading-relaxed break-words text-[#292524]">
-                      {msg.content}
-                    </p>
+                    {/* Text content with clean tag highlighting */}
+                    <div className="text-xs sm:text-sm leading-normal break-words text-[#292524]">
+                      {msg.content.split(/(@[a-zA-Z0-9_]+)/g).map((part, i) =>
+                        part.startsWith('@') ? (
+                          <Link
+                            key={i}
+                            href={`/profile/${part.slice(1)}`}
+                            className="font-semibold text-[#C2410C] bg-[#FFF7ED] px-1 py-0.2 rounded border border-[#FED7AA]/60 hover:underline inline-block mr-0.5"
+                          >
+                            {part}
+                          </Link>
+                        ) : (
+                          <span key={i}>{part}</span>
+                        )
+                      )}
+                    </div>
 
                     {/* Code snippet */}
                     {msg.codeSnippet && (
@@ -2907,26 +2906,25 @@ export default function ForumPage() {
 
             {/* Modal Actions */}
             <div className="pt-2 flex flex-col sm:flex-row items-center justify-end gap-2 border-t border-[#E7E5E4]">
+              <Link
+                href={`/profile/${selectedProfileTrader.username}`}
+                className="w-full sm:w-auto px-4 py-2 text-center rounded-xl text-xs font-bold bg-[#C2410C] hover:bg-[#EA580C] text-white shadow-xs transition-all"
+              >
+                Open Full Profile Page &rarr;
+              </Link>
               {selectedProfileTrader.isCurrentUser ? (
                 <Link
                   href="/settings"
                   className="w-full sm:w-auto px-4 py-2 text-center rounded-xl text-xs font-semibold bg-[#FFF7ED] text-[#C2410C] border border-[#FED7AA] hover:bg-[#FFEDD5] transition-all"
                 >
-                  Edit Profile in Settings
+                  Settings
                 </Link>
-              ) : (
-                <Link
-                  href="/journal"
-                  className="w-full sm:w-auto px-4 py-2 text-center rounded-xl text-xs font-semibold bg-[#FAFAF9] text-[#1C1917] border border-[#E7E5E4] hover:bg-[#F5F5F4] transition-all"
-                >
-                  View Performance in Journal
-                </Link>
-              )}
+              ) : null}
               <button
                 onClick={() => setSelectedProfileTrader(null)}
-                className="w-full sm:w-auto px-5 py-2 rounded-xl text-xs font-semibold bg-[#1C1917] hover:bg-[#292524] text-white shadow-xs transition-all"
+                className="w-full sm:w-auto px-4 py-2 rounded-xl text-xs font-semibold bg-[#F5F5F4] hover:bg-[#E7E5E4] text-[#44403C] transition-all"
               >
-                Close Profile
+                Close
               </button>
             </div>
           </div>

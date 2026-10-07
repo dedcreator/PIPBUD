@@ -1698,15 +1698,19 @@ export default function CommunityFeed({ onSwitchToPublic }: { onSwitchToPublic?:
                       </span>
                     </div>
 
-                    {/* Post Title */}
-                    <h2 className="text-sm sm:text-base font-bold text-[#1C1917] tracking-tight leading-snug">
-                      {post.title}
-                    </h2>
+                    {/* Post Title -> Click to view dedicated post page */}
+                    <Link href={`/community/post/${post.id}`} className="block group">
+                      <h2 className="text-sm sm:text-base font-bold text-[#1C1917] group-hover:text-[#C2410C] tracking-tight leading-snug cursor-pointer transition-colors">
+                        {post.title}
+                      </h2>
+                    </Link>
 
-                    {/* Post Content */}
-                    <p className="text-xs sm:text-sm text-[#44403C] leading-relaxed whitespace-pre-line">
-                      {post.content}
-                    </p>
+                    {/* Post Content -> Click to view dedicated post page */}
+                    <Link href={`/community/post/${post.id}`} className="block">
+                      <p className="text-xs sm:text-sm text-[#44403C] hover:text-[#1C1917] leading-relaxed whitespace-pre-line cursor-pointer">
+                        {post.content}
+                      </p>
+                    </Link>
 
                     {/* Setup Parameter Snapshot Card */}
                     {post.setupData && (
@@ -1827,6 +1831,14 @@ export default function CommunityFeed({ onSwitchToPublic }: { onSwitchToPublic?:
                             {post.category === 'question' ? 'Answers' : 'Replies'}
                           </span>
                         </button>
+
+                        <Link
+                          href={`/community/post/${post.id}`}
+                          className="h-8 px-2.5 rounded-xl border border-[#E7E5E4] hover:border-[#FED7AA] bg-[#FAFAF9] hover:bg-[#FFF7ED] text-[#C2410C] font-semibold inline-flex items-center gap-1 transition-all text-xs"
+                          title="Open full dedicated discussion page"
+                        >
+                          <span>Full Thread &rarr;</span>
+                        </Link>
                       </div>
 
                       <div className="flex items-center gap-1.5">
@@ -2415,24 +2427,33 @@ export default function CommunityFeed({ onSwitchToPublic }: { onSwitchToPublic?:
 
             {/* Modal Actions */}
             <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-2 border-t border-[#E7E5E4]">
-              <button
-                type="button"
-                onClick={() => {
-                  setSearchQuery(selectedProfileTrader.name);
-                  setSelectedCategory('all');
-                  setSelectedProfileTrader(null);
-                }}
-                className="w-full sm:w-auto px-4 py-2 rounded-xl text-xs font-semibold bg-[#FFF7ED] text-[#C2410C] border border-[#FED7AA] hover:bg-[#FFEDD5] transition-all cursor-pointer inline-flex items-center justify-center gap-1.5"
-              >
-                <Search className="w-3.5 h-3.5" />
-                <span>Filter Feed by {selectedProfileTrader.name.split(' ')[0]}</span>
-              </button>
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <Link
+                  href={`/profile/${selectedProfileTrader.username}`}
+                  className="w-full sm:w-auto px-4 py-2 rounded-xl text-xs font-bold bg-[#C2410C] hover:bg-[#EA580C] text-white shadow-xs transition-all text-center inline-flex items-center justify-center gap-1"
+                >
+                  <span>Full Profile Page &rarr;</span>
+                </Link>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchQuery(selectedProfileTrader.name);
+                    setSelectedCategory('all');
+                    setSelectedProfileTrader(null);
+                  }}
+                  className="w-full sm:w-auto px-3.5 py-2 rounded-xl text-xs font-semibold bg-[#FAFAF9] text-[#57534E] border border-[#E7E5E4] hover:bg-[#F5F5F4] transition-all cursor-pointer inline-flex items-center justify-center gap-1.5"
+                >
+                  <Search className="w-3.5 h-3.5" />
+                  <span>Filter Feed</span>
+                </button>
+              </div>
 
               <button
                 onClick={() => setSelectedProfileTrader(null)}
-                className="w-full sm:w-auto px-5 py-2 rounded-xl text-xs font-semibold bg-[#1C1917] hover:bg-[#292524] text-white shadow-xs transition-all cursor-pointer"
+                className="w-full sm:w-auto px-4 py-2 rounded-xl text-xs font-semibold bg-[#F5F5F4] hover:bg-[#E7E5E4] text-[#44403C] transition-all cursor-pointer"
               >
-                Close Profile
+                Close
               </button>
             </div>
           </div>

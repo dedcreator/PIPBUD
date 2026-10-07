@@ -46,24 +46,31 @@ export default function HeroSection() {
             Log every trade via @PipBudBot in seconds. Build your verified track record to unlock 7 gated skill tiers on a modern trader forum. Fall short of your tier’s performance? You get automatically removed.
           </p>
 
-          {/* Focused 2 CTA Buttons */}
+          {/* Focused CTA Buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <Link
+              href="/feed"
+              className="w-full sm:w-auto h-11 px-6 bg-[#C2410C] hover:bg-[#EA580C] text-white font-semibold rounded-xl transition-all shadow-xs inline-flex items-center justify-center gap-2 text-sm active:scale-98"
+            >
+              <span>Launch App Terminal</span>
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+
             <a
               href="https://t.me/PipBudBot"
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full sm:w-auto h-11 px-6 bg-[#C2410C] hover:bg-[#EA580C] text-white font-medium rounded-xl transition-all shadow-xs inline-flex items-center justify-center gap-2 text-sm active:scale-98"
+              className="w-full sm:w-auto h-11 px-5 bg-white hover:bg-[#FFF7ED] border border-[#E7E5E4] hover:border-[#FED7AA] text-[#1C1917] font-medium rounded-xl transition-all inline-flex items-center justify-center gap-2 text-sm"
             >
-              <Send className="w-3.5 h-3.5" />
-              <span>Start on Telegram Bot</span>
+              <Send className="w-3.5 h-3.5 text-[#C2410C]" />
+              <span>Telegram Bot Journal</span>
             </a>
 
             <Link
               href="/forum"
-              className="w-full sm:w-auto h-11 px-5 bg-white hover:bg-[#FFF7ED] border border-[#E7E5E4] hover:border-[#FED7AA] text-[#1C1917] font-medium rounded-xl transition-all inline-flex items-center justify-center gap-1.5 text-sm"
+              className="w-full sm:w-auto h-11 px-5 bg-[#FAFAF9] hover:bg-white border border-[#E7E5E4] hover:border-[#FED7AA] text-[#44403C] font-medium rounded-xl transition-all inline-flex items-center justify-center gap-1.5 text-sm"
             >
               <span>Explore 7-Tier Forum</span>
-              <ArrowRight className="w-3.5 h-3.5 text-[#78716C]" />
             </Link>
           </div>
         </div>

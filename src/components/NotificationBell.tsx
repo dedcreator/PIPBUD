@@ -21,7 +21,7 @@ import TraderAvatar from './TraderAvatar';
 
 export interface NotificationItem {
   id: string;
-  type: 'upvote' | 'reply' | 'verified_answer' | 'forum_reaction' | 'tier_audit' | 'system';
+  type: 'upvote' | 'reply' | 'chat_tag' | 'verified_answer' | 'forum_reaction' | 'tier_audit' | 'system';
   title: string;
   message: string;
   link: string;
@@ -48,7 +48,30 @@ export default function NotificationBell() {
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const [pushPermission, setPushPermission] = useState<NotificationPermission>('default');
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const lastNotifiedIdRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'Notification' in window) {
+      setPushPermission(window.Notification.permission);
+    }
+  }, []);
+
+  const requestPushPermission = async () => {
+    if (typeof window !== 'undefined' && 'Notification' in window) {
+      try {
+        const perm = await window.Notification.requestPermission();
+        setPushPermission(perm);
+        if (perm === 'granted') {
+          new window.Notification('PipBud Notifications Active', {
+            body: 'You will receive instant alerts for community replies and chat mentions.',
+            icon: '/favicon.ico'
+          });
+        }
+      } catch {}
+    }
+  };
 
   const fetchNotifications = useCallback(async () => {
     if (!user) return;
@@ -72,8 +95,23 @@ export default function NotificationBell() {
 
       if (res.ok) {
         const data = await res.json();
-        setNotifications(data.notifications || []);
+        const list: NotificationItem[] = data.notifications || [];
+        setNotifications(list);
         setUnreadCount(data.unread_count || 0);
+
+        // Web Push Notification if a new unread item arrives
+        if (list.length > 0) {
+          const newest = list[0];
+          if (!newest.is_read && lastNotifiedIdRef.current && lastNotifiedIdRef.current !== newest.id) {
+            if (typeof window !== 'undefined' && 'Notification' in window && window.Notification.permission === 'granted') {
+              new window.Notification(newest.title, {
+                body: newest.message,
+                icon: '/favicon.ico'
+              });
+            }
+          }
+          lastNotifiedIdRef.current = newest.id;
+        }
       }
     } catch {
       // Quiet fail if offline
@@ -199,6 +237,8 @@ export default function NotificationBell() {
         return <Flame className="w-3.5 h-3.5 text-[#EA580C]" />;
       case 'reply':
         return <MessageSquare className="w-3.5 h-3.5 text-[#3B82F6]" />;
+      case 'chat_tag':
+        return <MessageSquare className="w-3.5 h-3.5 text-[#C2410C]" />;
       case 'verified_answer':
         return <CheckCircle2 className="w-3.5 h-3.5 text-[#0F766E]" />;
       case 'forum_reaction':
@@ -238,6 +278,20 @@ export default function NotificationBell() {
       {/* Dropdown Menu */}
       {isOpen && (
         <div className="fixed inset-x-3 sm:absolute sm:inset-x-auto sm:right-0 top-16 sm:top-full sm:mt-2 w-auto sm:w-96 max-w-[calc(100vw-24px)] bg-white rounded-2xl shadow-2xl border border-[#E7E5E4] z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+          {/* Push notification banner if not granted */}
+          {pushPermission === 'default' && (
+            <div className="bg-[#FFF7ED] px-3.5 py-2 border-b border-[#FED7AA] flex items-center justify-between gap-2">
+              <span className="text-[11px] text-[#9A3412] font-medium truncate">Enable push alerts for mentions & replies</span>
+              <button
+                type="button"
+                onClick={requestPushPermission}
+                className="px-2 py-0.5 rounded-lg bg-[#C2410C] text-white text-[10px] font-bold hover:bg-[#EA580C] shrink-0 cursor-pointer"
+              >
+                Enable
+              </button>
+            </div>
+          )}
+
           {/* Header */}
           <div className="p-3.5 sm:p-4 bg-[#FAFAF9] border-b border-[#E7E5E4] flex items-center justify-between">
             <div className="flex items-center gap-2">

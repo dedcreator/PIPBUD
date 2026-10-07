@@ -11,7 +11,8 @@ import {
   Send,
   AlertOctagon,
   Bot,
-  Sliders
+  Sliders,
+  Bell
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
@@ -33,13 +34,13 @@ export default function MobileNavDock() {
           label: 'Home',
           href: '/',
           icon: Home,
-          isActive: pathname === '/',
+          isActive: pathname === '/' || pathname === '/feed',
         },
         {
           label: 'Journal',
           href: '/journal',
           icon: BarChart3,
-          isActive: pathname === '/journal',
+          isActive: pathname.startsWith('/journal'),
         },
         {
           label: 'Forum',
@@ -49,17 +50,17 @@ export default function MobileNavDock() {
           isActive: pathname === '/forum',
         },
         {
-          label: 'Tiers',
-          href: '/#tiers',
-          icon: ShieldCheck,
-          isActive: pathname === '/#tiers',
+          label: 'Notifications',
+          href: '/notifications',
+          icon: Bell,
+          isActive: pathname === '/notifications',
         },
         {
-          label: 'Settings',
-          href: '/settings',
-          icon: Sliders,
+          label: 'Profile',
+          href: '/profile',
+          icon: User,
           tierBadge: `L${user.skill_level}`,
-          isActive: pathname === '/settings',
+          isActive: pathname.startsWith('/profile') || pathname.startsWith('/trader') || pathname === '/settings',
         },
       ]
     : [
