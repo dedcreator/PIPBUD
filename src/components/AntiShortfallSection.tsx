@@ -11,216 +11,173 @@ import {
   Flame,
   CheckCircle,
   XCircle,
-  Radio
+  Radio,
+  Zap
 } from 'lucide-react';
 
 export default function AntiShortfallSection() {
   const [demoState, setDemoState] = useState<'healthy' | 'warning' | 'demoted'>('warning');
 
   return (
-    <section id="legitimacy" className="py-20 md:py-28 bg-[#FAFAF9] border-t border-[#E7E5E4]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="anti-shortfall" className="py-20 md:py-28 bg-[#000000] text-[#E7E9EA] border-t border-white/10 relative overflow-hidden">
+      {/* Background glow */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[350px] pointer-events-none bg-[radial-gradient(ellipse,rgba(244,63,94,0.12)_0%,rgba(76,29,149,0.06)_50%,transparent_70%)] blur-3xl z-0" />
+
+      <div className="relative z-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[#FEF2F2] text-[#B91C1C] border border-[#FEE2E2] mb-3">
+          <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-semibold glass-ultrathin border border-[#F43F5E]/30 text-[#F43F5E] mb-4">
             <AlertOctagon className="w-3.5 h-3.5" />
             <span>Zero-Tolerance Quality Governance</span>
           </div>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-[#1C1917] mb-4">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-white mb-4">
             Everybody is Legit.{' '}
-            <span className="text-[#B91C1C]">Fall short, and you get removed.</span>
+            <span className="text-[#F43F5E]">Fall short, and you get removed.</span>
           </h2>
-          <p className="text-base sm:text-lg text-[#44403C]">
-            Trading communities are plagued by fake gurus with demo screenshots and lucky streaks. On PipBud, your forum access is tied to continuous live journal performance.
+          <p className="text-base sm:text-lg text-[#71767B]">
+            Trading communities are plagued by fake gurus with demo screenshots and unverified claims. On PipBud, your forum access is tied to continuous live journal performance.
           </p>
         </div>
 
         {/* The 4-Stage Lifecycle Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-16">
           {/* Step 1 */}
-          <div className="bg-white p-6 rounded-2xl border border-[#E7E5E4] shadow-xs relative">
-            <div className="w-9 h-9 rounded-xl bg-[#FFF7ED] text-[#C2410C] font-bold text-sm flex items-center justify-center mb-4">
+          <div className="glass-regular p-6 rounded-3xl border border-white/12 space-y-3">
+            <div className="w-9 h-9 rounded-2xl glass-violet text-[#A78BFA] font-bold text-sm flex items-center justify-center border border-[#8B5CF6]/40">
               01
             </div>
-            <h3 className="font-bold text-base text-[#1C1917] mb-2">Continuous Ledger Audit</h3>
-            <p className="text-xs text-[#78716C] leading-relaxed">
-              Every trade logged via Telegram or MT5 sync is verified. PipBud continuously computes your 30-day win rate, profit factor, and maximum drawdown curve.
+            <h3 className="font-bold text-base text-white">Continuous Ledger Audit</h3>
+            <p className="text-xs text-[#71767B] leading-relaxed">
+              Every trade logged via Telegram or MT5 sync is cryptographically verified. PipBud continuously computes your 30-day win rate, profit factor, and maximum drawdown curve.
             </p>
           </div>
 
           {/* Step 2 */}
-          <div className="bg-white p-6 rounded-2xl border border-[#E7E5E4] shadow-xs relative">
-            <div className="w-9 h-9 rounded-xl bg-[#FFFBEB] text-[#D97706] font-bold text-sm flex items-center justify-center mb-4">
+          <div className="glass-regular p-6 rounded-3xl border border-white/12 space-y-3">
+            <div className="w-9 h-9 rounded-2xl bg-[#F59E0B]/20 text-[#F59E0B] font-bold text-sm flex items-center justify-center border border-[#F59E0B]/30">
               02
             </div>
-            <h3 className="font-bold text-base text-[#1C1917] mb-2">Tier Health Metric</h3>
-            <p className="text-xs text-[#78716C] leading-relaxed">
+            <h3 className="font-bold text-base text-white">Tier Health Metric</h3>
+            <p className="text-xs text-[#71767B] leading-relaxed">
               Every trader holds a Tier Health Score (100% to 0%). Breaching drawdown limits, revenge trading, or logging stop-less trades drains your health bar.
             </p>
           </div>
 
           {/* Step 3 */}
-          <div className="bg-white p-6 rounded-2xl border border-[#E7E5E4] shadow-xs relative">
-            <div className="w-9 h-9 rounded-xl bg-[#FEF2F2] text-[#B91C1C] font-bold text-sm flex items-center justify-center mb-4">
+          <div className="glass-regular p-6 rounded-3xl border border-white/12 space-y-3">
+            <div className="w-9 h-9 rounded-2xl bg-[#F43F5E]/20 text-[#F43F5E] font-bold text-sm flex items-center justify-center border border-[#F43F5E]/30">
               03
             </div>
-            <h3 className="font-bold text-base text-[#1C1917] mb-2">Automated Early Warning</h3>
-            <p className="text-xs text-[#78716C] leading-relaxed">
-              When health drops to 50%, you receive an urgent Telegram alert with a cooldown protocol. You get a temporary grace window to restore risk discipline.
+            <h3 className="font-bold text-base text-white">Automated Warning</h3>
+            <p className="text-xs text-[#71767B] leading-relaxed">
+              When health drops below 50%, you receive an urgent Telegram alert with a cooldown protocol. You get a temporary grace window to restore risk discipline.
             </p>
           </div>
 
           {/* Step 4 */}
-          <div className="bg-white p-6 rounded-2xl border border-[#E7E5E4] shadow-xs relative">
-            <div className="w-9 h-9 rounded-xl bg-[#1C1917] text-white font-bold text-sm flex items-center justify-center mb-4">
+          <div className="glass-regular p-6 rounded-3xl border border-white/12 space-y-3">
+            <div className="w-9 h-9 rounded-2xl bg-white/10 text-white font-bold text-sm flex items-center justify-center border border-white/20">
               04
             </div>
-            <h3 className="font-bold text-base text-[#1C1917] mb-2">Instant Relegation &amp; Kick</h3>
-            <p className="text-xs text-[#78716C] leading-relaxed">
-              At 0% health, the bot executes an automated kick. Permissions are stripped from higher forum channels and Telegram groups, and logged in #demotions-log.
+            <h3 className="font-bold text-base text-white">Instant Removal &amp; Kick</h3>
+            <p className="text-xs text-[#71767B] leading-relaxed">
+              At 0% health, the bot executes an automated kick. Permissions are stripped from higher forum channels and logged transparently in #demotions-log.
             </p>
           </div>
         </div>
 
-        {/* Live Interactive Demotion Sandbox */}
-        <div className="bg-white rounded-2xl border border-[#E7E5E4] shadow-[0_4px_12px_rgba(28,25,23,0.06)] overflow-hidden">
-          <div className="p-4 sm:p-6 bg-[#F5F5F4] border-b border-[#E7E5E4] flex flex-wrap items-center justify-between gap-3">
+        {/* Interactive Simulator Card */}
+        <div className="max-w-4xl mx-auto glass-thick rounded-3xl border border-white/18 p-6 sm:p-8 space-y-6 shadow-2xl">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-white/10">
             <div>
-              <h3 className="text-sm font-bold text-[#1C1917] flex items-center gap-2">
-                <Radio className="w-4 h-4 text-[#B91C1C] animate-pulse" />
-                <span>Simulate The Anti-Shortfall Engine</span>
+              <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                <span>Tier Health &amp; Demotion Simulator</span>
+                <span className="w-2 h-2 rounded-full bg-[#22C55E] animate-pulse" />
               </h3>
-              <p className="text-xs text-[#78716C]">
-                See how the system responds when an operator breaches risk limits.
+              <p className="text-xs text-[#71767B]">
+                Interactive preview of how the automated anti-shortfall engine protects community standards.
               </p>
             </div>
 
-            {/* Simulation States Controller */}
-            <div className="flex items-center gap-1.5 bg-white p-1 rounded-xl border border-[#E7E5E4]">
+            {/* State Controls */}
+            <div className="flex items-center gap-1 bg-[#101012] p-1 rounded-2xl border border-white/10 text-xs">
               <button
                 onClick={() => setDemoState('healthy')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                className={`px-3 py-1.5 rounded-xl font-medium transition-all cursor-pointer ${
                   demoState === 'healthy'
-                    ? 'bg-[#15803D] text-white'
-                    : 'text-[#78716C] hover:text-[#1C1917]'
+                    ? 'bg-[#22C55E]/20 text-[#22C55E] border border-[#22C55E]/40'
+                    : 'text-[#71767B] hover:text-white'
                 }`}
               >
-                1. Healthy Execution
+                100% Healthy
               </button>
               <button
                 onClick={() => setDemoState('warning')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                className={`px-3 py-1.5 rounded-xl font-medium transition-all cursor-pointer ${
                   demoState === 'warning'
-                    ? 'bg-[#A16207] text-white'
-                    : 'text-[#78716C] hover:text-[#1C1917]'
+                    ? 'bg-[#F59E0B]/20 text-[#F59E0B] border border-[#F59E0B]/40'
+                    : 'text-[#71767B] hover:text-white'
                 }`}
               >
-                2. Drawdown Warning
+                45% Warning
               </button>
               <button
                 onClick={() => setDemoState('demoted')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                className={`px-3 py-1.5 rounded-xl font-medium transition-all cursor-pointer ${
                   demoState === 'demoted'
-                    ? 'bg-[#B91C1C] text-white'
-                    : 'text-[#78716C] hover:text-[#1C1917]'
+                    ? 'bg-[#F43F5E]/20 text-[#F43F5E] border border-[#F43F5E]/40'
+                    : 'text-[#71767B] hover:text-white'
                 }`}
               >
-                3. Relegated &amp; Removed
+                0% Demoted
               </button>
             </div>
           </div>
 
-          {/* Sandbox Body */}
-          <div className="p-6 sm:p-8 bg-white">
-            {demoState === 'healthy' && (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
-                <div className="p-4 rounded-xl bg-[#F0FDFA] border border-[#CCFBF1]">
-                  <div className="flex items-center justify-between text-xs font-bold text-[#0F766E] mb-2">
-                    <span>Trader Status</span>
-                    <span>Level 4: Funded Pro</span>
-                  </div>
-                  <div className="text-2xl font-bold text-[#0F766E] mb-1">100% Health</div>
-                  <p className="text-xs text-[#115E59]">Drawdown: 2.1% (Safe below 5.0% ceiling)</p>
-                </div>
-
-                <div className="p-4 rounded-xl bg-[#FAFAF9] border border-[#E7E5E4]">
-                  <div className="text-xs text-[#78716C] mb-1">Channel Access</div>
-                  <div className="font-mono text-xs font-bold text-[#1C1917]">
-                    #funded-floor, #live-tape-reading
-                  </div>
-                  <span className="inline-block mt-2 text-[10px] text-[#0F766E] bg-[#F0FDFA] px-2 py-0.5 rounded font-medium">
-                    Full Voice &amp; Chat Enabled
-                  </span>
-                </div>
-
-                <div className="p-4 rounded-xl bg-[#FAFAF9] border border-[#E7E5E4] text-xs space-y-1">
-                  <div className="font-semibold text-[#1C1917]">Telegram Notification:</div>
-                  <p className="text-[#78716C] italic">
-                    &ldquo;All stats verified. You are in good standing for Level 4.&rdquo;
-                  </p>
-                </div>
+          {/* Status Display Area */}
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-center">
+            <div className="md:col-span-7 space-y-3">
+              <div className="flex justify-between items-center text-xs">
+                <span className="text-[#71767B]">Simulated Member: @trader_alex</span>
+                <span
+                  className="font-bold text-xs"
+                  style={{
+                    color: demoState === 'healthy' ? '#22C55E' : demoState === 'warning' ? '#F59E0B' : '#F43F5E',
+                  }}
+                >
+                  {demoState === 'healthy' ? 'Health: 98% (Compliant)' : demoState === 'warning' ? 'Health: 45% (Drawdown Warning)' : 'Health: 0% (Demoted)'}
+                </span>
               </div>
-            )}
 
-            {demoState === 'warning' && (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
-                <div className="p-4 rounded-xl bg-[#FFFBEB] border border-[#FDE68A]">
-                  <div className="flex items-center justify-between text-xs font-bold text-[#92400E] mb-2">
-                    <span>Trader Status</span>
-                    <span className="text-[#B45309]">Probation Warning</span>
-                  </div>
-                  <div className="text-2xl font-bold text-[#D97706] mb-1">45% Health</div>
-                  <p className="text-xs text-[#92400E]">Drawdown: 4.8% (Dangerously close to 5.0% limit)</p>
-                </div>
-
-                <div className="p-4 rounded-xl bg-[#FAFAF9] border border-[#E7E5E4]">
-                  <div className="text-xs text-[#78716C] mb-1">Channel Access</div>
-                  <div className="font-mono text-xs font-bold text-[#D97706]">
-                    #funded-floor (Restricted Read-Only)
-                  </div>
-                  <span className="inline-block mt-2 text-[10px] text-[#D97706] bg-[#FFFBEB] px-2 py-0.5 rounded font-medium">
-                    24-Hour Cooldown Protocol
-                  </span>
-                </div>
-
-                <div className="p-4 rounded-xl bg-[#FFFBEB] border border-[#FDE68A] text-xs space-y-1">
-                  <div className="font-semibold text-[#92400E]">Telegram Warning:</div>
-                  <p className="text-[#78716C] italic">
-                    &ldquo;⚠️ Drawdown spiked to 4.8%. If your next trade exceeds 5.0%, you will be removed immediately.&rdquo;
-                  </p>
-                </div>
+              {/* Progress bar */}
+              <div className="w-full bg-[#101012] h-2.5 rounded-full overflow-hidden border border-white/10">
+                <div
+                  className="h-full rounded-full transition-all duration-500"
+                  style={{
+                    width: demoState === 'healthy' ? '98%' : demoState === 'warning' ? '45%' : '0%',
+                    backgroundColor: demoState === 'healthy' ? '#22C55E' : demoState === 'warning' ? '#F59E0B' : '#F43F5E',
+                  }}
+                />
               </div>
-            )}
 
-            {demoState === 'demoted' && (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
-                <div className="p-4 rounded-xl bg-[#FEF2F2] border border-[#FEE2E2]">
-                  <div className="flex items-center justify-between text-xs font-bold text-[#B91C1C] mb-2">
-                    <span>Trader Status</span>
-                    <span className="text-[#B91C1C]">DEMOTED TO LEVEL 3</span>
-                  </div>
-                  <div className="text-2xl font-bold text-[#B91C1C] mb-1">0% Health</div>
-                  <p className="text-xs text-[#7F1D1D]">Drawdown: 5.4% (Breached 5.0% threshold)</p>
-                </div>
+              <p className="text-xs text-[#71767B] leading-relaxed">
+                {demoState === 'healthy' && 'Trader maintains 2.1% max drawdown on Level 4. Full access to #funded-floor and verified live commentary channels.'}
+                {demoState === 'warning' && 'Drawdown hit 4.8% on a 5.0% threshold. Bot dispatched telegram alert. Trader has 48 hours to restore performance parameters.'}
+                {demoState === 'demoted' && 'Max drawdown exceeded 5.2%. Automated script demoted @trader_alex back to Level 3 Consistent Desk. Record published in #demotions-log.'}
+              </p>
+            </div>
 
-                <div className="p-4 rounded-xl bg-[#FEF2F2] border border-[#FEE2E2]">
-                  <div className="text-xs text-[#78716C] mb-1">Channel Access</div>
-                  <div className="font-mono text-xs font-bold text-[#B91C1C] line-through">
-                    #funded-floor (REVOKED)
-                  </div>
-                  <span className="inline-block mt-2 text-[10px] text-[#B91C1C] bg-white px-2 py-0.5 rounded font-medium border border-[#FEE2E2]">
-                    Kicked from Supergroup
-                  </span>
-                </div>
-
-                <div className="p-4 rounded-xl bg-[#FAFAF9] border border-[#E7E5E4] text-xs space-y-1">
-                  <div className="font-semibold text-[#1C1917]">Public Transparency Notice:</div>
-                  <p className="text-[#78716C] font-mono text-[11px]">
-                    &ldquo;[AUDIT DEMOTION] Trader @emeka_scalp relegated to Level 3. Drawdown breach.&rdquo;
-                  </p>
-                </div>
-              </div>
-            )}
+            <div className="md:col-span-5 p-4 rounded-2xl bg-[#101012] border border-white/10 font-mono text-xs space-y-1.5">
+              <span className="text-[10px] text-[#71767B] font-sans block uppercase font-bold tracking-wider">
+                Automated Audit Log
+              </span>
+              <p className="text-white text-[11px] leading-relaxed">
+                [SYSTEM]: @trader_alex status checked.<br />
+                {demoState === 'healthy' && '[STATUS]: Tier 4 Pass • Sharpe 1.62'}
+                {demoState === 'warning' && '[ALERT]: Tier Health 45% • Caution active'}
+                {demoState === 'demoted' && '[ACTION]: Relegated L4 -> L3 • Channel keys revoked'}
+              </p>
+            </div>
           </div>
         </div>
       </div>

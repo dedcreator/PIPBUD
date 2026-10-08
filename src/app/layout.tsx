@@ -1,18 +1,8 @@
 import type { Metadata, Viewport } from 'next';
-import { Poppins, Inter } from 'next/font/google';
+import { Inter } from 'next/font/google';
 import './globals.css';
 import { Analytics } from '@vercel/analytics/react';
 import { AuthProvider } from '@/context/AuthContext';
-import MobileNavDock from '@/components/MobileNavDock';
-import InstallAppBanner from '@/components/InstallAppBanner';
-import PWASplashScreen from '@/components/PWASplashScreen';
-
-const poppins = Poppins({
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
-  variable: '--font-poppins',
-  display: 'swap',
-});
 
 const inter = Inter({
   subsets: ['latin'],
@@ -22,39 +12,16 @@ const inter = Inter({
 });
 
 export const viewport: Viewport = {
-  themeColor: '#C2410C',
+  themeColor: '#000000',
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
-  userScalable: false,
   viewportFit: 'cover',
 };
 
 export const metadata: Metadata = {
   title: 'PipBud — Telegram Trading Journal & 7-Level Verified Trader Forum',
-  description: 'Log trades instantly on Telegram. Audit your stats on the Web Journal. Unlock 7 exclusive skill tiers on a state-of-the-art messaging platform. Fall short of your tier’s performance? You get automatically removed. 100% verified meritocracy.',
-  manifest: '/manifest.webmanifest',
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: 'default',
-    title: 'PipBud',
-    startupImage: [
-      {
-        url: '/splash/apple-splash-universal.png',
-      },
-      {
-        url: '/splash/apple-splash-1179-2556.png',
-        media: '(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3)',
-      },
-      {
-        url: '/splash/apple-splash-1290-2796.png',
-        media: '(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3)',
-      },
-    ],
-  },
-  formatDetection: {
-    telephone: false,
-  },
+  description: 'Log trades instantly on Telegram. Build your audited track record to unlock 7 gated skill tiers on a modern trader forum. 100% verified meritocracy.',
   icons: {
     icon: [
       { url: '/icon-192.png', sizes: '192x192', type: 'image/png' },
@@ -64,7 +31,7 @@ export const metadata: Metadata = {
       { url: '/apple-touch-icon.png', sizes: '192x192', type: 'image/png' },
     ],
   },
-  keywords: 'trading journal, telegram trading bot, forex journal, 7 skill levels, trader forum, verified traders, prop firm trading, SMC ICT order block, trade analytics, PWA trading app',
+  keywords: 'trading journal, telegram trading bot, forex journal, 7 skill levels, trader forum, verified traders, prop firm trading, SMC ICT order block, trade analytics',
   openGraph: {
     title: 'PipBud — Telegram Trading Journal & 7-Level Verified Trader Forum',
     description: '100% verified trader meritocracy. Telegram bot journal, web analytics, and 7-tier gated messaging platform.',
@@ -86,14 +53,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="scroll-smooth">
-      <body className={`${poppins.variable} ${inter.variable} bg-[#FAFAF9] text-[#1C1917] antialiased selection:bg-[#FED7AA] selection:text-[#9A3412]`}>
-        <PWASplashScreen />
+    <html lang="en" className="dark scroll-smooth">
+      <body className={`${inter.variable} bg-[#000000] text-[#E7E9EA] antialiased selection:bg-[#8B5CF6]/40 selection:text-white min-h-screen`}>
         <AuthProvider>
-          <div className="min-h-screen flex flex-col">
+          <div className="min-h-screen flex flex-col relative bg-[#000000]">
             {children}
-            <InstallAppBanner />
-            <MobileNavDock />
           </div>
         </AuthProvider>
         <Analytics />

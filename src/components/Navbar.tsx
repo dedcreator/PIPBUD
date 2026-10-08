@@ -2,152 +2,109 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Menu, X, Send, User, ShieldCheck, MessageSquare } from 'lucide-react';
+import { Menu, X, Send, ArrowRight, ShieldCheck, ExternalLink } from 'lucide-react';
 import PipbudLogo from './PipbudLogo';
-import { useAuth } from '@/context/AuthContext';
-import NotificationBell from './NotificationBell';
-import TraderAvatar from './TraderAvatar';
 
-interface NavbarProps {
-  onReturnToFeed?: () => void;
-}
-
-export default function Navbar({ onReturnToFeed }: NavbarProps = {}) {
+export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { user } = useAuth();
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://app.pipbud.xyz';
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 15);
+    const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-40 transition-all duration-200 ${
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         scrolled
-          ? 'bg-[#FAFAF9]/95 backdrop-blur-md border-b border-[#E7E5E4] shadow-xs'
-          : 'bg-[#FAFAF9]/80 backdrop-blur-sm border-b border-[#E7E5E4]/60'
+          ? 'glass-thick border-b border-white/14 shadow-[0_8px_32px_rgba(0,0,0,0.8)]'
+          : 'bg-[#000000]/70 backdrop-blur-md border-b border-white/8'
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+        <div className="flex items-center justify-between h-18">
           {/* Logo */}
           <div className="flex items-center">
             <PipbudLogo size="md" />
           </div>
 
-          {/* Desktop Nav Links: Gated based on login state */}
-          <div className="hidden md:flex items-center gap-6">
+          {/* Desktop Nav Links */}
+          <div className="hidden md:flex items-center gap-7">
             <Link
               href="/#tiers"
-              className="text-xs sm:text-sm font-medium text-[#44403C] hover:text-[#C2410C] transition-colors"
+              className="text-xs sm:text-sm font-medium text-[#71767B] hover:text-white transition-colors"
             >
               The 7 Tiers
             </Link>
-
-            {user ? (
-              <>
-                <Link
-                  href="/feed"
-                  className="text-xs sm:text-sm font-bold text-[#C2410C] hover:text-[#EA580C] transition-all flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#FFF7ED] border border-[#FED7AA] shadow-2xs active:scale-95 cursor-pointer"
-                >
-                  <MessageSquare className="w-3.5 h-3.5" />
-                  <span>Launch App</span>
-                </Link>
-                <Link
-                  href="/journal"
-                  className="text-xs sm:text-sm font-semibold text-[#1C1917] hover:text-[#C2410C] transition-colors flex items-center gap-1.5"
-                >
-                  <span>Web Journal</span>
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#0F766E]" />
-                </Link>
-                <Link
-                  href="/forum"
-                  className="text-xs sm:text-sm font-semibold text-[#1C1917] hover:text-[#C2410C] transition-colors flex items-center gap-1.5"
-                >
-                  <span>Trader Forum</span>
-                  <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-[#FFF7ED] text-[#C2410C] border border-[#FED7AA]">
-                    L{user.skill_level}
-                  </span>
-                </Link>
-              </>
-            ) : (
-              <>
-                <Link
-                  href="/#how-it-works"
-                  className="text-xs sm:text-sm font-medium text-[#44403C] hover:text-[#C2410C] transition-colors"
-                >
-                  How It Works
-                </Link>
-                <Link
-                  href="/#bot"
-                  className="text-xs sm:text-sm font-medium text-[#44403C] hover:text-[#C2410C] transition-colors"
-                >
-                  Telegram Bot
-                </Link>
-              </>
-            )}
-
             <Link
-              href="/#legitimacy"
-              className="text-xs sm:text-sm font-medium text-[#44403C] hover:text-[#C2410C] transition-colors"
+              href="/#how-it-works"
+              className="text-xs sm:text-sm font-medium text-[#71767B] hover:text-white transition-colors"
             >
-              Removal Rules
+              How It Works
+            </Link>
+            <Link
+              href="/#anti-shortfall"
+              className="text-xs sm:text-sm font-medium text-[#71767B] hover:text-white transition-colors"
+            >
+              Anti-Shortfall
+            </Link>
+            <Link
+              href="/#bot"
+              className="text-xs sm:text-sm font-medium text-[#71767B] hover:text-white transition-colors"
+            >
+              Telegram Bot
+            </Link>
+            <Link
+              href="/#journal"
+              className="text-xs sm:text-sm font-medium text-[#71767B] hover:text-white transition-colors"
+            >
+              Web Journal
+            </Link>
+            <Link
+              href="/#faq"
+              className="text-xs sm:text-sm font-medium text-[#71767B] hover:text-white transition-colors"
+            >
+              FAQ
             </Link>
           </div>
 
-          {/* Action CTA & User Auth */}
+          {/* Action CTAs */}
           <div className="hidden sm:flex items-center gap-3">
-            {user ? (
-              <>
-                <NotificationBell />
-                <Link
-                  href="/settings"
-                  className="h-9 px-2.5 sm:px-3 text-xs font-semibold bg-white border border-[#E7E5E4] hover:border-[#FED7AA] text-[#1C1917] rounded-xl transition-all inline-flex items-center gap-2 shadow-xs hover:bg-[#FFF7ED]"
-                  title="Trader Settings & Privacy"
-                >
-                  <TraderAvatar
-                    name={user.display_name || user.username}
-                    username={user.username}
-                    avatarUrl={user.avatar_url}
-                    avatarType={user.avatar_type}
-                    tierColor={user.tier_color}
-                    size="xs"
-                  />
-                  <span className="font-bold text-[#C2410C]">L{user.skill_level}</span>
-                  <span className="text-[#44403C] max-w-[110px] truncate">
-                    {user.display_name || `@${user.username}`}
-                  </span>
-                </Link>
-              </>
-            ) : (
-              <Link
-                href="/login"
-                className="h-9 px-4 text-xs font-semibold text-[#1C1917] bg-white border border-[#E7E5E4] hover:border-[#FED7AA] hover:bg-[#FFF7ED] rounded-xl transition-all inline-flex items-center shadow-xs"
-              >
-                Log In
-              </Link>
-            )}
-
             <a
               href="https://t.me/PipBudBot"
               target="_blank"
               rel="noopener noreferrer"
-              className="h-9 px-4 text-xs font-medium bg-[#C2410C] hover:bg-[#EA580C] text-white rounded-xl transition-all inline-flex items-center gap-1.5 shadow-xs active:scale-98"
+              className="btn-secondary h-9 px-4 text-xs font-medium inline-flex items-center gap-1.5"
             >
-              <Send className="w-3.5 h-3.5" />
-              <span>Start on Telegram</span>
+              <Send className="w-3.5 h-3.5 text-[#A78BFA]" />
+              <span>@PipBudBot</span>
+            </a>
+
+            <a
+              href={appUrl}
+              className="btn-primary h-9 px-4 text-xs font-semibold inline-flex items-center gap-1.5 shadow-md"
+            >
+              <span>Launch App</span>
+              <ArrowRight className="w-3.5 h-3.5" />
             </a>
           </div>
 
-          {/* Mobile Notification & menu toggle */}
-          <div className="flex md:hidden items-center gap-1.5">
-            {user && <NotificationBell />}
+          {/* Mobile menu toggle */}
+          <div className="flex md:hidden items-center gap-2">
+            <a
+              href={appUrl}
+              className="btn-primary h-8 px-3 text-xs font-semibold inline-flex items-center gap-1"
+            >
+              <span>App</span>
+              <ArrowRight className="w-3 h-3" />
+            </a>
+
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
-              className="p-2 rounded-lg text-[#44403C] hover:text-[#1C1917] hover:bg-[#E7E5E4]/50 transition-colors"
+              className="p-2 rounded-xl glass-ultrathin text-[#71767B] hover:text-white transition-colors border border-white/10"
               aria-label="Toggle menu"
             >
               {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -158,133 +115,69 @@ export default function Navbar({ onReturnToFeed }: NavbarProps = {}) {
 
       {/* Mobile Drawer */}
       {mobileOpen && (
-        <div className="md:hidden bg-white border-b border-[#E7E5E4] px-4 pt-3 pb-5 space-y-3 shadow-md animate-in slide-in-from-top-2 duration-150">
-          {user && (
-            <div className="space-y-2">
-              <div className="p-3 bg-[#FAFAF9] rounded-xl border border-[#E7E5E4] flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
-                  <TraderAvatar
-                    name={user.display_name || user.username}
-                    username={user.username}
-                    avatarUrl={user.avatar_url}
-                    avatarType={user.avatar_type}
-                    tierColor={user.tier_color}
-                    size="sm"
-                  />
-                  <div>
-                    <span className="text-[10px] text-[#78716C] block">Logged In Trader</span>
-                    <span className="text-xs font-bold text-[#1C1917]">@{user.username}</span>
-                  </div>
-                </div>
-                <span
-                  className="px-2 py-0.5 rounded-full text-[10px] font-bold text-white shadow-xs"
-                  style={{ backgroundColor: user.tier_color || '#C2410C' }}
-                >
-                  {user.tier_badge}
-                </span>
-              </div>
-
-              <Link
-                href="/feed"
-                onClick={() => setMobileOpen(false)}
-                className="w-full h-11 px-4 rounded-xl bg-[#C2410C] hover:bg-[#EA580C] text-white font-bold text-xs inline-flex items-center justify-center gap-2 shadow-xs transition-all active:scale-95 cursor-pointer"
-              >
-                <MessageSquare className="w-4 h-4" />
-                <span>Launch App Terminal</span>
-              </Link>
-            </div>
-          )}
-
-          <div className="flex flex-col space-y-2">
+        <div className="md:hidden glass-thick border-b border-white/14 px-4 pt-3 pb-6 space-y-4 shadow-2xl animate-in slide-in-from-top-2 duration-200">
+          <div className="flex flex-col space-y-2.5">
             <Link
               href="/#tiers"
               onClick={() => setMobileOpen(false)}
-              className="px-2 py-1.5 rounded-lg text-sm font-medium text-[#1C1917] hover:bg-[#FFF7ED] hover:text-[#C2410C]"
+              className="px-3 py-2 rounded-xl text-sm font-medium text-[#E7E9EA] hover:glass-violet hover:text-white transition-all"
             >
               The 7 Tiers
             </Link>
-
-            {user ? (
-              <>
-                <Link
-                  href="/journal"
-                  onClick={() => setMobileOpen(false)}
-                  className="px-2 py-1.5 rounded-lg text-sm font-semibold text-[#1C1917] hover:bg-[#FFF7ED] hover:text-[#C2410C] flex items-center justify-between"
-                >
-                  <span>Web Journal Dashboard</span>
-                  <span className="text-[10px] font-bold text-[#0F766E] bg-[#F0FDFA] px-2 py-0.5 rounded-full border border-[#CCFBF1]">
-                    Audited
-                  </span>
-                </Link>
-                <Link
-                  href="/forum"
-                  onClick={() => setMobileOpen(false)}
-                  className="px-2 py-1.5 rounded-lg text-sm font-semibold text-[#1C1917] hover:bg-[#FFF7ED] hover:text-[#C2410C] flex items-center justify-between"
-                >
-                  <span>7-Tier Trader Forum</span>
-                  <span className="text-[10px] font-bold text-[#C2410C] bg-[#FFF7ED] px-2 py-0.5 rounded-full border border-[#FED7AA]">
-                    L{user.skill_level}
-                  </span>
-                </Link>
-              </>
-            ) : (
-              <>
-                <Link
-                  href="/#how-it-works"
-                  onClick={() => setMobileOpen(false)}
-                  className="px-2 py-1.5 rounded-lg text-sm font-medium text-[#1C1917] hover:bg-[#FFF7ED] hover:text-[#C2410C]"
-                >
-                  How It Works
-                </Link>
-                <Link
-                  href="/#bot"
-                  onClick={() => setMobileOpen(false)}
-                  className="px-2 py-1.5 rounded-lg text-sm font-medium text-[#1C1917] hover:bg-[#FFF7ED] hover:text-[#C2410C]"
-                >
-                  Telegram Bot Journal
-                </Link>
-              </>
-            )}
-
             <Link
-              href="/#legitimacy"
+              href="/#how-it-works"
               onClick={() => setMobileOpen(false)}
-              className="px-2 py-1.5 rounded-lg text-sm font-medium text-[#1C1917] hover:bg-[#FFF7ED] hover:text-[#C2410C]"
+              className="px-3 py-2 rounded-xl text-sm font-medium text-[#E7E9EA] hover:glass-violet hover:text-white transition-all"
             >
-              Removal Rules
+              How It Works
             </Link>
-
-            {user && (
-              <Link
-                href="/settings"
-                onClick={() => setMobileOpen(false)}
-                className="px-2 py-1.5 rounded-lg text-sm font-semibold text-[#1C1917] hover:bg-[#FFF7ED] hover:text-[#C2410C] flex items-center justify-between"
-              >
-                <span>Privacy & Trader Settings</span>
-                <span className="text-[10px] font-bold text-[#0F766E] bg-[#F0FDFA] px-2 py-0.5 rounded-full border border-[#CCFBF1]">
-                  Shield
-                </span>
-              </Link>
-            )}
-
             <Link
-              href="/login"
+              href="/#anti-shortfall"
               onClick={() => setMobileOpen(false)}
-              className="px-2 py-1.5 rounded-lg text-sm font-medium text-[#1C1917] hover:bg-[#FFF7ED] hover:text-[#C2410C]"
+              className="px-3 py-2 rounded-xl text-sm font-medium text-[#E7E9EA] hover:glass-violet hover:text-white transition-all"
             >
-              {user ? 'Account Tiers & Logout' : 'Log In via Telegram'}
+              Anti-Shortfall Protocol
+            </Link>
+            <Link
+              href="/#bot"
+              onClick={() => setMobileOpen(false)}
+              className="px-3 py-2 rounded-xl text-sm font-medium text-[#E7E9EA] hover:glass-violet hover:text-white transition-all"
+            >
+              Telegram Bot Journal
+            </Link>
+            <Link
+              href="/#journal"
+              onClick={() => setMobileOpen(false)}
+              className="px-3 py-2 rounded-xl text-sm font-medium text-[#E7E9EA] hover:glass-violet hover:text-white transition-all"
+            >
+              Web Journal Dashboard
+            </Link>
+            <Link
+              href="/#faq"
+              onClick={() => setMobileOpen(false)}
+              className="px-3 py-2 rounded-xl text-sm font-medium text-[#E7E9EA] hover:glass-violet hover:text-white transition-all"
+            >
+              FAQ
             </Link>
           </div>
 
-          <div className="pt-2 border-t border-[#E7E5E4]">
+          <div className="pt-2 border-t border-white/10 flex flex-col gap-2.5">
+            <a
+              href={appUrl}
+              className="w-full h-11 btn-primary text-xs font-semibold inline-flex items-center justify-center gap-2"
+            >
+              <span>Launch Web App (app.pipbud.xyz)</span>
+              <ArrowRight className="w-4 h-4" />
+            </a>
+
             <a
               href="https://t.me/PipBudBot"
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full h-10 inline-flex items-center justify-center gap-2 bg-[#C2410C] text-white rounded-xl text-xs font-medium hover:bg-[#EA580C]"
+              className="w-full h-11 btn-secondary text-xs font-medium inline-flex items-center justify-center gap-2"
             >
-              <Send className="w-3.5 h-3.5" />
-              <span>Launch @PipBudBot</span>
+              <Send className="w-4 h-4 text-[#A78BFA]" />
+              <span>Start on Telegram Bot</span>
             </a>
           </div>
         </div>

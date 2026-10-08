@@ -1,198 +1,210 @@
 @import "tailwindcss";
 
 @theme {
-  --font-poppins: var(--font-poppins), 'Inter', 'Noto Sans', system-ui, sans-serif;
+  --font-poppins: var(--font-poppins), 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --font-inter: var(--font-inter), 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
 
-  /* Pipbud Design System - Amber Palette */
-  --color-amber-50: #FFF7ED;
-  --color-amber-100: #FFEDD5;
-  --color-amber-200: #FED7AA;
-  --color-amber-300: #FDBA74;
-  --color-amber-400: #FB923C;
-  --color-amber-500: #F97316;
-  --color-amber-600: #EA580C;
-  --color-amber-700: #C2410C;
-  --color-amber-800: #9A3412;
-  --color-amber-900: #7C2D12;
+  /* PipBud Liquid Glass v3.0 - Violet Brand Scale */
+  --color-violet-50: #F5F3FF;
+  --color-violet-100: #EDE9FE;
+  --color-violet-200: #DDD6FE;
+  --color-violet-300: #C4B5FD;
+  --color-violet-400: #A78BFA;
+  --color-violet-500: #8B5CF6;
+  --color-violet-600: #7C3AED;
+  --color-violet-700: #6D28D9;
+  --color-violet-800: #5B21B6;
+  --color-violet-900: #4C1D95;
+  --color-violet-950: #2E1065;
 
-  /* Pipbud Design System - Warm Stone Neutrals */
-  --color-ink: #1C1917;
-  --color-ink-2: #44403C;
-  --color-ink-3: #78716C;
-  --color-line: #E7E5E4;
-  --color-surface: #FAFAF9;
-  --color-card: #FFFFFF;
-  --color-subtle: #F5F5F4;
+  /* Liquid Glass - Surfaces & Structure */
+  --color-black: #000000;
+  --color-bg-1: #0A0A0B;
+  --color-bg-2: #101012;
+  --color-bg-3: #16161A;
+  --color-text-1: #E7E9EA;
+  --color-text-2: #71767B;
+  --color-border-hairline: #2F3336;
 
-  /* Pipbud Design System - Semantic & Trust */
-  --color-trust: #0F766E;
-  --color-trust-light: #CCFBF1;
-  --color-trust-soft: #F0FDFA;
-  --color-trust-dark: #2DD4BF;
-  --color-success: #15803D;
-  --color-warning: #A16207;
-  --color-error: #B91C1C;
-  --color-info: #2563EB;
+  /* Liquid Glass - Semantic & Financial */
+  --color-profit: #22C55E;
+  --color-loss: #F43F5E;
+  --color-warning: #F59E0B;
+  --color-info: #38BDF8;
 }
 
 :root {
-  --background: #FAFAF9;
-  --foreground: #1C1917;
+  --background: #000000;
+  --foreground: #E7E9EA;
+}
+
+html {
+  scroll-behavior: smooth;
+  color-scheme: dark;
+  background-color: #000000;
 }
 
 body {
-  background-color: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-poppins), 'Inter', 'Noto Sans', system-ui, sans-serif;
+  background-color: #000000;
+  color: #E7E9EA;
+  font-family: var(--font-inter), 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   font-feature-settings: "tnum" 1, "rlig" 1, "calt" 1;
   -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
 }
 
 /* Tabular figures for prices, ratings and financial stats */
 .tabular-nums {
   font-feature-settings: "tnum" 1;
+  font-variant-numeric: tabular-nums;
 }
 
-/* Pipbud Button Variants according to Design System Spec */
+/* ============================================================ */
+/* LIQUID GLASS MATERIAL UTILITIES (v3.0 SPECIFICATION)        */
+/* ============================================================ */
+
+.glass-ultrathin {
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(12px) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-regular {
+  background: rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 8px 32px rgba(0, 0, 0, 0.6);
+}
+
+.glass-thick {
+  background: rgba(10, 10, 11, 0.76);
+  backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 12px 40px rgba(0, 0, 0, 0.7);
+}
+
+.glass-violet {
+  background: rgba(139, 92, 246, 0.18);
+  backdrop-filter: blur(28px) saturate(170%);
+  -webkit-backdrop-filter: blur(28px) saturate(170%);
+  border: 1px solid rgba(167, 139, 250, 0.45);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 8px 32px rgba(139, 92, 246, 0.25);
+}
+
+/* Fallback for browsers without backdrop-filter or reduced transparency */
+@supports not (backdrop-filter: blur(1px)) {
+  .glass-ultrathin {
+    background: #101012;
+  }
+  .glass-regular {
+    background: #0A0A0B;
+  }
+  .glass-thick {
+    background: #0A0A0B;
+  }
+  .glass-violet {
+    background: #2E1065;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .glass-ultrathin,
+  .glass-regular,
+  .glass-thick {
+    background: #0A0A0B !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
+
+/* Signature Gradients */
+.brand-gradient {
+  background: linear-gradient(135deg, #A78BFA 0%, #8B5CF6 50%, #6D28D9 100%);
+}
+
+.brand-aurora {
+  background: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(124, 58, 237, 0.28), rgba(46, 16, 101, 0.08) 50%, rgba(0, 0, 0, 0) 100%);
+}
+
+.brand-aurora-subtle {
+  background: radial-gradient(ellipse 60% 40% at 50% 0%, rgba(139, 92, 246, 0.18), rgba(0, 0, 0, 0) 70%);
+}
+
+.sovereign-ring {
+  background: linear-gradient(135deg, #8B5CF6 0%, #F5F3FF 100%);
+}
+
+/* PipBud Liquid Glass Buttons */
 .btn-primary {
-  background-color: #C2410C;
+  background: linear-gradient(135deg, #A78BFA 0%, #8B5CF6 50%, #6D28D9 100%);
   color: #FFFFFF;
-  font-weight: 500;
-  border-radius: 12px;
-  transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
+  font-weight: 600;
+  border-radius: 9999px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 4px 16px rgba(139, 92, 246, 0.35);
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
   display: inline-flex;
   align-items: center;
   justify-content: center;
 }
 .btn-primary:hover {
-  background-color: #EA580C;
+  transform: scale(1.02);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 6px 24px rgba(139, 92, 246, 0.5);
 }
 .btn-primary:active {
-  background-color: #9A3412;
   transform: scale(0.98);
 }
 
 .btn-secondary {
-  background-color: #FFFFFF;
-  border: 1px solid #C2410C;
-  color: #C2410C;
+  background: rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #E7E9EA;
   font-weight: 500;
-  border-radius: 12px;
-  transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
+  border-radius: 9999px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
   display: inline-flex;
   align-items: center;
   justify-content: center;
 }
 .btn-secondary:hover {
-  background-color: #FFF7ED;
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(167, 139, 250, 0.4);
+  color: #FFFFFF;
+  transform: scale(1.02);
 }
 .btn-secondary:active {
   transform: scale(0.98);
 }
 
-.btn-ghost {
-  background-color: #FFF7ED;
-  color: #C2410C;
-  font-weight: 500;
-  border-radius: 12px;
-  transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-.btn-ghost:hover {
-  background-color: #FFEDD5;
-}
-
-.btn-dark {
-  background-color: #1C1917;
-  color: #FFFFFF;
-  font-weight: 500;
-  border-radius: 12px;
-  transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-.btn-dark:hover {
-  background-color: #44403C;
-}
-
-/* Card & Surface utilities */
-.card-pipbud {
-  background-color: #FFFFFF;
-  border: 1px solid #E7E5E4;
-  border-radius: 16px;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-.card-pipbud:hover {
-  border-color: #FED7AA;
-  box-shadow: 0 4px 12px rgba(28, 25, 23, 0.06);
-}
-
-/* Approved brand gradient */
-.brand-gradient {
-  background: linear-gradient(135deg, #FB923C 0%, #F97316 50%, #EA580C 100%);
-}
-
-.brand-gradient-subtle {
-  background: linear-gradient(135deg, #FFF7ED 0%, #FFEDD5 50%, #FED7AA 100%);
-}
-
-/* Smooth scrolling */
-html {
-  scroll-behavior: smooth;
-  color-scheme: light;
-}
-
-/* Custom scrollbar matching warm stone */
+/* Custom dark scrollbar matching liquid glass */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
-
 ::-webkit-scrollbar-track {
-  background: #FAFAF9;
+  background: #000000;
 }
-
 ::-webkit-scrollbar-thumb {
-  background: #E7E5E4;
+  background: #2F3336;
   border-radius: 4px;
 }
-
 ::-webkit-scrollbar-thumb:hover {
-  background: #D6D3D1;
+  background: #4C1D95;
 }
 
-/* Focus rings with amber-500 */
+/* Focus rings with violet-500 */
 *:focus-visible {
-  outline: 2px solid #F97316;
+  outline: 2px solid #8B5CF6;
   outline-offset: 2px;
-  border-radius: 6px;
+  border-radius: 8px;
 }
 
-/* ============================================================ */
-/* MODERN SOCIAL APP FLUIDITY, MICRO-INTERACTIONS & SPRINGS     */
-/* ============================================================ */
-
-@keyframes popScale {
-  0% { transform: scale(1); }
-  45% { transform: scale(1.22); }
-  75% { transform: scale(0.95); }
-  100% { transform: scale(1); }
-}
-
-@keyframes slideUpIn {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
+/* Animations */
 @keyframes pulseLiveDot {
   0%, 100% {
     transform: scale(1);
@@ -204,39 +216,12 @@ html {
   }
 }
 
-.animate-pop-scale {
-  animation: popScale 0.32s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-.animate-slide-up-in {
-  animation: slideUpIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
 .animate-pulse-live {
   animation: pulseLiveDot 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
-.interactive-spring {
-  transition: transform 0.18s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.18s ease;
-}
-.interactive-spring:hover {
-  transform: translateY(-1px);
-}
-.interactive-spring:active {
-  transform: scale(0.96);
-}
-
-.social-card-shadow {
-  box-shadow: 0 1px 3px 0 rgba(28, 25, 23, 0.04), 0 1px 2px -1px rgba(28, 25, 23, 0.04);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.social-card-shadow:hover {
-  box-shadow: 0 6px 16px -2px rgba(28, 25, 23, 0.08), 0 2px 6px -2px rgba(28, 25, 23, 0.04);
-}
-
-/* Standalone PWA App Mode - Hide marketing footers & website elements */
+/* Standalone PWA App Mode */
 @media (display-mode: standalone) {
-  footer,
   .pwa-hide {
     display: none !important;
   }

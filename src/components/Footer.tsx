@@ -1,36 +1,23 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { ShieldCheck, Send, BarChart3, MessageSquare, ExternalLink, FileText } from 'lucide-react';
 import PipbudLogo from './PipbudLogo';
-import { ShieldCheck, Send, MessageSquare, BarChart3 } from 'lucide-react';
 
 export default function Footer() {
-  const [isStandalone, setIsStandalone] = useState(false);
-
-  useEffect(() => {
-    const standalone =
-      window.matchMedia('(display-mode: standalone)').matches ||
-      (window.navigator as any).standalone === true;
-    setIsStandalone(standalone);
-  }, []);
-
-  // When running installed as a PWA, hide footer completely so it looks like a native app
-  if (isStandalone) {
-    return null;
-  }
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://app.pipbud.xyz';
 
   return (
-    <footer className="bg-[#FAFAF9] border-t border-[#E7E5E4] pt-16 pb-28 md:pb-12 text-xs text-[#78716C] pwa:hidden">
+    <footer className="bg-[#000000] text-[#71767B] border-t border-white/10 pt-16 pb-12 relative z-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-12">
-          {/* Brand Info */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 mb-12">
+          {/* Brand Column */}
           <div className="lg:col-span-2 space-y-4">
             <PipbudLogo size="md" />
-            <p className="text-xs text-[#44403C] max-w-sm leading-relaxed">
+            <p className="text-xs text-[#71767B] max-w-sm leading-relaxed">
               PipBud combines an effortless automated journal on Telegram with a 7-tier verified trader messaging forum. Real execution. Real records. Zero fake gurus.
             </p>
-            <div className="flex items-center gap-2 text-[11px] text-[#0F766E] bg-[#F0FDFA] border border-[#CCFBF1] px-3 py-1.5 rounded-lg w-fit">
+            <div className="flex items-center gap-2 text-[11px] text-[#22C55E] glass-ultrathin border border-[#22C55E]/30 px-3 py-1.5 rounded-full w-fit">
               <ShieldCheck className="w-4 h-4 shrink-0" />
               <span>Anti-Shortfall Engine: Fall short, get removed.</span>
             </div>
@@ -38,48 +25,58 @@ export default function Footer() {
 
           {/* Ecosystem Column */}
           <div className="space-y-3">
-            <h4 className="font-bold text-xs text-[#1C1917] uppercase tracking-wider">
+            <h4 className="font-bold text-xs text-white uppercase tracking-wider">
               Ecosystem
             </h4>
-            <ul className="space-y-2 text-xs">
+            <ul className="space-y-2.5 text-xs">
               <li>
-                <Link href="/feed" className="hover:text-[#C2410C] transition-colors flex items-center gap-1.5 font-semibold text-[#1C1917]">
-                  <MessageSquare className="w-3.5 h-3.5 text-[#C2410C]" />
+                <a
+                  href={appUrl}
+                  className="hover:text-white transition-colors flex items-center gap-1.5 font-semibold text-[#DDD6FE]"
+                >
+                  <MessageSquare className="w-3.5 h-3.5 text-[#8B5CF6]" />
                   <span>Web App Terminal</span>
-                </Link>
+                  <ExternalLink className="w-3 h-3 opacity-60" />
+                </a>
               </li>
               <li>
                 <a
                   href="https://t.me/PipBudBot"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:text-[#C2410C] transition-colors flex items-center gap-1.5"
+                  className="hover:text-white transition-colors flex items-center gap-1.5"
                 >
-                  <Send className="w-3.5 h-3.5 text-[#C2410C]" />
+                  <Send className="w-3.5 h-3.5 text-[#8B5CF6]" />
                   <span>Telegram Bot Journal</span>
                 </a>
               </li>
               <li>
-                <Link href="/journal" className="hover:text-[#C2410C] transition-colors flex items-center gap-1.5">
-                  <BarChart3 className="w-3.5 h-3.5 text-[#C2410C]" />
+                <a
+                  href={`${appUrl}/journal`}
+                  className="hover:text-white transition-colors flex items-center gap-1.5"
+                >
+                  <BarChart3 className="w-3.5 h-3.5 text-[#22C55E]" />
                   <span>Web Journal Dashboard</span>
-                </Link>
-              </li>
-              <li>
-                <Link href="/forum" className="hover:text-[#C2410C] transition-colors flex items-center gap-1.5">
-                  <MessageSquare className="w-3.5 h-3.5 text-[#C2410C]" />
-                  <span>7-Tier Trader Forum</span>
-                </Link>
+                </a>
               </li>
               <li>
                 <a
-                  href="/PipBud_Design_System.pdf"
+                  href={`${appUrl}/forum`}
+                  className="hover:text-white transition-colors flex items-center gap-1.5"
+                >
+                  <MessageSquare className="w-3.5 h-3.5 text-[#A78BFA]" />
+                  <span>7-Tier Trader Forum</span>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/PipBud_Liquid_Glass_Design_System_v3.pdf"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:text-[#C2410C] transition-colors flex items-center gap-1.5 text-[#0F766E] font-medium"
+                  className="hover:text-white transition-colors flex items-center gap-1.5 text-[#A78BFA] font-medium"
                 >
-                  <ShieldCheck className="w-3.5 h-3.5 text-[#0F766E]" />
-                  <span>Design System Specification (PDF)</span>
+                  <FileText className="w-3.5 h-3.5 text-[#A78BFA]" />
+                  <span>Liquid Glass PDF Spec (v3.0)</span>
                 </a>
               </li>
             </ul>
@@ -87,52 +84,52 @@ export default function Footer() {
 
           {/* The 7 Tiers Column */}
           <div className="space-y-3">
-            <h4 className="font-bold text-xs text-[#1C1917] uppercase tracking-wider">
+            <h4 className="font-bold text-xs text-white uppercase tracking-wider">
               The 7 Tiers
             </h4>
-            <ul className="space-y-2 text-xs text-[#44403C]">
-              <li>Level 1: Novice Desk</li>
-              <li>Level 2: Apprentice Hub</li>
-              <li>Level 3: Consistent Breakeven+</li>
-              <li>Level 4: Funded &amp; Prop Floor</li>
-              <li>Level 5: Elite Alpha Desk</li>
-              <li>Level 6: Master Mentor Sanctum</li>
-              <li>Level 7: Market Titan Syndicate</li>
+            <ul className="space-y-2 text-xs text-[#71767B]">
+              <li className="text-[#A1A1AA]">Level 1: Market Explorer</li>
+              <li className="text-[#60A5FA]">Level 2: Discipline Apprentice</li>
+              <li className="text-[#22C55E]">Level 3: Consistent Operator</li>
+              <li className="text-[#14B8A6]">Level 4: Risk Sentinel</li>
+              <li className="text-[#F59E0B]">Level 5: Capital Allocator</li>
+              <li className="text-[#E879F9]">Level 6: Market Maestro</li>
+              <li className="text-[#DDD6FE] font-semibold">Level 7: Institutional Sovereign</li>
             </ul>
           </div>
 
-          {/* Governance & Legal */}
+          {/* Governance & Trust */}
           <div className="space-y-3">
-            <h4 className="font-bold text-xs text-[#1C1917] uppercase tracking-wider">
+            <h4 className="font-bold text-xs text-white uppercase tracking-wider">
               Governance &amp; Trust
             </h4>
             <ul className="space-y-2 text-xs">
               <li>
-                <Link href="/privacy" className="hover:text-[#C2410C] transition-colors">
+                <Link href="/privacy" className="hover:text-white transition-colors">
                   Privacy Policy
                 </Link>
               </li>
               <li>
-                <Link href="/terms" className="hover:text-[#C2410C] transition-colors">
+                <Link href="/terms" className="hover:text-white transition-colors">
                   Terms of Service
                 </Link>
               </li>
               <li>
-                <span className="text-[#A8A29E]">NDPR Data Compliance</span>
+                <span className="text-[#71767B]">Cryptographic Trade Hashing</span>
               </li>
               <li>
-                <span className="text-[#A8A29E]">Zero Paid Rankings Rule</span>
+                <span className="text-[#71767B]">Zero Paid Rankings Rule</span>
               </li>
             </ul>
           </div>
         </div>
 
         {/* Bottom Rule Statement */}
-        <div className="pt-8 border-t border-[#E7E5E4] flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-[#A8A29E]">
+        <div className="pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-[#71767B]">
           <p>
-            RULE: Businesses and traders can never pay for ratings, badges, or tier access. Every position is mathematically earned.
+            GOVERNANCE: Businesses and traders can never pay for ratings, badges, or tier access. Every position is mathematically earned.
           </p>
-          <p>&copy; {new Date().getFullYear()} PipBud. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} PipBud Capital Technologies. All rights reserved.</p>
         </div>
       </div>
     </footer>

@@ -13,7 +13,7 @@ import Footer from '@/components/Footer';
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-[#FAFAF9] text-[#1C1917] selection:bg-[#FED7AA] selection:text-[#9A3412]">
+    <main className="min-h-screen bg-[#000000] text-[#E7E9EA] selection:bg-[#8B5CF6]/40 selection:text-white relative">
       <Navbar />
       <HeroSection />
       <TiersSection />

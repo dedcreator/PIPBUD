@@ -9,170 +9,106 @@ import {
   Sparkles,
   PieChart,
   Calendar,
-  Layers
+  Layers,
+  Activity
 } from 'lucide-react';
 
 export default function WebJournalPreviewSection() {
-  const equityPoints = [
-    { trade: 0, val: 10000 },
-    { trade: 10, val: 10450 },
-    { trade: 20, val: 10200 },
-    { trade: 30, val: 11100 },
-    { trade: 40, val: 11400 },
-    { trade: 50, val: 12250 },
-    { trade: 65, val: 12050 },
-    { trade: 86, val: 12820 },
-  ];
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://app.pipbud.xyz';
 
   return (
-    <section className="py-20 md:py-28 bg-white border-t border-[#E7E5E4]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="journal" className="py-20 md:py-28 bg-[#000000] text-[#E7E9EA] border-t border-white/10 relative overflow-hidden">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-1">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           {/* Left Details */}
           <div className="lg:col-span-5 space-y-6">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[#FFF7ED] text-[#C2410C]">
+            <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-semibold glass-ultrathin border border-white/14 text-[#A78BFA]">
               <BarChart3 className="w-3.5 h-3.5" />
-              <span>Full Web Journal Companion</span>
+              <span>Dual-Telemetry Journal Studio</span>
             </div>
 
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-[#1C1917] leading-tight">
+            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-white leading-tight">
               Log on Telegram.{' '}
-              <span className="text-[#C2410C]">Dissect on the Web.</span>
+              <span className="bg-gradient-to-r from-[#DDD6FE] to-[#8B5CF6] bg-clip-text text-transparent">
+                Dissect on the Web.
+              </span>
             </h2>
 
-            <p className="text-sm sm:text-base text-[#44403C] leading-relaxed">
-              While Telegram captures the heat of the moment, the PipBud Web Journal gives you deep structural analytics. Track your equity curve, setup win rates, and session biases on a clean, distraction-free desktop dashboard.
+            <p className="text-sm sm:text-base text-[#71767B] leading-relaxed">
+              While Telegram captures the heat of the moment, the PipBud Web Journal gives you deep structural analytics. Track your equity curve, setup win rates, and emotional discipline on a distraction-free Liquid Glass desktop terminal.
             </p>
 
             <div className="space-y-3 pt-2">
-              <div className="flex items-center gap-2.5 text-xs text-[#1C1917]">
-                <ShieldCheck className="w-4 h-4 text-[#0F766E]" />
+              <div className="flex items-center gap-2.5 text-xs text-white">
+                <ShieldCheck className="w-4 h-4 text-[#22C55E]" />
                 <span>Audited Equity Curve syncing in real-time with Telegram</span>
               </div>
-              <div className="flex items-center gap-2.5 text-xs text-[#1C1917]">
-                <ShieldCheck className="w-4 h-4 text-[#0F766E]" />
-                <span>SMC/ICT Setup Tagging: OB, FVG, Liquidity Sweeps</span>
+              <div className="flex items-center gap-2.5 text-xs text-white">
+                <ShieldCheck className="w-4 h-4 text-[#22C55E]" />
+                <span>2-Step Workflow: Hard execution telemetry + Ruled paper reflection</span>
               </div>
-              <div className="flex items-center gap-2.5 text-xs text-[#1C1917]">
-                <ShieldCheck className="w-4 h-4 text-[#0F766E]" />
-                <span>Session Heatmaps: London vs NY Killzone edge</span>
+              <div className="flex items-center gap-2.5 text-xs text-white">
+                <ShieldCheck className="w-4 h-4 text-[#22C55E]" />
+                <span>Session Heatmaps: London vs NY Killzone expectancy analysis</span>
               </div>
             </div>
 
-            <div className="pt-4">
-              <Link
-                href="/journal"
-                className="h-12 px-6 bg-[#C2410C] hover:bg-[#EA580C] text-white rounded-xl text-sm font-medium inline-flex items-center gap-2 transition-all shadow-sm"
+            <div className="pt-2">
+              <a
+                href={`${appUrl}/journal`}
+                className="btn-primary px-6 py-2.5 text-xs sm:text-sm font-semibold rounded-full inline-flex items-center gap-2"
               >
-                <span>Open Full Web Journal</span>
+                <span>Open Journal Dashboard</span>
                 <ArrowRight className="w-4 h-4" />
-              </Link>
+              </a>
             </div>
           </div>
 
           {/* Right Preview Card */}
-          <div className="lg:col-span-7 bg-[#FAFAF9] p-6 sm:p-8 rounded-2xl border border-[#E7E5E4] shadow-[0_4px_12px_rgba(28,25,23,0.06)] space-y-6">
-            {/* Header KPI Row */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <div className="p-3 bg-white rounded-xl border border-[#E7E5E4]">
-                <span className="text-[10px] text-[#78716C] block">Net Profit</span>
-                <span className="text-lg font-bold text-[#15803D] tabular-nums">+$2,820.00</span>
-                <span className="text-[10px] text-[#15803D] block">+28.2%</span>
+          <div className="lg:col-span-7 glass-thick rounded-3xl border border-white/18 p-6 sm:p-7 shadow-[0_24px_80px_rgba(0,0,0,0.85)] space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-white/10">
+              <div>
+                <span className="text-xs font-bold text-white uppercase tracking-wider block">
+                  Desk Equity Curve • Verified Account
+                </span>
+                <span className="text-[11px] text-[#A78BFA] font-mono">IC Markets Raw Spread Live</span>
               </div>
-              <div className="p-3 bg-white rounded-xl border border-[#E7E5E4]">
-                <span className="text-[10px] text-[#78716C] block">Win Rate</span>
-                <span className="text-lg font-bold text-[#1C1917] tabular-nums">54.5%</span>
-                <span className="text-[10px] text-[#78716C] block">42W - 35L - 9BE</span>
+              <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-[#22C55E]/15 text-[#22C55E] border border-[#22C55E]/30">
+                +28.2% Net P&amp;L
+              </span>
+            </div>
+
+            {/* Telemetry Stat Row */}
+            <div className="grid grid-cols-4 gap-2 text-center text-xs font-mono">
+              <div className="p-2.5 rounded-xl bg-[#101012] border border-white/8">
+                <span className="text-[10px] text-[#71767B] block font-sans">Win Rate</span>
+                <strong className="text-white">61.4%</strong>
               </div>
-              <div className="p-3 bg-white rounded-xl border border-[#E7E5E4]">
-                <span className="text-[10px] text-[#78716C] block">Profit Factor</span>
-                <span className="text-lg font-bold text-[#1C1917] tabular-nums">1.72</span>
-                <span className="text-[10px] text-[#0F766E] block">Level 4 Verified</span>
+              <div className="p-2.5 rounded-xl bg-[#101012] border border-white/8">
+                <span className="text-[10px] text-[#71767B] block font-sans">Profit Factor</span>
+                <strong className="text-[#22C55E]">1.94</strong>
               </div>
-              <div className="p-3 bg-white rounded-xl border border-[#E7E5E4]">
-                <span className="text-[10px] text-[#78716C] block">Max Drawdown</span>
-                <span className="text-lg font-bold text-[#C2410C] tabular-nums">3.2%</span>
-                <span className="text-[10px] text-[#0F766E] block">Ceiling: 5.0%</span>
+              <div className="p-2.5 rounded-xl bg-[#101012] border border-white/8">
+                <span className="text-[10px] text-[#71767B] block font-sans">Sharpe</span>
+                <strong className="text-[#A78BFA]">1.62</strong>
+              </div>
+              <div className="p-2.5 rounded-xl bg-[#101012] border border-white/8">
+                <span className="text-[10px] text-[#71767B] block font-sans">Max DD</span>
+                <strong className="text-[#F43F5E]">-2.8%</strong>
               </div>
             </div>
 
-            {/* Interactive SVG Equity Curve */}
-            <div className="bg-white p-5 rounded-xl border border-[#E7E5E4]">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h4 className="text-xs font-bold text-[#1C1917]">Audited Account Equity Curve</h4>
-                  <p className="text-[10px] text-[#78716C]">Starting $10,000.00 • 86 verified trades</p>
+            {/* Midnight Ruled Reflection Notepad Preview */}
+            <div className="rounded-2xl bg-[#0A0A0B] border border-white/12 p-4 relative overflow-hidden space-y-2">
+              <div className="absolute top-0 bottom-0 left-6 w-[1.5px] bg-[#8B5CF6]/50 pointer-events-none" />
+              <div className="pl-5 space-y-1.5 font-mono text-xs">
+                <div className="flex items-center justify-between pb-1 border-b border-white/8 font-sans">
+                  <span className="text-[11px] font-bold text-[#A78BFA] uppercase">Post-Trade Autopsy</span>
+                  <span className="text-[10px] text-[#22C55E]">Calm &amp; Disciplined</span>
                 </div>
-                <span className="text-xs font-bold text-[#15803D] tabular-nums">Current: $12,820.00</span>
-              </div>
-
-              {/* Simplified SVG Chart */}
-              <div className="h-40 w-full">
-                <svg viewBox="0 0 500 120" className="w-full h-full overflow-visible">
-                  <defs>
-                    <linearGradient id="equityGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#C2410C" stopOpacity="0.25" />
-                      <stop offset="100%" stopColor="#C2410C" stopOpacity="0.0" />
-                    </linearGradient>
-                  </defs>
-                  {/* Grid Lines */}
-                  <line x1="0" y1="30" x2="500" y2="30" stroke="#E7E5E4" strokeDasharray="3 3" />
-                  <line x1="0" y1="70" x2="500" y2="70" stroke="#E7E5E4" strokeDasharray="3 3" />
-                  <line x1="0" y1="110" x2="500" y2="110" stroke="#E7E5E4" strokeDasharray="3 3" />
-
-                  {/* Gradient Fill */}
-                  <polygon
-                    points="0,110 0,105 70,88 140,94 210,65 280,55 350,30 420,38 500,10 500,110"
-                    fill="url(#equityGrad)"
-                  />
-                  {/* Equity Line */}
-                  <polyline
-                    fill="none"
-                    stroke="#C2410C"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    points="0,105 70,88 140,94 210,65 280,55 350,30 420,38 500,10"
-                  />
-                  {/* Latest point */}
-                  <circle cx="500" cy="10" r="4.5" fill="#C2410C" stroke="#FFFFFF" strokeWidth="2" />
-                </svg>
-              </div>
-            </div>
-
-            {/* Setup Breakdown */}
-            <div className="bg-white p-4 rounded-xl border border-[#E7E5E4] space-y-2.5">
-              <span className="text-[11px] font-bold text-[#1C1917] block">Setup Win Rate Distribution</span>
-              <div className="space-y-1.5 text-xs">
-                <div>
-                  <div className="flex justify-between text-[11px] mb-0.5">
-                    <span className="text-[#44403C]">Order Block (OB) Retest</span>
-                    <span className="font-bold text-[#1C1917]">64.2% WR (28 trades)</span>
-                  </div>
-                  <div className="w-full bg-[#FAFAF9] h-2 rounded-full overflow-hidden border border-[#E7E5E4]">
-                    <div className="bg-[#C2410C] h-full rounded-full" style={{ width: '64.2%' }} />
-                  </div>
-                </div>
-
-                <div>
-                  <div className="flex justify-between text-[11px] mb-0.5">
-                    <span className="text-[#44403C]">Fair Value Gap (FVG) Tap</span>
-                    <span className="font-bold text-[#1C1917]">58.0% WR (31 trades)</span>
-                  </div>
-                  <div className="w-full bg-[#FAFAF9] h-2 rounded-full overflow-hidden border border-[#E7E5E4]">
-                    <div className="bg-[#EA580C] h-full rounded-full" style={{ width: '58%' }} />
-                  </div>
-                </div>
-
-                <div>
-                  <div className="flex justify-between text-[11px] mb-0.5">
-                    <span className="text-[#44403C]">Liquidity Sweeps &amp; Turtle Soup</span>
-                    <span className="font-bold text-[#1C1917]">52.6% WR (19 trades)</span>
-                  </div>
-                  <div className="w-full bg-[#FAFAF9] h-2 rounded-full overflow-hidden border border-[#E7E5E4]">
-                    <div className="bg-[#FB923C] h-full rounded-full" style={{ width: '52.6%' }} />
-                  </div>
-                </div>
+                <p className="text-[#E7E9EA] text-[11px] leading-relaxed">
+                  EUR/USD swept London lows during NY open. Waited for 15m displacement closure before pressing market order. SL placed below invalidation level. 1:3.2R target achieved.
+                </p>
               </div>
             </div>
           </div>
