@@ -32,12 +32,24 @@ export default function Navbar() {
           </div>
 
           {/* Desktop Nav Links */}
-          <div className="hidden md:flex items-center gap-7">
+          <div className="hidden lg:flex items-center gap-6">
             <Link
               href="/#tiers"
               className="text-xs sm:text-sm font-medium text-[#71767B] hover:text-white transition-colors"
             >
               The 7 Tiers
+            </Link>
+            <Link
+              href="/#features"
+              className="text-xs sm:text-sm font-medium text-[#71767B] hover:text-white transition-colors"
+            >
+              Features
+            </Link>
+            <Link
+              href="/#ai-coach"
+              className="text-xs sm:text-sm font-medium text-[#71767B] hover:text-white transition-colors"
+            >
+              AI Coach
             </Link>
             <Link
               href="/#how-it-works"
@@ -46,22 +58,10 @@ export default function Navbar() {
               How It Works
             </Link>
             <Link
-              href="/#anti-shortfall"
+              href="/#pricing"
               className="text-xs sm:text-sm font-medium text-[#71767B] hover:text-white transition-colors"
             >
-              Anti-Shortfall
-            </Link>
-            <Link
-              href="/#bot"
-              className="text-xs sm:text-sm font-medium text-[#71767B] hover:text-white transition-colors"
-            >
-              Telegram Bot
-            </Link>
-            <Link
-              href="/#journal"
-              className="text-xs sm:text-sm font-medium text-[#71767B] hover:text-white transition-colors"
-            >
-              Web Journal
+              Pricing
             </Link>
             <Link
               href="/#faq"
@@ -125,11 +125,32 @@ export default function Navbar() {
               The 7 Tiers
             </Link>
             <Link
+              href="/#features"
+              onClick={() => setMobileOpen(false)}
+              className="px-3 py-2 rounded-xl text-sm font-medium text-[#E7E9EA] hover:glass-violet hover:text-white transition-all"
+            >
+              Features
+            </Link>
+            <Link
+              href="/#ai-coach"
+              onClick={() => setMobileOpen(false)}
+              className="px-3 py-2 rounded-xl text-sm font-medium text-[#E7E9EA] hover:glass-violet hover:text-white transition-all"
+            >
+              AI Coach
+            </Link>
+            <Link
               href="/#how-it-works"
               onClick={() => setMobileOpen(false)}
               className="px-3 py-2 rounded-xl text-sm font-medium text-[#E7E9EA] hover:glass-violet hover:text-white transition-all"
             >
               How It Works
+            </Link>
+            <Link
+              href="/#pricing"
+              onClick={() => setMobileOpen(false)}
+              className="px-3 py-2 rounded-xl text-sm font-medium text-[#E7E9EA] hover:glass-violet hover:text-white transition-all"
+            >
+              Pricing
             </Link>
             <Link
               href="/#anti-shortfall"

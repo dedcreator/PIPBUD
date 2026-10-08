@@ -1,178 +1,133 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { XCircle, FileText, Brain, TrendingDown, AlertTriangle, Zap } from 'lucide-react';
+import { AlertTriangle, FileSpreadsheet, Brain, Flame, EyeOff, ShieldAlert, ArrowRight } from 'lucide-react';
 
 const problems = [
   {
-    icon: FileText,
-    title: 'Messy Trade Journals',
-    description: 'Spreadsheets and notebooks are tedious. Most traders give up journaling within weeks.',
-    gradient: 'from-amber-50 to-amber-100/30',
-    iconBg: 'bg-amber-100',
-    iconColor: 'text-amber-600',
-    borderColor: 'border-amber-200/30',
-    hoverBorder: 'hover:border-amber-300/50',
+    icon: FileSpreadsheet,
+    badge: 'Friction',
+    title: 'Tedious Spreadsheets & Notebooks',
+    description: 'Manual Excel sheets and notebooks are painful to maintain mid-session. Over 80% of traders quit journaling within weeks, losing their historical edge data.',
+    tagColor: 'text-[#F59E0B]',
+    borderGlow: 'hover:border-[#F59E0B]/30',
+  },
+  {
+    icon: Flame,
+    badge: 'Psychology',
+    title: 'Silent Tilt & Revenge Sizing',
+    description: 'FOMO, revenge entries, and moving stop-losses happen in seconds. Trading in isolation means no one intervenes before emotion wipes out weeks of discipline.',
+    tagColor: 'text-[#F43F5E]',
+    borderGlow: 'hover:border-[#F43F5E]/30',
+  },
+  {
+    icon: EyeOff,
+    badge: 'Deception',
+    title: 'Fake Gurus & Fabricated PnLs',
+    description: 'Social feeds and trading Discords are saturated with inspected element inspect-element profits and demo flexing. Real audited track records are virtually nonexistent.',
+    tagColor: 'text-[#A78BFA]',
+    borderGlow: 'hover:border-[#A78BFA]/30',
   },
   {
     icon: Brain,
-    title: 'No Objective Feedback',
-    description: 'Trading alone means no one catches your mistakes. You repeat the same errors.',
-    gradient: 'from-rose-50 to-rose-100/30',
-    iconBg: 'bg-rose-100',
-    iconColor: 'text-rose-600',
-    borderColor: 'border-rose-200/30',
-    hoverBorder: 'hover:border-rose-300/50',
-  },
-  {
-    icon: TrendingDown,
-    title: 'Emotional Trading',
-    description: 'Revenge trading, FOMO, and tilt destroy accounts. You need someone to call it out.',
-    gradient: 'from-orange-50 to-orange-100/30',
-    iconBg: 'bg-orange-100',
-    iconColor: 'text-orange-600',
-    borderColor: 'border-orange-200/30',
-    hoverBorder: 'hover:border-orange-300/50',
-  },
-  {
-    icon: XCircle,
-    title: 'No Performance Insights',
-    description: "You don't know your real win rate, best setups, or when you trade best.",
-    gradient: 'from-purple-50 to-purple-100/30',
-    iconBg: 'bg-purple-100',
-    iconColor: 'text-purple-600',
-    borderColor: 'border-purple-200/30',
-    hoverBorder: 'hover:border-purple-300/50',
+    badge: 'Execution',
+    title: 'Invisible Risk & Strategy Leaks',
+    description: 'Most traders cannot state their true Profit Factor, expectancy per setup, or max historical drawdown. Without audited analytics, you repeat the same structural mistakes.',
+    tagColor: 'text-[#38BDF8]',
+    borderGlow: 'hover:border-[#38BDF8]/30',
   },
 ];
 
 export default function ProblemSection() {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://app.pipbud.xyz';
+
   return (
-    <section className="relative py-28 px-4 overflow-hidden bg-[#fcf9f6]">
-      {/* Paper texture overlay */}
-      <div className="absolute inset-0 opacity-[0.015]">
-        <div className="absolute inset-0" style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E")`,
-          backgroundSize: '200px 200px',
-        }} />
-      </div>
+    <section id="problem" className="relative py-24 sm:py-32 px-4 sm:px-6 lg:px-8 bg-[#000000] text-[#E7E9EA] overflow-hidden">
+      {/* Background Radial Glow */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] bg-[radial-gradient(circle,rgba(109,40,217,0.12)_0%,rgba(0,0,0,0)_70%)] pointer-events-none" />
 
-      {/* Decorative gradient blobs */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-[600px] h-[600px] bg-gradient-to-br from-amber-100/10 via-rose-100/5 to-transparent rounded-full blur-[150px]" />
-        <div className="absolute -bottom-40 -left-40 w-[600px] h-[600px] bg-gradient-to-tr from-purple-100/10 via-rose-100/5 to-transparent rounded-full blur-[150px]" />
-      </div>
-
-      <div className="relative max-w-6xl mx-auto">
-        {/* Header with refined typography */}
-        <div className="text-center mb-16">
+      <div className="relative z-10 max-w-6xl mx-auto">
+        {/* Header */}
+        <div className="text-center max-w-3xl mx-auto mb-16 sm:mb-20">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm border border-purple-100/50 rounded-full px-5 py-2 mb-6 shadow-[0_2px_20px_rgba(139,92,246,0.06)]"
+            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold glass-ultrathin border border-white/14 text-[#F59E0B] mb-5 shadow-sm"
           >
-            <AlertTriangle className="w-4 h-4 text-amber-500" />
-            <span className="text-purple-700 text-sm font-medium tracking-wide">The Problem</span>
+            <AlertTriangle className="w-4 h-4 text-[#F59E0B]" />
+            <span>The Retail Trading Reality</span>
           </motion.div>
-          
+
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
-            className="text-4xl sm:text-5xl md:text-6xl font-bold mb-4 leading-[1.05] tracking-tight"
+            className="text-3xl sm:text-5xl font-bold tracking-tight text-white leading-[1.15] mb-5"
           >
-            <span className="text-[#1a1410] font-serif">
-              Trading Without Data is
-            </span>
-            <br />
-            <span className="relative inline-block mt-2">
-              <span className="relative z-10 bg-gradient-to-r from-rose-500 via-amber-500 to-rose-600 bg-clip-text text-transparent font-serif italic">
-                Trading Blind
-              </span>
-              {/* Decorative underline */}
-              <svg className="absolute -bottom-3 left-0 w-full h-3" viewBox="0 0 200 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M2 10C40 2 80 2 120 6C160 10 180 4 198 8" stroke="url(#problemGradient)" strokeWidth="3" strokeLinecap="round"/>
-                <defs>
-                  <linearGradient id="problemGradient" x1="0" y1="0" x2="1" y2="0">
-                    <stop offset="0%" stopColor="#F59E0B"/>
-                    <stop offset="50%" stopColor="#EF4444"/>
-                    <stop offset="100%" stopColor="#DC2626"/>
-                  </linearGradient>
-                </defs>
-              </svg>
+            Trading Without Audited Data is{' '}
+            <span className="bg-gradient-to-r from-[#F43F5E] via-[#F59E0B] to-[#A78BFA] bg-clip-text text-transparent">
+              Trading Blind.
             </span>
           </motion.h2>
-          
+
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.2 }}
-            className="text-lg text-gray-600 max-w-2xl mx-auto font-light"
+            className="text-sm sm:text-base md:text-lg text-[#71767B] font-normal leading-relaxed"
           >
-            These common pitfalls are holding you back from consistent profitability.
-            <br className="hidden sm:block" />
-            <span className="text-gray-500">It's time to trade with clarity.</span>
+            95% of retail traders never fail because their technical analysis was wrong. They fail because of friction, emotional tilt, and zero objective risk accountability.
           </motion.p>
         </div>
 
-        {/* Problem cards - refined paper design */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-          {problems.map((problem, i) => (
+        {/* 4 Cards Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 max-w-5xl mx-auto">
+          {problems.map((prob, i) => (
             <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 30 }}
+              key={prob.title}
+              initial={{ opacity: 0, y: 24 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: i * 0.1, duration: 0.5 }}
-              className={`group relative bg-white/80 backdrop-blur-sm rounded-2xl p-6 border ${problem.borderColor} ${problem.hoverBorder} transition-all duration-500 hover:-translate-y-2 shadow-[0_2px_15px_rgba(0,0,0,0.04)] hover:shadow-[0_12px_40px_rgba(0,0,0,0.06)]`}
+              transition={{ delay: i * 0.1, duration: 0.4 }}
+              className={`glass-thick rounded-2xl p-6 sm:p-8 border border-white/10 ${prob.borderGlow} transition-all duration-300 relative group hover:-translate-y-1`}
             >
-              {/* Decorative top bar */}
-              <div className={`absolute top-0 left-1/2 -translate-x-1/2 w-12 h-0.5 bg-gradient-to-r from-transparent via-${problem.iconColor.replace('text-', '')} to-transparent group-hover:w-20 transition-all duration-500`} />
-              
-              <div className="flex gap-4">
-                <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${problem.iconBg} flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300`}>
-                  <problem.icon className={`w-5 h-5 ${problem.iconColor}`} strokeWidth={1.5} />
+              <div className="flex items-start justify-between mb-5">
+                <div className="w-12 h-12 rounded-xl glass-regular border border-white/14 flex items-center justify-center text-white group-hover:scale-105 transition-transform">
+                  <prob.icon className={`w-6 h-6 ${prob.tagColor}`} />
                 </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-[#1a1410] font-semibold text-lg mb-1.5 tracking-tight">
-                    {problem.title}
-                  </h3>
-                  <p className="text-gray-600 text-sm leading-relaxed font-light">
-                    {problem.description}
-                  </p>
-                </div>
+                <span className={`text-[11px] font-semibold tracking-wider uppercase px-2.5 py-1 rounded-full glass-ultrathin border border-white/10 ${prob.tagColor}`}>
+                  {prob.badge}
+                </span>
               </div>
 
-              {/* Number indicator */}
-              <div className="absolute -top-3 -right-3 w-8 h-8 rounded-full bg-white border border-gray-100/50 shadow-[0_2px_10px_rgba(0,0,0,0.04)] flex items-center justify-center text-xs font-medium text-gray-400">
-                {i + 1}
-              </div>
+              <h3 className="text-lg sm:text-xl font-bold text-white mb-2 tracking-tight group-hover:text-[#DDD6FE] transition-colors">
+                {prob.title}
+              </h3>
+
+              <p className="text-sm text-[#71767B] leading-relaxed font-normal">
+                {prob.description}
+              </p>
             </motion.div>
           ))}
         </div>
 
-        {/* Bottom indicator */}
+        {/* Transition Anchor Pill */}
         <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ delay: 0.6 }}
-          className="mt-12 text-center"
+          transition={{ delay: 0.4 }}
+          className="mt-14 text-center"
         >
-          <div className="inline-flex items-center gap-3 px-6 py-3 bg-white/60 backdrop-blur-sm rounded-full border border-purple-100/30">
-            <Zap className="w-4 h-4 text-purple-500" />
-            <span className="text-sm text-gray-600 font-light">
-              Ready to stop trading blind? <span className="text-purple-600 font-medium">PipBud is your solution.</span>
-            </span>
+          <div className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full glass-violet border border-[#8B5CF6]/30 text-xs sm:text-sm text-[#DDD6FE]">
+            <ShieldAlert className="w-4 h-4 text-[#A78BFA]" />
+            <span>PipBud replaces chaos with instant logging and a verified meritocracy.</span>
           </div>
         </motion.div>
       </div>
-
-      {/* Bottom gradient fade */}
-      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#fcf9f6] via-[#fcf9f6]/80 to-transparent pointer-events-none" />
     </section>
   );
 }
