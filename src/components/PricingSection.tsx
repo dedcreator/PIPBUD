@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { CheckCircle2, Sparkles, Zap, Shield, ArrowRight, Send, Lock } from 'lucide-react';
+import { CheckCircle2, ShieldCheck, ArrowRight, Send } from 'lucide-react';
 
 const plans = [
   {
@@ -10,7 +10,7 @@ const plans = [
     frequency: 'forever free',
     description: 'Perfect for logging trades instantly on Telegram and building your initial audited track record.',
     popular: false,
-    cardClass: 'glass-thick border border-white/10 hover:border-white/20',
+    cardClass: 'bg-[#FAFAF9] border border-[#E7E5E4]',
     features: [
       'Unlimited Telegram trade logging via @PipBudBot',
       'Text, voice note & screenshot parsing',
@@ -26,17 +26,17 @@ const plans = [
     name: 'Pro Trader',
     price: '$29',
     frequency: 'per month',
-    description: 'For active traders demanding real-time AI coaching, behavioral tilt intervention, and full analytics.',
+    description: 'For active traders demanding real-time risk validation, behavioral discipline guardrails, and full analytics.',
     popular: true,
-    cardClass: 'glass-violet border border-[#8B5CF6]/40 shadow-[0_8px_32px_rgba(139,92,246,0.25)] relative',
+    cardClass: 'bg-white border-2 border-[#1C1917] shadow-sm relative',
     features: [
       'Everything in Free Explorer',
-      'Unlimited 24/7 AI Coach GO / NO-GO trade audits',
+      'Pre-trade risk enforcement & GO / NO-GO checklist validation',
       'Real-time behavioral tilt & revenge trade interceptor',
       'Institutional equity curves, MAE/MFE & session heatmaps',
       'MT4, MT5 & Prop Firm read-only investor verification sync',
       'Eligibility to unlock Level 2 - Level 7 gated forum channels*',
-      'Priority multi-model NLP & chart vision inference',
+      'High-speed trade parsing & multi-chart attachments',
     ],
     ctaText: 'Launch Pro Workspace',
     ctaLink: 'https://app.pipbud.xyz',
@@ -48,10 +48,7 @@ export default function PricingSection() {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://app.pipbud.xyz';
 
   return (
-    <section id="pricing" className="relative py-24 sm:py-32 px-4 sm:px-6 lg:px-8 bg-[#000000] text-[#E7E9EA] overflow-hidden">
-      {/* Background glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[550px] bg-[radial-gradient(circle,rgba(109,40,217,0.14)_0%,rgba(0,0,0,0)_70%)] pointer-events-none" />
-
+    <section id="pricing" className="relative py-24 sm:py-32 px-4 sm:px-6 lg:px-8 bg-white text-[#1C1917] border-t border-[#E7E5E4]">
       <div className="relative z-10 max-w-5xl mx-auto">
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto mb-16 sm:mb-20">
@@ -59,9 +56,9 @@ export default function PricingSection() {
             initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold glass-ultrathin border border-white/14 text-[#DDD6FE] mb-5 shadow-sm"
+            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-[#FAFAF9] border border-[#E7E5E4] text-[#78716C] mb-5 shadow-sm"
           >
-            <Sparkles className="w-4 h-4 text-[#A78BFA]" />
+            <ShieldCheck className="w-4 h-4 text-[#1C1917]" />
             <span>Transparent Pricing</span>
           </motion.div>
 
@@ -70,10 +67,10 @@ export default function PricingSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
-            className="text-3xl sm:text-5xl font-bold tracking-tight text-white leading-[1.15] mb-5"
+            className="text-3xl sm:text-5xl font-bold tracking-tight text-[#1C1917] leading-[1.15] mb-5"
           >
             Invest in Discipline.{' '}
-            <span className="bg-gradient-to-r from-[#DDD6FE] via-[#A78BFA] to-[#8B5CF6] bg-clip-text text-transparent">
+            <span className="text-[#C2410C]">
               Earn Your Rank.
             </span>
           </motion.h2>
@@ -83,9 +80,9 @@ export default function PricingSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.2 }}
-            className="text-sm sm:text-base md:text-lg text-[#71767B] font-normal leading-relaxed"
+            className="text-sm sm:text-base md:text-lg text-[#78716C] font-normal leading-relaxed"
           >
-            Zero pay-to-win. Subscriptions unlock tooling and AI compute; higher forum ranks can <span className="text-white font-semibold">only</span> be unlocked by verified broker execution.
+            Zero pay-to-win. Subscriptions unlock tooling and journal analytics; higher forum ranks can <span className="text-[#1C1917] font-semibold">only</span> be unlocked by verified broker execution.
           </motion.p>
         </div>
 
@@ -98,29 +95,29 @@ export default function PricingSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.1, duration: 0.4 }}
-              className={`rounded-3xl p-7 sm:p-8 flex flex-col justify-between ${plan.cardClass} transition-all duration-300 hover:-translate-y-1`}
+              className={`rounded-2xl p-7 sm:p-8 flex flex-col justify-between ${plan.cardClass} transition-all duration-300 hover:-translate-y-1`}
             >
               <div>
                 {plan.popular && (
-                  <div className="absolute -top-3.5 right-6 px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase bg-[#8B5CF6] text-white shadow-md">
+                  <div className="absolute -top-3.5 right-6 px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase bg-[#1C1917] text-white shadow-sm">
                     Most Popular
                   </div>
                 )}
 
                 <div className="mb-4">
-                  <h3 className="text-xl font-bold text-white mb-1 tracking-tight">
+                  <h3 className="text-xl font-bold text-[#1C1917] mb-1 tracking-tight">
                     {plan.name}
                   </h3>
-                  <p className="text-xs text-[#71767B] leading-relaxed">
+                  <p className="text-xs text-[#78716C] leading-relaxed">
                     {plan.description}
                   </p>
                 </div>
 
-                <div className="flex items-baseline gap-2 mb-6 pb-6 border-b border-white/8">
-                  <span className="text-4xl sm:text-5xl font-extrabold text-white tracking-tight">
+                <div className="flex items-baseline gap-2 mb-6 pb-6 border-b border-[#E7E5E4]">
+                  <span className="text-4xl sm:text-5xl font-extrabold text-[#1C1917] tracking-tight">
                     {plan.price}
                   </span>
-                  <span className="text-xs text-[#71767B]">
+                  <span className="text-xs text-[#78716C]">
                     / {plan.frequency}
                   </span>
                 </div>
@@ -128,8 +125,8 @@ export default function PricingSection() {
                 <ul className="space-y-3 mb-8 text-xs sm:text-sm">
                   {plan.features.map((feat) => (
                     <li key={feat} className="flex items-start gap-2.5">
-                      <CheckCircle2 className="w-4 h-4 text-[#22C55E] flex-shrink-0 mt-0.5" />
-                      <span className="text-[#E7E9EA] font-normal leading-relaxed">{feat}</span>
+                      <CheckCircle2 className="w-4 h-4 text-[#15803D] flex-shrink-0 mt-0.5" />
+                      <span className="text-[#44403C] font-normal leading-relaxed">{feat}</span>
                     </li>
                   ))}
                 </ul>
@@ -140,13 +137,13 @@ export default function PricingSection() {
                   href={plan.isExternal ? plan.ctaLink : appUrl}
                   target={plan.isExternal ? '_blank' : undefined}
                   rel={plan.isExternal ? 'noopener noreferrer' : undefined}
-                  className={`w-full h-12 rounded-full text-xs sm:text-sm font-semibold inline-flex items-center justify-center gap-2 transition-all ${
+                  className={`w-full h-11 rounded-lg text-xs sm:text-sm font-semibold inline-flex items-center justify-center gap-2 transition-all ${
                     plan.popular
-                      ? 'btn-primary shadow-[0_4px_24px_rgba(139,92,246,0.4)]'
-                      : 'btn-secondary'
+                      ? 'bg-[#1C1917] text-white hover:bg-[#292524] shadow-sm'
+                      : 'bg-white border border-[#E7E5E4] text-[#1C1917] hover:bg-[#F5F5F4]'
                   }`}
                 >
-                  {plan.isExternal ? <Send className="w-4 h-4 text-[#A78BFA]" /> : null}
+                  {plan.isExternal ? <Send className="w-4 h-4 text-[#78716C]" /> : null}
                   <span>{plan.ctaText}</span>
                   {!plan.isExternal ? <ArrowRight className="w-4 h-4" /> : null}
                 </a>
@@ -156,8 +153,8 @@ export default function PricingSection() {
         </div>
 
         {/* Note on Meritocracy */}
-        <div className="text-center max-w-xl mx-auto p-4 rounded-2xl glass-ultrathin border border-white/8 text-xs text-[#71767B]">
-          <span className="font-semibold text-[#DDD6FE]">* The Meritocracy Rule:</span> Skill tiers (L2 through L7) require meeting trade volume, win rate, and profit factor minimums. You cannot buy your way into higher tier channels.
+        <div className="text-center max-w-xl mx-auto p-4 rounded-xl bg-[#FAFAF9] border border-[#E7E5E4] text-xs text-[#78716C]">
+          <span className="font-semibold text-[#1C1917]">* The Meritocracy Rule:</span> Skill tiers (L2 through L7) require meeting trade volume, win rate, and profit factor minimums. You cannot buy your way into higher tier channels.
         </div>
       </div>
     </section>

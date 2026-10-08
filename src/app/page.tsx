@@ -5,7 +5,6 @@ import HeroSection from '@/components/HeroSection';
 import ProblemSection from '@/components/ProblemSection';
 import SolutionSection from '@/components/SolutionSection';
 import FeaturesGrid from '@/components/FeaturesGrid';
-import AICoachSection from '@/components/AICoachSection';
 import HowItWorks from '@/components/HowItWorks';
 import TiersSection from '@/components/TiersSection';
 import AntiShortfallSection from '@/components/AntiShortfallSection';
@@ -19,13 +18,12 @@ import Footer from '@/components/Footer';
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-[#000000] text-[#E7E9EA] selection:bg-[#8B5CF6]/40 selection:text-white relative">
+    <main className="min-h-screen bg-[#FAFAF9] text-[#1C1917] selection:bg-[#E7E5E4] selection:text-[#1C1917] relative">
       <Navbar />
       <HeroSection />
       <ProblemSection />
       <SolutionSection />
       <FeaturesGrid />
-      <AICoachSection />
       <HowItWorks />
       <TiersSection />
       <AntiShortfallSection />

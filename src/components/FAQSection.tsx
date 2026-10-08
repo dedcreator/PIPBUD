@@ -26,7 +26,7 @@ export default function FAQSection() {
     },
     {
       q: 'How does the Telegram bot make journaling frictionless?',
-      a: 'You can log trades in three natural ways: (1) upload a TradingView or MT4/5 chart screenshot; (2) speak trade details as a Telegram voice note transcribed via Whisper AI; or (3) type a quick command like "/log Long EU 1.0840 SL 1.0820 TP 1.0890 15m OB". The bot calculates the R:R, tracks confluences, and stores it in your verified ledger.',
+      a: 'You can log trades in three natural ways: (1) upload a TradingView or MT4/5 chart screenshot; (2) speak trade details as a Telegram voice note transcribed automatically into your journal; or (3) type a quick command like "/log Long EU 1.0840 SL 1.0820 TP 1.0890 15m OB". The bot calculates the R:R, tracks confluences, and stores it in your verified ledger.',
     },
     {
       q: 'How do I pass evaluation to reach Level 4: Risk Sentinel?',
@@ -39,17 +39,17 @@ export default function FAQSection() {
   ];
 
   return (
-    <section id="faq" className="py-20 md:py-28 bg-[#000000] text-[#E7E9EA] border-t border-white/10 relative overflow-hidden">
+    <section id="faq" className="py-20 md:py-28 bg-[#FAFAF9] text-[#1C1917] border-t border-[#E7E5E4] relative overflow-hidden">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-1">
         <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-semibold glass-ultrathin border border-white/14 text-[#A78BFA] mb-4">
-            <HelpCircle className="w-4 h-4 text-[#A78BFA]" />
+          <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-semibold bg-white border border-[#E7E5E4] text-[#78716C] mb-4 shadow-sm">
+            <HelpCircle className="w-4 h-4 text-[#1C1917]" />
             <span>Frequently Asked Questions</span>
           </div>
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-white mb-3">
+          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-[#1C1917] mb-3">
             Clear Answers. Pure Legitimacy.
           </h2>
-          <p className="text-sm sm:text-base text-[#71767B]">
+          <p className="text-sm sm:text-base text-[#78716C]">
             Everything you need to know about the 7 tiers, the Telegram bot, and the removal protocol.
           </p>
         </div>
@@ -60,26 +60,26 @@ export default function FAQSection() {
             return (
               <div
                 key={i}
-                className={`rounded-2xl transition-all duration-200 border cursor-pointer ${
+                className={`rounded-xl transition-all duration-200 border cursor-pointer ${
                   isOpen
-                    ? 'glass-violet border-[#8B5CF6]/50 shadow-lg'
-                    : 'glass-regular border-white/10 hover:border-white/20'
+                    ? 'bg-white border-[#1C1917] shadow-sm'
+                    : 'bg-white border-[#E7E5E4] hover:border-[#D6D3D1]'
                 }`}
               >
                 <button
                   type="button"
                   onClick={() => setOpenIndex(isOpen ? null : i)}
-                  className="w-full p-5 text-left flex items-center justify-between gap-4 font-semibold text-sm sm:text-base text-white"
+                  className="w-full p-5 text-left flex items-center justify-between gap-4 font-semibold text-sm sm:text-base text-[#1C1917]"
                 >
                   <span>{faq.q}</span>
                   <ChevronDown
-                    className={`w-4 h-4 text-[#A78BFA] shrink-0 transition-transform duration-200 ${
-                      isOpen ? 'rotate-180' : ''
+                    className={`w-4 h-4 text-[#78716C] shrink-0 transition-transform duration-200 ${
+                      isOpen ? 'rotate-180 text-[#1C1917]' : ''
                     }`}
                   />
                 </button>
                 {isOpen && (
-                  <div className="px-5 pb-5 pt-1 text-xs sm:text-sm text-[#71767B] leading-relaxed border-t border-white/8">
+                  <div className="px-5 pb-5 pt-1 text-xs sm:text-sm text-[#78716C] leading-relaxed border-t border-[#E7E5E4]">
                     {faq.a}
                   </div>
                 )}

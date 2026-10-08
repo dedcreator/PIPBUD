@@ -15,17 +15,6 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Detect app subdomain (e.g. app.pipbuds.com, app.localhost:3000, app.127.0.0.1:3000)
-  const isAppSubdomain = host.startsWith('app.') || host.startsWith('app-');
-
-  if (isAppSubdomain) {
-    // On the app subdomain, root path '/' directly renders the app trading terminal / feed
-    if (pathname === '/') {
-      url.pathname = '/feed';
-      return NextResponse.rewrite(url);
-    }
-  }
-
   return NextResponse.next();
 }
 

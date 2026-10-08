@@ -12,7 +12,7 @@ const inter = Inter({
 });
 
 export const viewport: Viewport = {
-  themeColor: '#000000',
+  themeColor: '#FAFAF9',
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
@@ -53,10 +53,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="dark scroll-smooth">
-      <body className={`${inter.variable} bg-[#000000] text-[#E7E9EA] antialiased selection:bg-[#8B5CF6]/40 selection:text-white min-h-screen`}>
+    <html lang="en" className="scroll-smooth">
+      <body className={`${inter.variable} bg-[#FAFAF9] text-[#1C1917] antialiased selection:bg-[#E7E5E4] selection:text-[#1C1917] min-h-screen`}>
         <AuthProvider>
-          <div className="min-h-screen flex flex-col relative bg-[#000000]">
+          <div className="min-h-screen flex flex-col relative bg-[#FAFAF9]">
             {children}
           </div>
         </AuthProvider>

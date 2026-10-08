@@ -17,7 +17,7 @@ export default function PipbudLogo({
   className = '',
 }: PipbudLogoProps) {
   const tileDimensions = {
-    sm: 'w-7 h-7 rounded-xl',
+    sm: 'w-7 h-7 rounded-lg',
     md: 'w-9 h-9 rounded-xl',
     lg: 'w-11 h-11 rounded-2xl',
   }[size];
@@ -36,9 +36,9 @@ export default function PipbudLogo({
 
   const content = (
     <div className={`group inline-flex items-center gap-2.5 select-none ${className}`}>
-      {/* Official Liquid Glass P-Bud Tile */}
+      {/* Official Liquid Glass P-Bud Tile (Obsidian & Institutional Accent) */}
       <div
-        className={`relative ${tileDimensions} flex items-center justify-center shrink-0 bg-white/[0.08] backdrop-blur-md border border-white/20 shadow-[inset_0_1px_0_rgba(255,255,255,0.4),0_8px_20px_rgba(0,0,0,0.5)] transition-all duration-200 group-hover:scale-105 group-hover:border-[#A78BFA]/50 group-hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.5),0_8px_24px_rgba(139,92,246,0.35)]`}
+        className={`relative ${tileDimensions} flex items-center justify-center shrink-0 bg-[#1C1917] border border-[#292524] shadow-sm transition-all duration-200 group-hover:scale-105`}
       >
         <svg
           width={svgDimensions}
@@ -48,9 +48,6 @@ export default function PipbudLogo({
           xmlns="http://www.w3.org/2000/svg"
           className="transition-transform duration-200"
         >
-          {/* Subtle violet ambient glow inside glass */}
-          <circle cx="16" cy="16" r="10" fill="url(#violetGlow)" opacity="0.35" />
-
           {/* Stem of the P */}
           <line
             x1="9"
@@ -72,32 +69,20 @@ export default function PipbudLogo({
           />
 
           {/* Pip (the smallest price movement) inside ring */}
-          <circle cx="17" cy="16.5" r="2.2" fill="#A78BFA" />
+          <circle cx="17" cy="16.5" r="2.2" fill="#C2410C" />
 
           {/* Bud rising from stem tip */}
           <path
             d="M 9 10 C 7 6 12 3 15 5.5 C 16.5 6.8 14 9.5 9 10 Z"
-            fill="url(#budGrad)"
+            fill="#C2410C"
           />
-
-          <defs>
-            <radialGradient id="violetGlow" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stopColor="#8B5CF6" />
-              <stop offset="100%" stopColor="#6D28D9" stopOpacity="0" />
-            </radialGradient>
-            <linearGradient id="budGrad" x1="8" y1="4" x2="15" y2="10" gradientUnits="userSpaceOnUse">
-              <stop stopColor="#DDD6FE" />
-              <stop offset="60%" stopColor="#A78BFA" />
-              <stop offset="100%" stopColor="#8B5CF6" />
-            </linearGradient>
-          </defs>
         </svg>
       </div>
 
       {showWordmark && (
         <span className={`font-bold tracking-tight inline-flex items-center ${textSize}`}>
-          <span className="text-white">Pip</span>
-          <span className="text-[#A78BFA]">Bud</span>
+          <span className="text-[#1C1917]">Pip</span>
+          <span className="text-[#C2410C]">Bud</span>
         </span>
       )}
     </div>

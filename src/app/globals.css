@@ -4,49 +4,50 @@
   --font-poppins: var(--font-poppins), 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   --font-inter: var(--font-inter), 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
 
-  /* PipBud Liquid Glass v3.0 - Violet Brand Scale */
-  --color-violet-50: #F5F3FF;
-  --color-violet-100: #EDE9FE;
-  --color-violet-200: #DDD6FE;
-  --color-violet-300: #C4B5FD;
-  --color-violet-400: #A78BFA;
-  --color-violet-500: #8B5CF6;
-  --color-violet-600: #7C3AED;
-  --color-violet-700: #6D28D9;
-  --color-violet-800: #5B21B6;
-  --color-violet-900: #4C1D95;
-  --color-violet-950: #2E1065;
+  /* PipBud Institutional Design System (v2.4 Specification) */
+  --color-warm-bone: #FAFAF9;
+  --color-card-white: #FFFFFF;
+  --color-border-subtle: #E7E5E4;
+  --color-border-hairline: #F5F5F4;
+  
+  --color-text-main: #1C1917;
+  --color-text-muted: #78716C;
+  --color-text-subtle: #A8A29E;
 
-  /* Liquid Glass - Surfaces & Structure */
-  --color-black: #000000;
-  --color-bg-1: #0A0A0B;
-  --color-bg-2: #101012;
-  --color-bg-3: #16161A;
-  --color-text-1: #E7E9EA;
-  --color-text-2: #71767B;
-  --color-border-hairline: #2F3336;
+  /* Institutional Trading Semantics */
+  --color-profit: #15803D;
+  --color-profit-bg: #DCFCE7;
+  --color-loss: #B91C1C;
+  --color-loss-bg: #FEE2E2;
+  --color-warning: #D97706;
+  --color-warning-bg: #FEF3C7;
+  --color-info: #0F766E;
+  --color-info-bg: #F0FDFA;
 
-  /* Liquid Glass - Semantic & Financial */
-  --color-profit: #22C55E;
-  --color-loss: #F43F5E;
-  --color-warning: #F59E0B;
-  --color-info: #38BDF8;
+  /* Tier Progression Colors */
+  --color-tier-1: #A8A29E;
+  --color-tier-2: #64748B;
+  --color-tier-3: #15803D;
+  --color-tier-4: #0F766E;
+  --color-tier-5: #D97706;
+  --color-tier-6: #7C3AED;
+  --color-tier-7: #C2410C;
 }
 
 :root {
-  --background: #000000;
-  --foreground: #E7E9EA;
+  --background: #FAFAF9;
+  --foreground: #1C1917;
 }
 
 html {
   scroll-behavior: smooth;
-  color-scheme: dark;
-  background-color: #000000;
+  color-scheme: light;
+  background-color: #FAFAF9;
 }
 
 body {
-  background-color: #000000;
-  color: #E7E9EA;
+  background-color: #FAFAF9;
+  color: #1C1917;
   font-family: var(--font-inter), 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   font-feature-settings: "tnum" 1, "rlig" 1, "calt" 1;
   -webkit-font-smoothing: antialiased;
@@ -60,169 +61,110 @@ body {
 }
 
 /* ============================================================ */
-/* LIQUID GLASS MATERIAL UTILITIES (v3.0 SPECIFICATION)        */
+/* LIGHT GLASS & CARD UTILITIES (INSTITUTIONAL DESIGN SYSTEM)   */
 /* ============================================================ */
 
 .glass-ultrathin {
-  background: rgba(255, 255, 255, 0.04);
-  backdrop-filter: blur(12px) saturate(140%);
-  -webkit-backdrop-filter: blur(12px) saturate(140%);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(12px) saturate(120%);
+  -webkit-backdrop-filter: blur(12px) saturate(120%);
+  border: 1px solid rgba(231, 229, 228, 0.7);
 }
 
 .glass-regular {
-  background: rgba(255, 255, 255, 0.07);
-  backdrop-filter: blur(24px) saturate(160%);
-  -webkit-backdrop-filter: blur(24px) saturate(160%);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 8px 32px rgba(0, 0, 0, 0.6);
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  border: 1px solid #E7E5E4;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .glass-thick {
-  background: rgba(10, 10, 11, 0.76);
-  backdrop-filter: blur(40px) saturate(180%);
-  -webkit-backdrop-filter: blur(40px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 12px 40px rgba(0, 0, 0, 0.7);
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  border: 1px solid #E7E5E4;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
 }
 
 .glass-violet {
-  background: rgba(139, 92, 246, 0.18);
-  backdrop-filter: blur(28px) saturate(170%);
-  -webkit-backdrop-filter: blur(28px) saturate(170%);
-  border: 1px solid rgba(167, 139, 250, 0.45);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 8px 32px rgba(139, 92, 246, 0.25);
+  background: rgba(245, 243, 255, 0.95);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid #DDD6FE;
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.08);
 }
 
-/* Fallback for browsers without backdrop-filter or reduced transparency */
-@supports not (backdrop-filter: blur(1px)) {
-  .glass-ultrathin {
-    background: #101012;
-  }
-  .glass-regular {
-    background: #0A0A0B;
-  }
-  .glass-thick {
-    background: #0A0A0B;
-  }
-  .glass-violet {
-    background: #2E1065;
-  }
+/* Mobile Floating Dock Glass */
+.glass-dock {
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid #E7E5E4;
+  box-shadow: 0 8px 30px rgba(28, 25, 23, 0.08);
 }
 
-@media (prefers-reduced-transparency: reduce) {
-  .glass-ultrathin,
-  .glass-regular,
-  .glass-thick {
-    background: #0A0A0B !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-  }
-}
-
-/* Signature Gradients */
-.brand-gradient {
-  background: linear-gradient(135deg, #A78BFA 0%, #8B5CF6 50%, #6D28D9 100%);
-}
-
-.brand-aurora {
-  background: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(124, 58, 237, 0.28), rgba(46, 16, 101, 0.08) 50%, rgba(0, 0, 0, 0) 100%);
-}
-
-.brand-aurora-subtle {
-  background: radial-gradient(ellipse 60% 40% at 50% 0%, rgba(139, 92, 246, 0.18), rgba(0, 0, 0, 0) 70%);
-}
-
-.sovereign-ring {
-  background: linear-gradient(135deg, #8B5CF6 0%, #F5F3FF 100%);
-}
-
-/* PipBud Liquid Glass Buttons */
+/* Institutional Clean Buttons */
 .btn-primary {
-  background: linear-gradient(135deg, #A78BFA 0%, #8B5CF6 50%, #6D28D9 100%);
+  background: #1C1917;
   color: #FFFFFF;
   font-weight: 600;
   border-radius: 9999px;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 4px 16px rgba(139, 92, 246, 0.35);
-  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 2px 8px rgba(28, 25, 23, 0.12);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   display: inline-flex;
   align-items: center;
   justify-content: center;
 }
 .btn-primary:hover {
-  transform: scale(1.02);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 6px 24px rgba(139, 92, 246, 0.5);
+  background: #292524;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(28, 25, 23, 0.18);
 }
 .btn-primary:active {
   transform: scale(0.98);
 }
 
 .btn-secondary {
-  background: rgba(255, 255, 255, 0.07);
-  backdrop-filter: blur(24px) saturate(160%);
-  -webkit-backdrop-filter: blur(24px) saturate(160%);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  color: #E7E9EA;
+  background: #FFFFFF;
+  border: 1px solid #E7E5E4;
+  color: #1C1917;
   font-weight: 500;
   border-radius: 9999px;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3);
-  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   display: inline-flex;
   align-items: center;
   justify-content: center;
 }
 .btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.12);
-  border-color: rgba(167, 139, 250, 0.4);
-  color: #FFFFFF;
-  transform: scale(1.02);
+  background: #F5F5F4;
+  border-color: #D6D3D1;
+  color: #0C0A09;
 }
 .btn-secondary:active {
   transform: scale(0.98);
 }
 
-/* Custom dark scrollbar matching liquid glass */
+/* Institutional Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #000000;
+  background: #FAFAF9;
 }
 ::-webkit-scrollbar-thumb {
-  background: #2F3336;
+  background: #D6D3D1;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #4C1D95;
+  background: #A8A29E;
 }
 
-/* Focus rings with violet-500 */
+/* Focus styling */
 *:focus-visible {
-  outline: 2px solid #8B5CF6;
+  outline: 2px solid #1C1917;
   outline-offset: 2px;
-  border-radius: 8px;
-}
-
-/* Animations */
-@keyframes pulseLiveDot {
-  0%, 100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  50% {
-    transform: scale(1.45);
-    opacity: 0.6;
-  }
-}
-
-.animate-pulse-live {
-  animation: pulseLiveDot 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-/* Standalone PWA App Mode */
-@media (display-mode: standalone) {
-  .pwa-hide {
-    display: none !important;
-  }
+  border-radius: 6px;
 }
