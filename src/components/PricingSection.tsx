@@ -24,7 +24,7 @@ const plans = [
   },
   {
     name: 'Pro Trader',
-    price: '$29',
+    price: '$9',
     frequency: 'per month',
     description: 'For active traders demanding real-time risk validation, behavioral discipline guardrails, and full analytics.',
     popular: true,
