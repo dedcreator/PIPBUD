@@ -5,8 +5,18 @@ import Footer from '@/components/Footer';
 import { FileText, AlertTriangle, CheckCircle, Ban, Scale } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Terms of Service - PipBud',
-  description: 'PipBud terms of service and conditions of use.',
+  title: 'Terms of Service & Trader Meritocracy Rules — PipBud',
+  description:
+    'Terms of service, fair usage standards, and Zero-Tolerance Anti-Shortfall demotion rules for the PipBud platform and @PipBudBot.',
+  alternates: {
+    canonical: 'https://pipbud.xyz/terms',
+  },
+  openGraph: {
+    title: 'Terms of Service & Trader Meritocracy Rules — PipBud',
+    description:
+      'Terms of service, fair usage standards, and Zero-Tolerance Anti-Shortfall demotion rules for the PipBud platform.',
+    url: 'https://pipbud.xyz/terms',
+  },
 };
 
 export default function TermsPage() {

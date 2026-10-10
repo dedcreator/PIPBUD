@@ -27,6 +27,7 @@ export interface TraderProfile {
   avatar_type?: string;
   hide_telegram?: boolean;
   allow_direct_messages?: boolean;
+  telegram_username?: string;
   trading_style?: string;
   bio?: string;
   show_broker_badge?: boolean;

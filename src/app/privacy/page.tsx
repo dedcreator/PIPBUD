@@ -5,8 +5,18 @@ import Footer from '@/components/Footer';
 import { Shield, Lock, Eye, Database, Mail } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Privacy Policy - PipBud',
-  description: 'PipBud privacy policy - how we handle your trading data.',
+  title: 'Privacy Policy & Trader Data Protection — PipBud',
+  description:
+    'Learn how PipBud protects your trading journal, broker investor keys, and Telegram credentials with our Anti-DM Shield and privacy architecture.',
+  alternates: {
+    canonical: 'https://pipbud.xyz/privacy',
+  },
+  openGraph: {
+    title: 'Privacy Policy & Trader Data Protection — PipBud',
+    description:
+      'Learn how PipBud protects your trading journal, broker investor keys, and Telegram credentials.',
+    url: 'https://pipbud.xyz/privacy',
+  },
 };
 
 export default function PrivacyPage() {
